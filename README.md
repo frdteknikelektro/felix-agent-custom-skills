@@ -1,6 +1,6 @@
 # 🦊 Felix Custom Skills
 
-Custom skills for [Felix Agent](https://github.com/frdteknikelektro/felix-agent-docker) — an AI agent that wraps an LLM backend and routes messages through skill-gated turns.
+Custom skills for [Felix Agent](https://github.com/frdteknikelektro/felix-agent) — an AI agent that wraps an LLM backend and routes messages through skill-gated turns.
 
 > 📦 Skills in this repo extend Felix's built-in capabilities. Copy them into a running Felix instance to deploy.
 
@@ -81,9 +81,9 @@ Each `SKILL.md` follows this template order:
 
 ## 🔗 Relationship with Felix Agent
 
-This repo provides skills for the **[🦊 felix-agent-docker](https://github.com/frdteknikelektro/felix-agent-docker)** runtime. Skills here are not bundled in the Felix base image — deploy them by copying into Felix's `workspace/catalog/skills/` directory. Felix auto-loads all skills from that path on startup.
+This repo provides skills for the **[🦊 felix-agent](https://github.com/frdteknikelektro/felix-agent)** runtime. Skills here are not bundled in the Felix base image — deploy them by copying into Felix's `workspace/catalog/skills/` directory. Felix auto-loads all skills from that path on startup.
 
-For the core agent (Docker setup, owner console, chat adapters), see the [felix-agent-docker repository](https://github.com/frdteknikelektro/felix-agent-docker).
+For the core agent (Docker setup, owner console, chat adapters), see the [felix-agent repository](https://github.com/frdteknikelektro/felix-agent).
 
 ## 🧪 Development
 
@@ -95,7 +95,7 @@ npm run lint         # 🔍 typecheck (tsc --noEmit)
 
 ### ✨ Adding a New Skill
 
-1. 📋 Copy `template-skill` from felix-agent-docker as a starting point
+1. 📋 Copy `template-skill` from felix-agent as a starting point
 2. 📝 Create `skills/<skill-name>/SKILL.md` with the required YAML frontmatter (`id`, `name`, `description`, `version`, `kind`, `permissions`, `match`)
 3. 📐 Follow the section order: `Purpose` → `When to use` → `Out of scope` → `Use Cases` → `Permissions` → `Workflow` → `Checks`
 4. 📁 Add references, agent configs, or scripts as needed
