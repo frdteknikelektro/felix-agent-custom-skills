@@ -26,7 +26,6 @@ npm test
 |---|---|
 | 🐙 `github` | Full GitHub management via `gh` CLI — repos, issues, PRs, releases, workflows, secrets, gists, search |
 | 🦊 `gitlab` | Full GitLab management via `glab` CLI — repos, issues, MRs, releases, pipelines, variables, snippets |
-| 📋 `odoo` | Odoo 16.0 ERP interaction via XML-RPC — search, create, update records, download reports, inspect models |
 | 📊 `posthog` | PostHog analytics via REST API — events, feature flags, dashboards, HogQL, cohorts, experiments |
 | ⚡ `vercel` | Vercel platform management via `vercel` CLI — deploy, domains, env vars, logs, rollback, SSL |
 
@@ -44,6 +43,7 @@ npm test
 | Skill | Description |
 |---|---|
 | ☁️ `aws-jala` | AWS management for Jala — EC2, IAM, Lambda, billing, Cost Explorer. Reference-backed use-case runbooks |
+| 📋 `odoo-jala` | Odoo 16.0 ERP for Jala via XML-RPC — search, create, update records, download reports, inspect models |
 | 🚢 `shorebird-jala` | Shorebird Flutter code-push patch management — inspect releases, move tracks, rollback investigation |
 
 ### 🎭 Persona Skills

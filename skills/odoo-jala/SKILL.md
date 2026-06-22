@@ -1,7 +1,7 @@
 ---
-id: odoo
-name: Odoo ERP Management
-description: Full Odoo 16.0 ERP interaction via XML-RPC — search, read, create, update, delete records, download reports, inspect models. Supports all standard and custom modules. Uses ODOO_* environment variables. Uses text-based read/write permission guidance.
+id: odoo-jala
+name: Odoo Jala ERP Management
+description: Jala Odoo 16.0 ERP interaction via XML-RPC — search, read, create, update, delete records, download reports, inspect models. Supports all standard and custom modules (including Jala-specific modules). Uses ODOO_JALA_* environment variables. Uses text-based read/write permission guidance.
 version: 1
 enabled: true
 kind: operational
@@ -9,23 +9,25 @@ permissions:
   - odoo.read
   - odoo.write
 env:
-  - key: ODOO_URL
-    description: Odoo server URL (e.g. https://erp.example.com or http://localhost:8069)
+  - key: ODOO_JALA_URL
+    description: Jala Odoo server URL (default https://odoo.jala.tech)
     required: true
-  - key: ODOO_DB
-    description: Odoo database name
+  - key: ODOO_JALA_DB
+    description: Jala Odoo database name
     required: true
-  - key: ODOO_USERNAME
+  - key: ODOO_JALA_USERNAME
     description: Login username or email for XML-RPC authentication
     required: true
-  - key: ODOO_API_KEY
+  - key: ODOO_JALA_API_KEY
     description: Odoo 16 API key (preferred over password for XML-RPC auth)
     required: false
-  - key: ODOO_PASSWORD
+  - key: ODOO_JALA_PASSWORD
     description: Plain password for XML-RPC authentication (fallback if no API key)
     required: false
 match:
   - odoo
+  - odoo jala
+  - jala odoo
   - erp
   - sale order
   - invoice
@@ -44,11 +46,13 @@ match:
   - accounting
 ---
 
-# Odoo ERP Management
+# Odoo Jala ERP Management
 
 ## Purpose
 
-Operate an Odoo 16.0 instance through XML-RPC calls. This skill covers reading and writing records across all modules (Sales, Inventory, Accounting, CRM, HR, Purchase, custom modules), downloading reports, and inspecting model schemas — equivalent to what a user can do through the Odoo web UI.
+Operate Jala's Odoo 16.0 instance through XML-RPC calls. This skill covers reading and writing records across all modules (Sales, Inventory, Accounting, CRM, HR, Purchase, and Jala-specific custom modules), downloading reports, and inspecting model schemas — equivalent to what a user can do through the Odoo web UI.
+
+**Default target**: `https://odoo.jala.tech`. Override via `ODOO_JALA_URL`.
 
 Uses Python 3 stdlib `xmlrpc.client` — no extra packages required. All calls are made from inline Python or standalone scripts, depending on task complexity.
 
@@ -56,7 +60,7 @@ Use text-based permission judgment. Do not add or rely on hardcoded TypeScript c
 
 ## When to use
 
-Activate when the user asks to interact with the company Odoo ERP — query records, create or update data, download reports, or inspect model fields. Trigger words include "odoo", "erp", "sale order", "invoice", "product", "stock/inventory", "crm/lead", "hr/employee", "purchase/po", "partner", "quotation", "report", "bill", "accounting".
+Activate when the user asks to interact with Jala's Odoo ERP — query records, create or update data, download reports, or inspect model fields. Trigger words include "odoo", "jala odoo", "erp", "sale order", "invoice", "product", "stock/inventory", "crm/lead", "hr/employee", "purchase/po", "partner", "quotation", "report", "bill", "accounting".
 
 ## Out of scope
 
@@ -82,17 +86,17 @@ Activate when the user asks to interact with the company Odoo ERP — query reco
 
 Use the requested intent and the likely Odoo effect to choose the required permission:
 
-- `odoo:odoo.read` — searching, reading, counting, inspecting fields, downloading reports, and operations whose purpose is to observe existing data. Methods: `search_read`, `read`, `search_count`, `fields_get`, `render_report`.
-- `odoo:odoo.write` — create, update, delete, and any operation that can change Odoo state. Methods: `create`, `write`, `unlink`.
+- `odoo-jala:odoo.read` — searching, reading, counting, inspecting fields, downloading reports, and operations whose purpose is to observe existing data. Methods: `search_read`, `read`, `search_count`, `fields_get`, `render_report`.
+- `odoo-jala:odoo.write` — create, update, delete, and any operation that can change Odoo state. Methods: `create`, `write`, `unlink`.
 
-If an operation is ambiguous, treat it as `odoo:odoo.write` unless the user is only asking to inspect or view current data.
+If an operation is ambiguous, treat it as `odoo-jala:odoo.write` unless the user is only asking to inspect or view current data.
 
 Destructive operations are allowed only when the user explicitly asks for the specific destructive intent: `unlink` (delete records) or `write` that removes data.
 
 ## Workflow
 
 1. Classify the requested work as read or write using the permission policy above.
-2. Export Odoo connection variables from `ODOO_*` env vars. Verify the connection by calling `authenticate()` without printing secrets.
+2. Export Odoo connection variables from `ODOO_JALA_*` env vars. Verify the connection by calling `authenticate()` without printing secrets.
 3. Run the appropriate XML-RPC operation via Python. Use inline `python3 -c` for simple lookups; write a temporary `.py` script for multi-step or complex logic (then clean it up).
 4. For read tasks, return confirmed Odoo facts. Include the model, domain used, and result summary.
 5. For write tasks, perform only the requested change. Echo back the created/updated record ID(s). For destructive work, proceed only when the user explicitly names the destructive intent.
@@ -100,29 +104,36 @@ Destructive operations are allowed only when the user explicitly asks for the sp
 
 ## Environment
 
-Use credentials from the environment before every Odoo XML-RPC call. Do not use credential files.
+Use credentials from the `ODOO_JALA_*` environment variables. Do not use credential files.
 
 Required variables:
-- `ODOO_URL` — Odoo server URL (e.g. `https://erp.example.com` or `http://localhost:8069`)
-- `ODOO_DB` — database name
-- `ODOO_USERNAME` — login username or email
+- `ODOO_JALA_URL` — Jala Odoo server URL (default: `https://odoo.jala.tech`)
+- `ODOO_JALA_DB` — database name
+- `ODOO_JALA_USERNAME` — login username or email
 
 One of:
-- `ODOO_API_KEY` — Odoo 16 API key (preferred, used as password in XML-RPC auth)
-- `ODOO_PASSWORD` — plain password (fallback if no API key)
+- `ODOO_JALA_API_KEY` — Odoo 16 API key (preferred, used as password in XML-RPC auth)
+- `ODOO_JALA_PASSWORD` — plain password (fallback if no API key)
 
-Optional variables:
-- `ODOO_COMPANY_ID` — default company ID for multi-company setups
+Command pattern:
+
+```bash
+export ODOO_URL="$ODOO_JALA_URL"
+export ODOO_DB="$ODOO_JALA_DB"
+export ODOO_USERNAME="$ODOO_JALA_USERNAME"
+if [ -n "${ODOO_JALA_API_KEY:-}" ]; then export ODOO_API_KEY="$ODOO_JALA_API_KEY"; fi
+if [ -n "${ODOO_JALA_PASSWORD:-}" ]; then export ODOO_PASSWORD="$ODOO_JALA_PASSWORD"; fi
+```
 
 Verify the connection before any real work:
 
 ```bash
 python3 -c "
 import xmlrpc.client, os
-url = os.environ['ODOO_URL']
-db = os.environ['ODOO_DB']
-user = os.environ['ODOO_USERNAME']
-pwd = os.environ.get('ODOO_API_KEY') or os.environ.get('ODOO_PASSWORD')
+url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
+db = os.environ['ODOO_JALA_DB']
+user = os.environ['ODOO_JALA_USERNAME']
+pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
 common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
 uid = common.authenticate(db, user, pwd, {})
 print(f'Authenticated as uid={uid}')
@@ -148,17 +159,17 @@ Every script needs this preamble (never print the password):
 ```python
 import xmlrpc.client, os, json
 
-url = os.environ['ODOO_URL']
-db = os.environ['ODOO_DB']
-user = os.environ['ODOO_USERNAME']
-pwd = os.environ.get('ODOO_API_KEY') or os.environ.get('ODOO_PASSWORD')
+url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
+db = os.environ['ODOO_JALA_DB']
+user = os.environ['ODOO_JALA_USERNAME']
+pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
 
 common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
 uid = common.authenticate(db, user, pwd, {})
 models = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object')
 ```
 
-### Search and read records (`odoo:odoo.read`)
+### Search and read records (`odoo-jala:odoo.read`)
 
 **search_read** — fetch records with a domain filter:
 
@@ -207,7 +218,7 @@ fields = models.execute_kw(db, uid, pwd,
 )
 ```
 
-### Create records (`odoo:odoo.write`)
+### Create records (`odoo-jala:odoo.write`)
 
 ```python
 record_id = models.execute_kw(db, uid, pwd,
@@ -225,7 +236,7 @@ lead_id = models.execute_kw(db, uid, pwd,
 )
 ```
 
-### Update records (`odoo:odoo.write`)
+### Update records (`odoo-jala:odoo.write`)
 
 ```python
 models.execute_kw(db, uid, pwd,
@@ -236,7 +247,7 @@ models.execute_kw(db, uid, pwd,
 
 For multiple records, pass a list of IDs: `[[1, 2, 3], {...}]`
 
-### Delete records (`odoo:odoo.write`, destructive)
+### Delete records (`odoo-jala:odoo.write`, destructive)
 
 ```python
 models.execute_kw(db, uid, pwd,
@@ -247,7 +258,7 @@ models.execute_kw(db, uid, pwd,
 
 Only run when the user explicitly asks to delete. Confirm the record ID and model before proceeding.
 
-### Download reports (`odoo:odoo.read`)
+### Download reports (`odoo-jala:odoo.read`)
 
 ```python
 report = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/report')
@@ -280,8 +291,10 @@ Common report names:
 ```bash
 python3 -c "
 import xmlrpc.client, os, json
-url, db, user = os.environ['ODOO_URL'], os.environ['ODOO_DB'], os.environ['ODOO_USERNAME']
-pwd = os.environ.get('ODOO_API_KEY') or os.environ.get('ODOO_PASSWORD')
+url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
+db = os.environ['ODOO_JALA_DB']
+user = os.environ['ODOO_JALA_USERNAME']
+pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
 common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
 uid = common.authenticate(db, user, pwd, {})
 models = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object')
@@ -295,8 +308,10 @@ print(json.dumps(result, indent=2))
 ```bash
 python3 -c "
 import xmlrpc.client, os
-url, db, user = os.environ['ODOO_URL'], os.environ['ODOO_DB'], os.environ['ODOO_USERNAME']
-pwd = os.environ.get('ODOO_API_KEY') or os.environ.get('ODOO_PASSWORD')
+url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
+db = os.environ['ODOO_JALA_DB']
+user = os.environ['ODOO_JALA_USERNAME']
+pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
 common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
 uid = common.authenticate(db, user, pwd, {})
 models = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object')
@@ -307,16 +322,17 @@ print(f'Created record id={rid}')
 
 ## Quick Examples
 
-Every example includes the required env setup. Copy the full sequence.
+Every example uses the `ODOO_JALA_*` env vars.
 
 ### List recent sales orders
 
 ```bash
-export ODOO_URL="$ODOO_URL" ODOO_DB="$ODOO_DB" ODOO_USERNAME="$ODOO_USERNAME" ODOO_API_KEY="$ODOO_API_KEY"
 python3 -c "
 import xmlrpc.client, os, json
-url, db, user = os.environ['ODOO_URL'], os.environ['ODOO_DB'], os.environ['ODOO_USERNAME']
-pwd = os.environ.get('ODOO_API_KEY') or os.environ.get('ODOO_PASSWORD')
+url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
+db = os.environ['ODOO_JALA_DB']
+user = os.environ['ODOO_JALA_USERNAME']
+pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
 common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
 uid = common.authenticate(db, user, pwd, {})
 models = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object')
@@ -329,11 +345,12 @@ for o in orders:
 ### Find a customer and their invoices
 
 ```bash
-export ODOO_URL="$ODOO_URL" ODOO_DB="$ODOO_DB" ODOO_USERNAME="$ODOO_USERNAME" ODOO_API_KEY="$ODOO_API_KEY"
 python3 -c "
 import xmlrpc.client, os, json
-url, db, user = os.environ['ODOO_URL'], os.environ['ODOO_DB'], os.environ['ODOO_USERNAME']
-pwd = os.environ.get('ODOO_API_KEY') or os.environ.get('ODOO_PASSWORD')
+url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
+db = os.environ['ODOO_JALA_DB']
+user = os.environ['ODOO_JALA_USERNAME']
+pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
 common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
 uid = common.authenticate(db, user, pwd, {})
 models = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object')
@@ -351,11 +368,12 @@ if partners:
 ### Create a CRM lead
 
 ```bash
-export ODOO_URL="$ODOO_URL" ODOO_DB="$ODOO_DB" ODOO_USERNAME="$ODOO_USERNAME" ODOO_API_KEY="$ODOO_API_KEY"
 python3 -c "
 import xmlrpc.client, os
-url, db, user = os.environ['ODOO_URL'], os.environ['ODOO_DB'], os.environ['ODOO_USERNAME']
-pwd = os.environ.get('ODOO_API_KEY') or os.environ.get('ODOO_PASSWORD')
+url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
+db = os.environ['ODOO_JALA_DB']
+user = os.environ['ODOO_JALA_USERNAME']
+pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
 common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
 uid = common.authenticate(db, user, pwd, {})
 models = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object')
@@ -367,11 +385,12 @@ print(f'Created lead id={lead_id}')
 ### Update a sales order line price
 
 ```bash
-export ODOO_URL="$ODOO_URL" ODOO_DB="$ODOO_DB" ODOO_USERNAME="$ODOO_USERNAME" ODOO_API_KEY="$ODOO_API_KEY"
 python3 -c "
 import xmlrpc.client, os
-url, db, user = os.environ['ODOO_URL'], os.environ['ODOO_DB'], os.environ['ODOO_USERNAME']
-pwd = os.environ.get('ODOO_API_KEY') or os.environ.get('ODOO_PASSWORD')
+url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
+db = os.environ['ODOO_JALA_DB']
+user = os.environ['ODOO_JALA_USERNAME']
+pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
 common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
 uid = common.authenticate(db, user, pwd, {})
 models = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object')
@@ -383,11 +402,12 @@ print('Updated')
 ### Download an invoice PDF
 
 ```bash
-export ODOO_URL="$ODOO_URL" ODOO_DB="$ODOO_DB" ODOO_USERNAME="$ODOO_USERNAME" ODOO_API_KEY="$ODOO_API_KEY"
 python3 -c "
 import xmlrpc.client, os, base64
-url, db, user = os.environ['ODOO_URL'], os.environ['ODOO_DB'], os.environ['ODOO_USERNAME']
-pwd = os.environ.get('ODOO_API_KEY') or os.environ.get('ODOO_PASSWORD')
+url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
+db = os.environ['ODOO_JALA_DB']
+user = os.environ['ODOO_JALA_USERNAME']
+pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
 common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
 uid = common.authenticate(db, user, pwd, {})
 report = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/report')
@@ -402,11 +422,12 @@ print(f'Wrote invoice.pdf ({len(pdf)} bytes)')
 ### Inspect model fields
 
 ```bash
-export ODOO_URL="$ODOO_URL" ODOO_DB="$ODOO_DB" ODOO_USERNAME="$ODOO_USERNAME" ODOO_API_KEY="$ODOO_API_KEY"
 python3 -c "
 import xmlrpc.client, os, json
-url, db, user = os.environ['ODOO_URL'], os.environ['ODOO_DB'], os.environ['ODOO_USERNAME']
-pwd = os.environ.get('ODOO_API_KEY') or os.environ.get('ODOO_PASSWORD')
+url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
+db = os.environ['ODOO_JALA_DB']
+user = os.environ['ODOO_JALA_USERNAME']
+pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
 common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
 uid = common.authenticate(db, user, pwd, {})
 models = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object')
@@ -416,14 +437,15 @@ for fname, finfo in sorted(fields.items()):
 "
 ```
 
-### Find which model to use
+### Discover available models (including Jala custom modules)
 
 ```bash
-export ODOO_URL="$ODOO_URL" ODOO_DB="$ODOO_DB" ODOO_USERNAME="$ODOO_USERNAME" ODOO_API_KEY="$ODOO_API_KEY"
 python3 -c "
 import xmlrpc.client, os
-url, db, user = os.environ['ODOO_URL'], os.environ['ODOO_DB'], os.environ['ODOO_USERNAME']
-pwd = os.environ.get('ODOO_API_KEY') or os.environ.get('ODOO_PASSWORD')
+url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
+db = os.environ['ODOO_JALA_DB']
+user = os.environ['ODOO_JALA_USERNAME']
+pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
 common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
 uid = common.authenticate(db, user, pwd, {})
 models = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object')
@@ -435,7 +457,7 @@ for m in matches:
 
 ## Key Odoo Models
 
-Common model names to use in XML-RPC calls:
+Common model names. Use `ir.model` discovery at runtime for Jala custom modules.
 
 | Model | Name | Common Fields |
 |---|---|---|
@@ -477,14 +499,16 @@ Common Odoo 16 report references:
 - Include the model name, domain used, record ID(s) created/updated, and result count.
 - When listing records, use compact format: one line per record with key fields.
 - Redact credential values, env var values, and API keys.
-- Include the exact python -c command run (with redacted auth boilerplate).
+- Include the exact python3 -c command run (with redacted auth boilerplate).
 - Report Odoo errors with the fault code and message.
 - Separate confirmed Odoo facts from assumptions.
 - If blocked by missing env vars, authentication failure, or Odoo API errors, state the blocker and the smallest next step.
+- Default target is `https://odoo.jala.tech` unless `ODOO_JALA_URL` overrides it.
+- For custom Jala modules, discover model names at runtime via `ir.model` search rather than guessing.
 
 ## Checks
 
-- Always export `ODOO_*` env vars before any XML-RPC call.
+- Always export `ODOO_JALA_*` env vars before any XML-RPC call.
 - Always verify the connection by calling `authenticate()` before doing real work.
 - Never print credential values, API keys, passwords, or auth tokens.
 - If Python 3 is not available, tell the user to install it first.
