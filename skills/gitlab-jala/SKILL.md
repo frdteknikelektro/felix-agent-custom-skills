@@ -1,7 +1,7 @@
 ---
 id: gitlab-jala
 name: GitLab Jala Management
-description: Jala-specific GitLab account management. Extends the base gitlab skill — all operations, permission policy, destructive gating, and CLI checks are identical. The only difference is the credential: GITLAB_JALA_TOKEN (available in environment) replaces GITLAB_TOKEN.
+description: "Jala-specific GitLab account management. Extends the base gitlab skill — all operations, permission policy, destructive gating, and CLI checks are identical. The only difference is the credential: GITLAB_JALA_TOKEN (available in environment) replaces GITLAB_TOKEN."
 version: 1
 enabled: true
 kind: operational

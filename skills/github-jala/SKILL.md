@@ -1,7 +1,7 @@
 ---
 id: github-jala
 name: GitHub Jala Management
-description: Jala-specific GitHub account management. Extends the base github skill — all operations, permission policy, destructive gating, and CLI checks are identical. The only difference is the credential: GITHUB_JALA_TOKEN (available in environment) replaces GITHUB_TOKEN.
+description: "Jala-specific GitHub account management. Extends the base github skill — all operations, permission policy, destructive gating, and CLI checks are identical. The only difference is the credential: GITHUB_JALA_TOKEN (available in environment) replaces GITHUB_TOKEN."
 version: 1
 enabled: true
 kind: operational

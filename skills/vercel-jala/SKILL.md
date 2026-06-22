@@ -1,7 +1,7 @@
 ---
 id: vercel-jala
 name: Vercel Jala Management
-description: Jala-specific Vercel account management. Extends the base vercel skill — all operations, permission policy, destructive gating, and CLI checks are identical. The only difference is the credential: VERCEL_JALA_TOKEN (available in environment) replaces VERCEL_TOKEN.
+description: "Jala-specific Vercel account management. Extends the base vercel skill — all operations, permission policy, destructive gating, and CLI checks are identical. The only difference is the credential: VERCEL_JALA_TOKEN (available in environment) replaces VERCEL_TOKEN."
 version: 1
 enabled: true
 kind: operational
