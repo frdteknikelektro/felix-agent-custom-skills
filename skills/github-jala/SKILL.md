@@ -9,6 +9,10 @@ permissions:
   - github.read
   - github.review
   - github.write
+env:
+  - key: GITHUB_JALA_TOKEN
+    description: GitHub token for Jala org account (exported as GITHUB_TOKEN for the gh CLI)
+    required: true
 match:
   - github jala
   - jala github

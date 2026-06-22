@@ -8,6 +8,13 @@ kind: operational
 permissions:
   - posthog.read
   - posthog.write
+env:
+  - key: POSTHOG_JALA_PERSONAL_KEY
+    description: PostHog personal API key for Jala org (exported as POSTHOG_PERSONAL_KEY)
+    required: true
+  - key: POSTHOG_JALA_PROJECT_KEY
+    description: PostHog project key for Jala (exported as POSTHOG_PROJECT_KEY)
+    required: false
 match:
   - posthog jala
   - jala posthog

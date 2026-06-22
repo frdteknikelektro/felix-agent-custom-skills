@@ -8,6 +8,13 @@ kind: operational
 permissions:
   - posthog.read
   - posthog.write
+env:
+  - key: POSTHOG_PERSONAL_KEY
+    description: PostHog personal API key for API requests
+    required: true
+  - key: POSTHOG_PROJECT_KEY
+    description: PostHog project key (only needed for public capture/decide endpoints)
+    required: false
 match:
   - posthog
   - feature flag

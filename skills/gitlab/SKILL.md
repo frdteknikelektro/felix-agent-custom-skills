@@ -9,6 +9,10 @@ permissions:
   - gitlab.read
   - gitlab.review
   - gitlab.write
+env:
+  - key: GITLAB_TOKEN
+    description: GitLab personal access token or group access token for glab CLI
+    required: true
 match:
   - gitlab
   - glab

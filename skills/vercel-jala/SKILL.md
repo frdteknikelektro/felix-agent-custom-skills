@@ -8,6 +8,10 @@ kind: operational
 permissions:
   - vercel.read
   - vercel.write
+env:
+  - key: VERCEL_JALA_TOKEN
+    description: Vercel token for Jala account (exported as VERCEL_TOKEN for the vercel CLI)
+    required: true
 match:
   - vercel jala
   - jala vercel

@@ -7,6 +7,19 @@ enabled: true
 kind: operational
 permissions:
   - shell.run
+env:
+  - key: SHOREBIRD_JALA_TOKEN
+    description: Shorebird token for Jala account
+    required: true
+  - key: SHOREBIRD_JALA_APP_ID
+    description: Shorebird application ID for Jala
+    required: true
+  - key: SHOREBIRD_JALA_API_BASE_URL
+    description: Shorebird API base URL override
+    required: false
+  - key: SHOREBIRD_JALA_ORG_ID
+    description: Shorebird organization ID for Jala
+    required: false
 match:
   - shorebird
   - shorebird jala

@@ -8,6 +8,10 @@ kind: operational
 permissions:
   - vercel.read
   - vercel.write
+env:
+  - key: VERCEL_TOKEN
+    description: Vercel personal access token or team-scoped token for vercel CLI
+    required: true
 match:
   - vercel
   - deploy

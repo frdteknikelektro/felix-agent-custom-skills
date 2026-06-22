@@ -9,6 +9,10 @@ permissions:
   - github.read
   - github.review
   - github.write
+env:
+  - key: GITHUB_TOKEN
+    description: GitHub personal access token or fine-grained token for gh CLI
+    required: true
 match:
   - github
   - repo

@@ -8,6 +8,19 @@ kind: operational
 permissions:
   - aws.read
   - aws.write
+env:
+  - key: AWS_JALA_ACCESS_KEY_ID
+    description: AWS IAM access key for Jala account
+    required: true
+  - key: AWS_JALA_SECRET_ACCESS_KEY
+    description: AWS IAM secret access key for Jala account
+    required: true
+  - key: AWS_JALA_SESSION_TOKEN
+    description: AWS STS session token (if using temporary credentials)
+    required: false
+  - key: AWS_JALA_REGION
+    description: AWS region override (e.g. ap-southeast-1)
+    required: false
 match:
   - aws
   - aws jala

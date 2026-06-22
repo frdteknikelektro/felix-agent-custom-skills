@@ -9,6 +9,10 @@ permissions:
   - gitlab.read
   - gitlab.review
   - gitlab.write
+env:
+  - key: GITLAB_JALA_TOKEN
+    description: GitLab token for atnic group (exported as GITLAB_TOKEN for the glab CLI)
+    required: true
 match:
   - gitlab jala
   - jala gitlab

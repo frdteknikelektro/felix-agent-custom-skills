@@ -26,6 +26,7 @@ npm test
 |---|---|
 | 🐙 `github` | Full GitHub management via `gh` CLI — repos, issues, PRs, releases, workflows, secrets, gists, search |
 | 🦊 `gitlab` | Full GitLab management via `glab` CLI — repos, issues, MRs, releases, pipelines, variables, snippets |
+| 📋 `odoo` | Odoo 16.0 ERP interaction via XML-RPC — search, create, update records, download reports, inspect models |
 | 📊 `posthog` | PostHog analytics via REST API — events, feature flags, dashboards, HogQL, cohorts, experiments |
 | ⚡ `vercel` | Vercel platform management via `vercel` CLI — deploy, domains, env vars, logs, rollback, SSL |
 
@@ -76,6 +77,7 @@ Each `SKILL.md` follows this template order:
 ## Use Cases     — 📝 concrete end-to-end scenarios
 ## Permissions   — 🔐 {skill-id}.{action} permission contract
 ## Workflow      — 🔄 step-by-step operating procedure
+## Environment   — 🔑 env vars the skill consumes (and their frontmatter `env:` contract)
 ## Checks        — ✅ pre/post execution checklist
 ```
 
@@ -96,7 +98,7 @@ npm run lint         # 🔍 typecheck (tsc --noEmit)
 ### ✨ Adding a New Skill
 
 1. 📋 Copy `template-skill` from felix-agent as a starting point
-2. 📝 Create `skills/<skill-name>/SKILL.md` with the required YAML frontmatter (`id`, `name`, `description`, `version`, `kind`, `permissions`, `match`)
+2. 📝 Create `skills/<skill-name>/SKILL.md` with the required YAML frontmatter (`id`, `name`, `description`, `version`, `kind`, `permissions`, `env`, `match`)
 3. 📐 Follow the section order: `Purpose` → `When to use` → `Out of scope` → `Use Cases` → `Permissions` → `Workflow` → `Checks`
 4. 📁 Add references, agent configs, or scripts as needed
 5. 🧪 Write tests in `tests/<skill-name>.test.ts`
