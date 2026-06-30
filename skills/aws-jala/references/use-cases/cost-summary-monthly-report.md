@@ -13,9 +13,9 @@ Default period:
 Allow explicit overrides. If the user asks for a specific month pair, quarter, or start/end window, follow the requested period instead of the default.
 
 ## Permission
-Required permission: `aws-jala:aws.read`.
+Required permission: `aws.read`.
 
-Cost Explorer is read-only in this workflow. Do not require `aws-jala:aws.write`.
+Cost Explorer is read-only in this workflow. Do not require `aws.write`.
 
 Installing local report-generation dependencies, such as Python charting packages, is allowed when needed for the artifact bundle. This is local environment setup, not AWS remote-state mutation.
 

@@ -8,10 +8,10 @@
 #
 # Usage (from inside the main agent session shell):
 #
-#   /home/agent/workspace/skills/art-of-melancomedy/scripts/delegate.sh \
+#   "${WORKSPACE_DIR:-/home/agent/workspace}/catalog/skills/art-of-melancomedy/scripts/delegate.sh" \
 #     'Lix lix, stres nih, bikinin joke tentang kopi dong'
 #
-#   /home/agent/workspace/skills/art-of-melancomedy/scripts/delegate.sh \
+#   "${WORKSPACE_DIR:-/home/agent/workspace}/catalog/skills/art-of-melancomedy/scripts/delegate.sh" \
 #     '<user message>' \
 #     '<optional recent-thread context blob>'
 #
@@ -88,9 +88,8 @@ mkdir -p "$LOG_DIR"
 TS="$(date -u +%Y%m%dT%H%M%S%3N)"
 LAST_MSG_FILE="$LOG_DIR/${TS}.last.txt"
 LOG_FILE="$LOG_DIR/${TS}.log"
-PROMPT_DUMP="$LOG_DIR/${TS}.prompt.txt"
 
-SKILL_DIR="${WORKSPACE}/skills/art-of-melancomedy"
+SKILL_DIR="${MELANCOMEDY_SKILL_DIR:-${WORKSPACE}/catalog/skills/art-of-melancomedy}"
 
 # ── Build focused prompt (shared by both harnesses) ────────────────────────
 
@@ -125,8 +124,6 @@ Output: the reply text only. No preamble. No JSON. No "Here is your punchline:".
 PROMPT_EOF
 )
 
-printf '%s' "$PROMPT" > "$PROMPT_DUMP"
-
 # ── Dispatch subagent ──────────────────────────────────────────────────────
 
 if [[ "$HARNESS_TYPE" == "opencode" ]]; then
@@ -142,7 +139,6 @@ if [[ "$HARNESS_TYPE" == "opencode" ]]; then
     --dir "${WORKSPACE}"
     --model "${MODEL}"
     --format json
-    --dangerously-skip-permissions
   )
   if [[ -n "$OC_VARIANT" ]]; then
     OC_ARGS+=(--variant "$OC_VARIANT")
@@ -190,7 +186,6 @@ else
 
   if ! timeout "$TIMEOUT_SECONDS" codex exec \
         --skip-git-repo-check \
-        --dangerously-bypass-approvals-and-sandbox \
         --model "$MODEL" \
         -c model_reasoning_effort="$REASONING" \
         --output-last-message "$LAST_MSG_FILE" \

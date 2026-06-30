@@ -18,6 +18,8 @@ npm test
 
 > 💡 Skills are loaded by Felix on boot. You can also create or remove skills via the Felix WebUI (`POST /api/skills` / `DELETE /api/skills/:id`).
 
+> 🔗 Overlay skills such as `github-jala`, `gitlab-jala`, `posthog-jala`, and `vercel-jala` depend on their matching base skill. Deploy both directories into the same `workspace/catalog/skills/` folder.
+
 ## 🧩 Skills
 
 ### 💻 Platform Skills
@@ -75,7 +77,7 @@ Each `SKILL.md` follows this template order:
 ## When to use   — 🔔 trigger phrases and activation conditions
 ## Out of scope  — 🚫 what this skill does NOT handle
 ## Use Cases     — 📝 concrete end-to-end scenarios
-## Permissions   — 🔐 {skill-id}.{action} permission contract
+## Permissions   — 🔐 bare {domain}.{action} permission names; Felix stores grants as {skill-id}:{permission}
 ## Workflow      — 🔄 step-by-step operating procedure
 ## Environment   — 🔑 env vars the skill consumes (and their frontmatter `env:` contract)
 ## Checks        — ✅ pre/post execution checklist

@@ -86,10 +86,12 @@ Activate when the user asks to interact with Jala's Odoo ERP — query records, 
 
 Use the requested intent and the likely Odoo effect to choose the required permission:
 
-- `odoo-jala:odoo.read` — searching, reading, counting, inspecting fields, downloading reports, and operations whose purpose is to observe existing data. Methods: `search_read`, `read`, `search_count`, `fields_get`, `render_report`.
-- `odoo-jala:odoo.write` — create, update, delete, and any operation that can change Odoo state. Methods: `create`, `write`, `unlink`.
+Request the bare permission shown below; Felix stores grants under this skill id.
 
-If an operation is ambiguous, treat it as `odoo-jala:odoo.write` unless the user is only asking to inspect or view current data.
+- `odoo.read` — searching, reading, counting, inspecting fields, downloading reports, and operations whose purpose is to observe existing data. Methods: `search_read`, `read`, `search_count`, `fields_get`, `render_report`.
+- `odoo.write` — create, update, delete, and any operation that can change Odoo state. Methods: `create`, `write`, `unlink`.
+
+If an operation is ambiguous, treat it as `odoo.write` unless the user is only asking to inspect or view current data.
 
 Destructive operations are allowed only when the user explicitly asks for the specific destructive intent: `unlink` (delete records) or `write` that removes data.
 
@@ -142,356 +144,29 @@ print(f'Authenticated as uid={uid}')
 
 Never print credential values. Refer to connection details by their env var names only.
 
-## Operations
+## Operation references
 
-All operations use Python `xmlrpc.client`. The Odoo 16 XML-RPC endpoints are:
+Keep this file for routing, permission policy, environment setup, output rules, and completion checks. Load only the reference needed for the requested branch:
 
-| Endpoint | Path | Purpose |
-|---|---|---|
-| Common | `/xmlrpc/2/common` | Authentication, version check |
-| Object | `/xmlrpc/2/object` | Model CRUD operations |
-| Report | `/xmlrpc/2/report` | Report generation and download |
+- **Auth boilerplate** — read [auth-boilerplate](references/commands/auth-boilerplate.md).
+- **Search and read records (`odoo.read`)** — read [search-and-read-records-odoo-read](references/commands/search-and-read-records-odoo-read.md).
+- **Create records (`odoo.write`)** — read [create-records-odoo-write](references/commands/create-records-odoo-write.md).
+- **Update records (`odoo.write`)** — read [update-records-odoo-write](references/commands/update-records-odoo-write.md).
+- **Delete records (`odoo.write`, destructive)** — read [delete-records-odoo-write-destructive](references/commands/delete-records-odoo-write-destructive.md).
+- **Download reports (`odoo.read`)** — read [download-reports-odoo-read](references/commands/download-reports-odoo-read.md).
+- **Quick inline patterns** — read [quick-inline-patterns](references/commands/quick-inline-patterns.md).
+- **Quick Examples** — read [quick-examples](references/commands/quick-examples.md).
+- **List recent sales orders** — read [list-recent-sales-orders](references/commands/list-recent-sales-orders.md).
+- **Find a customer and their invoices** — read [find-a-customer-and-their-invoices](references/commands/find-a-customer-and-their-invoices.md).
+- **Create a CRM lead** — read [create-a-crm-lead](references/commands/create-a-crm-lead.md).
+- **Update a sales order line price** — read [update-a-sales-order-line-price](references/commands/update-a-sales-order-line-price.md).
+- **Download an invoice PDF** — read [download-an-invoice-pdf](references/commands/download-an-invoice-pdf.md).
+- **Inspect model fields** — read [inspect-model-fields](references/commands/inspect-model-fields.md).
+- **Discover available models (including Jala custom modules)** — read [discover-available-models-including-jala-custom-modules](references/commands/discover-available-models-including-jala-custom-modules.md).
+- **Key Odoo Models** — read [key-odoo-models](references/commands/key-odoo-models.md).
+- **Report Names** — read [report-names](references/commands/report-names.md).
 
-### Auth boilerplate
-
-Every script needs this preamble (never print the password):
-
-```python
-import xmlrpc.client, os, json
-
-url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
-db = os.environ['ODOO_JALA_DB']
-user = os.environ['ODOO_JALA_USERNAME']
-pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
-
-common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
-uid = common.authenticate(db, user, pwd, {})
-models = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object')
-```
-
-### Search and read records (`odoo-jala:odoo.read`)
-
-**search_read** — fetch records with a domain filter:
-
-```python
-result = models.execute_kw(db, uid, pwd,
-    '<model>', 'search_read',
-    [[<domain>]],
-    {'fields': [<field_list>], 'limit': <n>, 'offset': <m>}
-)
-```
-
-Domain format: list of tuples `[('field', 'operator', value)]`. Common operators: `=`, `!=`, `>`, `<`, `>=`, `<=`, `like`, `ilike`, `in`, `not in`, `child_of`, `parent_of`.
-
-Examples:
-- Confirmed sales orders: `[('state', '=', 'sale')]`
-- Invoices for a partner: `[('partner_id', '=', 42), ('move_type', '=', 'out_invoice')]`
-- Products with stock below 10: `[('qty_available', '<', 10)]`
-- Records created this month: `[('create_date', '>=', '2024-01-01'), ('create_date', '<', '2024-02-01')]`
-
-**read** — get a specific record by ID:
-
-```python
-result = models.execute_kw(db, uid, pwd,
-    '<model>', 'read',
-    [[<id>]],
-    {'fields': [<field_list>]}
-)
-```
-
-**search_count** — count records matching a domain:
-
-```python
-count = models.execute_kw(db, uid, pwd,
-    '<model>', 'search_count',
-    [[<domain>]]
-)
-```
-
-**fields_get** — inspect model fields:
-
-```python
-fields = models.execute_kw(db, uid, pwd,
-    '<model>', 'fields_get',
-    [],
-    {'attributes': ['type', 'string', 'required', 'readonly', 'relation', 'selection']}
-)
-```
-
-### Create records (`odoo-jala:odoo.write`)
-
-```python
-record_id = models.execute_kw(db, uid, pwd,
-    '<model>', 'create',
-    [{'field': value, ...}]
-)
-```
-
-Example — create a CRM lead:
-
-```python
-lead_id = models.execute_kw(db, uid, pwd,
-    'crm.lead', 'create',
-    [{'name': 'New Opportunity', 'partner_id': 42, 'type': 'opportunity'}]
-)
-```
-
-### Update records (`odoo-jala:odoo.write`)
-
-```python
-models.execute_kw(db, uid, pwd,
-    '<model>', 'write',
-    [[<id>], {'field': new_value, ...}]
-)
-```
-
-For multiple records, pass a list of IDs: `[[1, 2, 3], {...}]`
-
-### Delete records (`odoo-jala:odoo.write`, destructive)
-
-```python
-models.execute_kw(db, uid, pwd,
-    '<model>', 'unlink',
-    [[<id>]]
-)
-```
-
-Only run when the user explicitly asks to delete. Confirm the record ID and model before proceeding.
-
-### Download reports (`odoo-jala:odoo.read`)
-
-```python
-report = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/report')
-result = report.render_report(db, uid, pwd,
-    '<report_name>', [<ids>],
-    {'<format>': {}, ...}
-)
-```
-
-Write the PDF/base64 output to a file:
-
-```python
-import base64
-pdf_data = base64.b64decode(result['result'])
-with open('report.pdf', 'wb') as f:
-    f.write(pdf_data)
-```
-
-Common report names:
-- Invoices: `account.report_invoice` (single) / `account.report_invoice_with_payments` (with payment info)
-- Sales orders: `sale.report_saleorder` (single) / `sale.report_saleorder_document` (quotation/order)
-- Purchase orders: `purchase.report_purchasequotation` (RFQ) / `purchase.report_purchaseorder` (PO)
-- Picking slips: `stock.report_picking`
-- Products: `stock.report_product_template_label`
-
-### Quick inline patterns
-
-**One-liner to fetch data** (read-only):
-
-```bash
-python3 -c "
-import xmlrpc.client, os, json
-url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
-db = os.environ['ODOO_JALA_DB']
-user = os.environ['ODOO_JALA_USERNAME']
-pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
-common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
-uid = common.authenticate(db, user, pwd, {})
-models = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object')
-result = models.execute_kw(db, uid, pwd, '<model>', 'search_read', [[('state','=','sale')]], {'fields':['name','partner_id','amount_total'], 'limit':10})
-print(json.dumps(result, indent=2))
-"
-```
-
-**One-liner to create** (write):
-
-```bash
-python3 -c "
-import xmlrpc.client, os
-url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
-db = os.environ['ODOO_JALA_DB']
-user = os.environ['ODOO_JALA_USERNAME']
-pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
-common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
-uid = common.authenticate(db, user, pwd, {})
-models = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object')
-rid = models.execute_kw(db, uid, pwd, '<model>', 'create', [{'name':'<value>'}])
-print(f'Created record id={rid}')
-"
-```
-
-## Quick Examples
-
-Every example uses the `ODOO_JALA_*` env vars.
-
-### List recent sales orders
-
-```bash
-python3 -c "
-import xmlrpc.client, os, json
-url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
-db = os.environ['ODOO_JALA_DB']
-user = os.environ['ODOO_JALA_USERNAME']
-pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
-common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
-uid = common.authenticate(db, user, pwd, {})
-models = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object')
-orders = models.execute_kw(db, uid, pwd, 'sale.order', 'search_read', [[['state','in',['sale','done']]]], {'fields':['name','partner_id','amount_total','state','date_order'], 'limit':20, 'order':'date_order desc'})
-for o in orders:
-    print(f\"{o['name']} | {o['partner_id'][1]} | {o['amount_total']} | {o['state']}\")
-"
-```
-
-### Find a customer and their invoices
-
-```bash
-python3 -c "
-import xmlrpc.client, os, json
-url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
-db = os.environ['ODOO_JALA_DB']
-user = os.environ['ODOO_JALA_USERNAME']
-pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
-common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
-uid = common.authenticate(db, user, pwd, {})
-models = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object')
-# Find partner
-partners = models.execute_kw(db, uid, pwd, 'res.partner', 'search_read', [[['name','ilike','Acme']]], {'fields':['id','name'], 'limit':5})
-if partners:
-    pid = partners[0]['id']
-    print(f\"Partner: {partners[0]['name']} (id={pid})\")
-    invoices = models.execute_kw(db, uid, pwd, 'account.move', 'search_read', [[['partner_id','=',pid],['move_type','=','out_invoice']]], {'fields':['name','invoice_date','amount_total','state'], 'limit':10})
-    for inv in invoices:
-        print(f\"  {inv['name']} | {inv['invoice_date']} | {inv['amount_total']} | {inv['state']}\")
-"
-```
-
-### Create a CRM lead
-
-```bash
-python3 -c "
-import xmlrpc.client, os
-url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
-db = os.environ['ODOO_JALA_DB']
-user = os.environ['ODOO_JALA_USERNAME']
-pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
-common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
-uid = common.authenticate(db, user, pwd, {})
-models = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object')
-lead_id = models.execute_kw(db, uid, pwd, 'crm.lead', 'create', [{'name':'Website Inquiry - Pricing', 'type':'lead'}])
-print(f'Created lead id={lead_id}')
-"
-```
-
-### Update a sales order line price
-
-```bash
-python3 -c "
-import xmlrpc.client, os
-url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
-db = os.environ['ODOO_JALA_DB']
-user = os.environ['ODOO_JALA_USERNAME']
-pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
-common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
-uid = common.authenticate(db, user, pwd, {})
-models = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object')
-models.execute_kw(db, uid, pwd, 'sale.order.line', 'write', [[<line_id>], {'price_unit': <new_price>}])
-print('Updated')
-"
-```
-
-### Download an invoice PDF
-
-```bash
-python3 -c "
-import xmlrpc.client, os, base64
-url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
-db = os.environ['ODOO_JALA_DB']
-user = os.environ['ODOO_JALA_USERNAME']
-pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
-common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
-uid = common.authenticate(db, user, pwd, {})
-report = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/report')
-result = report.render_report(db, uid, pwd, 'account.report_invoice', [<invoice_id>], {})
-pdf = base64.b64decode(result['result'])
-with open('invoice.pdf', 'wb') as f:
-    f.write(pdf)
-print(f'Wrote invoice.pdf ({len(pdf)} bytes)')
-"
-```
-
-### Inspect model fields
-
-```bash
-python3 -c "
-import xmlrpc.client, os, json
-url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
-db = os.environ['ODOO_JALA_DB']
-user = os.environ['ODOO_JALA_USERNAME']
-pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
-common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
-uid = common.authenticate(db, user, pwd, {})
-models = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object')
-fields = models.execute_kw(db, uid, pwd, '<model>', 'fields_get', [], {'attributes':['type','string','required','relation','selection']})
-for fname, finfo in sorted(fields.items()):
-    print(f\"{fname}: {finfo['type']} ({finfo['string']})\")
-"
-```
-
-### Discover available models (including Jala custom modules)
-
-```bash
-python3 -c "
-import xmlrpc.client, os
-url = os.environ.get('ODOO_JALA_URL', 'https://odoo.jala.tech')
-db = os.environ['ODOO_JALA_DB']
-user = os.environ['ODOO_JALA_USERNAME']
-pwd = os.environ.get('ODOO_JALA_API_KEY') or os.environ.get('ODOO_JALA_PASSWORD')
-common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
-uid = common.authenticate(db, user, pwd, {})
-models = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object')
-matches = models.execute_kw(db, uid, pwd, 'ir.model', 'search_read', [[['model','ilike','<search_term>']]], {'fields':['model','name'], 'limit':10})
-for m in matches:
-    print(f\"{m['model']}: {m['name']}\")
-"
-```
-
-## Key Odoo Models
-
-Common model names. Use `ir.model` discovery at runtime for Jala custom modules.
-
-| Model | Name | Common Fields |
-|---|---|---|
-| `res.partner` | Contacts | `name`, `email`, `phone`, `company_type`, `vat` |
-| `sale.order` | Sales Orders | `name`, `partner_id`, `amount_total`, `state`, `date_order` |
-| `sale.order.line` | Sales Order Lines | `order_id`, `product_id`, `product_uom_qty`, `price_unit` |
-| `account.move` | Journal Entries / Invoices | `name`, `partner_id`, `amount_total`, `move_type`, `state` |
-| `account.move.line` | Journal Items | `move_id`, `account_id`, `debit`, `credit`, `partner_id` |
-| `purchase.order` | Purchase Orders | `name`, `partner_id`, `amount_total`, `state`, `date_order` |
-| `stock.move` | Stock Moves | `product_id`, `product_uom_qty`, `state`, `location_id`, `location_dest_id` |
-| `stock.quant` | Stock On Hand | `product_id`, `quantity`, `location_id` |
-| `stock.picking` | Transfers | `name`, `picking_type_id`, `state`, `move_ids` |
-| `product.product` | Product Variants | `name`, `default_code`, `lst_price`, `qty_available` |
-| `product.template` | Product Templates | `name`, `list_price`, `type`, `categ_id` |
-| `crm.lead` | CRM Leads/Opportunities | `name`, `partner_id`, `type` (lead/opportunity), `stage_id`, `probability` |
-| `hr.employee` | Employees | `name`, `department_id`, `job_id`, `work_email` |
-| `hr.attendance` | Attendance | `employee_id`, `check_in`, `check_out` |
-| `ir.model` | Model Registry | `model`, `name` |
-
-## Report Names
-
-Common Odoo 16 report references:
-
-| Report Technical Name | What It Generates |
-|---|---|
-| `account.report_invoice` | Single invoice PDF |
-| `account.report_invoice_with_payments` | Invoice with payment info |
-| `sale.report_saleorder` | Sale order / quotation PDF |
-| `purchase.report_purchaseorder` | Purchase order PDF |
-| `purchase.report_purchasequotation` | Purchase RFQ PDF |
-| `stock.report_picking` | Delivery slip / picking PDF |
-| `stock.report_deliveryslip` | Delivery slip PDF |
-| `stock.report_picking_operations` | Picking operations (detailed) |
-| `stock.report_product_template_label` | Product barcode labels |
+For any mutating branch, completion requires the requested remote state to be observed directly or by a follow-up read when the platform exposes one.
 
 ## Output
 

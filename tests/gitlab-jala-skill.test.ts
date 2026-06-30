@@ -2,15 +2,16 @@ import fs from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
 describe("gitlab-jala skill", () => {
-  it("namespaces permissions under gitlab-jala", async () => {
+  it("uses bare GitLab permissions for the gitlab-jala skill id", async () => {
     const raw = await fs.readFile(new URL("../skills/gitlab-jala/SKILL.md", import.meta.url), "utf8");
 
     expect(raw).toContain("gitlab.read");
     expect(raw).toContain("gitlab.review");
     expect(raw).toContain("gitlab.write");
-    expect(raw).toContain("gitlab-jala:gitlab.read");
-    expect(raw).toContain("gitlab-jala:gitlab.review");
-    expect(raw).toContain("gitlab-jala:gitlab.write");
+    expect(raw).not.toContain("gitlab-jala:gitlab.read");
+    expect(raw).not.toContain("gitlab-jala:gitlab.review");
+    expect(raw).not.toContain("gitlab-jala:gitlab.write");
+    expect(raw).toContain("Request the bare permission shown below");
   });
 
   it("uses GITLAB_JALA_TOKEN and maps it to GITLAB_TOKEN", async () => {
@@ -28,11 +29,11 @@ describe("gitlab-jala skill", () => {
   it("references the base gitlab skill for operation documentation", async () => {
     const raw = await fs.readFile(new URL("../skills/gitlab-jala/SKILL.md", import.meta.url), "utf8");
 
-    expect(raw).toContain("skills/gitlab/SKILL.md");
+    expect(raw).toContain("../gitlab/SKILL.md");
     expect(raw).toContain("extends the base `gitlab` skill");
     expect(raw).toContain("only overrides the credential contract");
     expect(raw).toContain("Do not duplicate operation documentation");
-    expect(raw).toContain("Read `skills/gitlab/SKILL.md` for any operation not documented here");
+    expect(raw).toContain("Read [../gitlab/SKILL.md](../gitlab/SKILL.md) for any operation not documented here");
   });
 
   it("keeps destructive gating consistent with base skill", async () => {

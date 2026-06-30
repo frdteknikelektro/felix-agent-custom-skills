@@ -4,7 +4,7 @@
 Use this recipe when the user asks which EC2 instances exist, which are running, what instance types are used, or needs a compact compute inventory.
 
 ## Permission
-Required permission: `aws-jala:aws.read`.
+Required permission: `aws.read`.
 
 ## Inputs
 Optional:

@@ -28,7 +28,7 @@ match:
 
 ## Purpose
 
-Operate Jala's GitLab account (group: `atnic`) through the `glab` CLI. This skill extends the base `gitlab` skill. Every operation, permission policy, destructive-operation gate, CLI availability check, and command reference is identical — read `skills/gitlab/SKILL.md` for the full reference. This skill only overrides the credential contract and the default group context.
+Operate Jala's GitLab account (group: `atnic`) through the `glab` CLI. This skill extends the base `gitlab` skill. Every operation, permission policy, destructive-operation gate, CLI availability check, and command reference is identical — read [../gitlab/SKILL.md](../gitlab/SKILL.md) for the full reference. This skill only overrides the credential contract and the default group context.
 
 **Default group**: All Jala repositories live under the `atnic` GitLab group. When no specific namespace is provided, default to `atnic`. For repo-scoped operations, use `--repo atnic/<project-name>`. To list all Jala repos, use `glab repo list --group atnic`.
 
@@ -52,13 +52,13 @@ Activate when the user asks to interact with Jala's specific GitLab account (atn
 
 ## Permissions
 
-Same text-based read/write split as the base `gitlab` skill, namespaced under `gitlab-jala`:
+Same text-based read/write split as the base `gitlab` skill. Request the bare permission shown below; Felix stores grants under this skill id.
 
-- `gitlab-jala:gitlab.read` — inspection, listing, viewing, searching, downloading (same scope as base).
-- `gitlab-jala:gitlab.review` — adding comments, approving and merging merge requests, and other collaborative review actions (same scope as base).
-- `gitlab-jala:gitlab.write` — create, edit, close, reopen, fork, archive, delete, retry, cancel, set (same scope as base).
+- `gitlab.read` — inspection, listing, viewing, searching, downloading (same scope as base).
+- `gitlab.review` — adding comments, approving and merging merge requests, and other collaborative review actions (same scope as base).
+- `gitlab.write` — create, edit, close, reopen, fork, archive, delete, retry, cancel, set (same scope as base).
 
-If an operation is ambiguous, treat it as `gitlab-jala:gitlab.write` unless the user is only asking to inspect or explain current state.
+If an operation is ambiguous, treat it as `gitlab.write` unless the user is only asking to inspect or explain current state.
 
 Destructive operations are allowed only when the user explicitly asks — same gating as the base skill.
 
@@ -94,7 +94,7 @@ If a `glab` command fails because the binary is missing, report it as a runtime 
 
 ## Operations
 
-All operations are identical to the base `gitlab` skill. Read `skills/gitlab/SKILL.md` for the full operation reference covering Repositories, Issues, Merge Requests, Releases, Pipelines/CI/CD, Variables, Snippets, and API Access.
+All operations are identical to the base `gitlab` skill. Read [../gitlab/SKILL.md](../gitlab/SKILL.md) for the full operation reference covering Repositories, Issues, Merge Requests, Releases, Pipelines/CI/CD, Variables, Snippets, and API Access.
 
 Every command must be preceded by using `GITLAB_TOKEN="$GITLAB_JALA_TOKEN"`.
 
@@ -161,7 +161,7 @@ Same as base `gitlab` skill. Keep replies concise and operational. Include proje
 - Always export `GITLAB_TOKEN="$GITLAB_JALA_TOKEN"` before any GitLab command.
 - Always verify the token with `glab auth status` before doing real work.
 - Never print `GITLAB_JALA_TOKEN`, `GITLAB_TOKEN`, or any variable values.
-- Read `skills/gitlab/SKILL.md` for any operation not documented here.
+- Read [../gitlab/SKILL.md](../gitlab/SKILL.md) for any operation not documented here.
 - If the `glab` CLI binary is missing, tell the user to use `install-tool` first.
 - Destructive operations must be explicitly requested by the user before proceeding.
 - Tokens are in the environment.

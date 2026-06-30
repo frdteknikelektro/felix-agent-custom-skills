@@ -32,7 +32,7 @@ match:
 
 ## Purpose
 
-Operate Jala's GitHub account (user `jalaproduct`, org `Atnic`) through the `gh` CLI. This skill extends the base `github` skill. Every operation, permission policy, destructive-operation gate, CLI availability check, and command reference is identical — read `skills/github/SKILL.md` for the full reference. This skill only overrides the credential contract and the default organization context.
+Operate Jala's GitHub account (user `jalaproduct`, org `Atnic`) through the `gh` CLI. This skill extends the base `github` skill. Every operation, permission policy, destructive-operation gate, CLI availability check, and command reference is identical — read [../github/SKILL.md](../github/SKILL.md) for the full reference. This skill only overrides the credential contract and the default organization context.
 
 **Default org**: All Jala repositories live under the `Atnic` GitHub organization. When no specific owner is provided, default to `Atnic`. For repo-scoped operations, use `--repo Atnic/<repo-name>`. To list all Jala repos, use `gh repo list Atnic`.
 
@@ -56,13 +56,13 @@ Activate when the user asks to interact with Jala's specific GitHub account (Atn
 
 ## Permissions
 
-Same text-based read/write split as the base `github` skill, namespaced under `github-jala`:
+Same text-based read/write split as the base `github` skill. Request the bare permission shown below; Felix stores grants under this skill id.
 
-- `github-jala:github.read` — inspection, listing, viewing, searching, downloading (same scope as base).
-- `github-jala:github.review` — adding comments, approving pull requests, merging pull requests, and other collaborative review actions (same scope as base).
-- `github-jala:github.write` — create, edit, close, reopen, fork, archive, rename, delete, rerun, cancel, set (same scope as base).
+- `github.read` — inspection, listing, viewing, searching, downloading (same scope as base).
+- `github.review` — adding comments, approving pull requests, merging pull requests, and other collaborative review actions (same scope as base).
+- `github.write` — create, edit, close, reopen, fork, archive, rename, delete, rerun, cancel, set (same scope as base).
 
-If an operation is ambiguous, treat it as `github-jala:github.write` unless the user is only asking to inspect or explain current state.
+If an operation is ambiguous, treat it as `github.write` unless the user is only asking to inspect or explain current state.
 
 Destructive operations are allowed only when the user explicitly asks — same gating as the base skill.
 
@@ -98,7 +98,7 @@ If a `gh` command fails because the binary is missing, report it as a runtime er
 
 ## Operations
 
-All operations are identical to the base `github` skill. Read `skills/github/SKILL.md` for the full operation reference covering Repositories, Issues, Pull Requests, Releases, Actions/Workflows, Secrets & Variables, Gists, Search, and API Access.
+All operations are identical to the base `github` skill. Read [../github/SKILL.md](../github/SKILL.md) for the full operation reference covering Repositories, Issues, Pull Requests, Releases, Actions/Workflows, Secrets & Variables, Gists, Search, and API Access.
 
 Every command must be preceded by using `GITHUB_TOKEN="$GITHUB_JALA_TOKEN"`.
 
@@ -165,7 +165,7 @@ Same as base `github` skill. Keep replies concise and operational. Include repo 
 - Always export `GITHUB_TOKEN="$GITHUB_JALA_TOKEN"` before any GitHub command.
 - Always verify the token with `gh auth status` before doing real work.
 - Never print `GITHUB_JALA_TOKEN`, `GITHUB_TOKEN`, or any secret values.
-- Read `skills/github/SKILL.md` for any operation not documented here.
+- Read [../github/SKILL.md](../github/SKILL.md) for any operation not documented here.
 - If the `gh` CLI binary is missing, tell the user to use `install-tool` first.
 - Destructive operations must be explicitly requested by the user before proceeding.
 - Tokens are in the environment.

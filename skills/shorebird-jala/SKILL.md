@@ -1,7 +1,7 @@
 ---
 id: shorebird-jala
 name: Shorebird Jala Management
-description: Use for Jala company Shorebird account management of already-created Flutter code-push releases and patches through npx-based CLI commands or verified Shorebird API calls, using the project-level SHOREBIRD_JALA_* env contract. This skill covers checking release/patch information, inspecting tracks, validation, rollback investigation, and changing an existing patch track such as staging, beta, or stable. Do not read local Flutter/Shorebird project config and do not create, build, upload, push, or publish new Shorebird releases or patches.
+description: Use for Jala Shorebird remote inspection and existing patch track management through npx Shorebird or verified API calls. Do not create, build, upload, push, or publish release or patch artifacts.
 version: 1
 enabled: true
 kind: operational
@@ -165,7 +165,7 @@ Commands that need the matching project checkout:
 ## Information sources
 
 Use remote/account sources only:
-- Required `.env` values for the chosen command.
+- Required env values for the chosen command.
 - Safe `npx shorebird` commands such as version/help/list/show/status commands.
 - Verified Shorebird API calls.
 
@@ -187,7 +187,7 @@ Useful docs:
 - Keep replies concise and operational.
 - Include exact commands run or proposed.
 - Separate confirmed facts from assumptions.
-- If blocked by missing `.env`, missing required env values, missing CLI/API coverage, or missing release identifiers, state the blocker and the smallest next step.
+- If blocked by missing required env values, missing CLI/API coverage, or missing release identifiers, state the blocker and the smallest next step.
 
 ## Checks
 

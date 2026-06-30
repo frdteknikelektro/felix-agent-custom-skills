@@ -35,7 +35,7 @@ match:
 
 ## Purpose
 
-Operate Jala's PostHog analytics through the REST API. This skill extends the base `posthog` skill. Every operation, permission policy, destructive-operation gate, and API pattern is identical — read `skills/posthog/SKILL.md` for the full reference. This skill only overrides the credential contract, the Jala organization/project context, and qualified match rules.
+Operate Jala's PostHog analytics through the REST API. This skill extends the base `posthog` skill. Every operation, permission policy, destructive-operation gate, and API pattern is identical — read [../posthog/SKILL.md](../posthog/SKILL.md) for the full reference. This skill only overrides the credential contract, the Jala organization/project context, and qualified match rules.
 
 **Jala organizations**:
 - **Jala** — org ID `10590`
@@ -63,12 +63,12 @@ Activate when the user asks to query PostHog specifically for Jala's organizatio
 
 ## Permissions
 
-Same text-based read/write split as the base `posthog` skill, namespaced under `posthog-jala`:
+Same text-based read/write split as the base `posthog` skill. Request the bare permission shown below; Felix stores grants under this skill id.
 
-- `posthog-jala:posthog.read` — inspection, listing, viewing, searching, querying, downloads (same scope as base).
-- `posthog-jala:posthog.write` — create, update, delete, toggle, launch, patch (same scope as base).
+- `posthog.read` — inspection, listing, viewing, searching, querying, downloads (same scope as base).
+- `posthog.write` — create, update, delete, toggle, launch, patch (same scope as base).
 
-If an operation is ambiguous, treat it as `posthog-jala:posthog.write` unless the user is only asking to inspect or explain current state.
+If an operation is ambiguous, treat it as `posthog.write` unless the user is only asking to inspect or explain current state.
 
 Destructive operations are allowed only when the user explicitly asks — same gating as the base skill.
 
@@ -129,7 +129,7 @@ When listing projects, include the org name so the user can disambiguate between
 
 ## Operations
 
-All operations are identical to the base `posthog` skill. Read `skills/posthog/SKILL.md` for the full operation reference covering Events, Feature Flags, Insights, Dashboards, Persons, Cohorts, Annotations, Surveys, Experiments, Session Recordings, HogQL Queries, Schema & Taxonomy, and Groups.
+All operations are identical to the base `posthog` skill. Read [../posthog/SKILL.md](../posthog/SKILL.md) for the full operation reference covering Events, Feature Flags, Insights, Dashboards, Persons, Cohorts, Annotations, Surveys, Experiments, Session Recordings, HogQL Queries, Schema & Taxonomy, and Groups.
 
 Every `curl` command must map `POSTHOG_JALA_PERSONAL_KEY` → `POSTHOG_PERSONAL_KEY`.
 
@@ -203,7 +203,7 @@ Same as base `posthog` skill. Keep replies concise and operational. Include proj
 - Always verify the key with `GET /api/users/@me/` before doing real work.
 - Never print `POSTHOG_JALA_PERSONAL_KEY` or any credential value.
 - For project-scoped operations, default to Jala orgs (10590, 28053) when the user doesn't specify.
-- Read `skills/posthog/SKILL.md` for any operation not documented here.
+- Read [../posthog/SKILL.md](../posthog/SKILL.md) for any operation not documented here.
 - Read `references/jala-context.md` for Jala org/project details — but verify with API if a reference ID returns 404.
 - Destructive operations must be explicitly requested by the user before proceeding.
 - Tokens are in the environment.

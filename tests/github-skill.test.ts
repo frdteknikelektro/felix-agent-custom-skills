@@ -8,12 +8,13 @@ describe("github skill", () => {
     expect(raw).toContain("github.read");
     expect(raw).toContain("github.review");
     expect(raw).toContain("github.write");
-    expect(raw).toContain("github:github.read");
-    expect(raw).toContain("github:github.review");
-    expect(raw).toContain("github:github.write");
+    expect(raw).not.toContain("github:github.read");
+    expect(raw).not.toContain("github:github.review");
+    expect(raw).not.toContain("github:github.write");
+    expect(raw).toContain("Request the bare permission shown below");
     expect(raw).toContain("Use text-based permission judgment");
     expect(raw).toContain("Do not add or rely on hardcoded TypeScript command detection");
-    expect(raw).toContain("If an operation is ambiguous, treat it as `github:github.write`");
+    expect(raw).toContain("If an operation is ambiguous, treat it as `github.write`");
   });
 
   it("keeps credentials in the runtime secret env without local env files", async () => {
@@ -30,13 +31,17 @@ describe("github skill", () => {
 
   it("preserves explicit destructive-operation gating", async () => {
     const raw = await fs.readFile(new URL("../skills/github/SKILL.md", import.meta.url), "utf8");
+    const repositories = await fs.readFile(
+      new URL("../skills/github/references/commands/repositories.md", import.meta.url),
+      "utf8",
+    );
 
     expect(raw).toContain("Destructive operations are allowed only when the user explicitly asks");
     expect(raw).toContain("repo delete");
     expect(raw).toContain("release delete");
     expect(raw).toContain("secret delete");
     expect(raw).toContain("gist delete");
-    expect(raw).toContain("Only run when the user explicitly asks");
+    expect(repositories).toContain("Only run when the user explicitly asks");
   });
 
   it("checks for gh CLI and defers to install-tool when missing", async () => {
@@ -51,36 +56,40 @@ describe("github skill", () => {
   it("includes all 9 operation categories", async () => {
     const raw = await fs.readFile(new URL("../skills/github/SKILL.md", import.meta.url), "utf8");
 
-    expect(raw).toContain("### Auth & Identity");
-    expect(raw).toContain("### Repositories");
-    expect(raw).toContain("### Issues");
-    expect(raw).toContain("### Pull Requests");
-    expect(raw).toContain("### Releases");
-    expect(raw).toContain("### Actions & Workflows");
-    expect(raw).toContain("### Secrets & Variables");
-    expect(raw).toContain("### Gists");
-    expect(raw).toContain("### Search");
-    expect(raw).toContain("### API Access");
+    expect(raw).toContain("[auth-and-identity](references/commands/auth-and-identity.md)");
+    expect(raw).toContain("[repositories](references/commands/repositories.md)");
+    expect(raw).toContain("[issues](references/commands/issues.md)");
+    expect(raw).toContain("[pull-requests](references/commands/pull-requests.md)");
+    expect(raw).toContain("[releases](references/commands/releases.md)");
+    expect(raw).toContain("[actions-and-workflows](references/commands/actions-and-workflows.md)");
+    expect(raw).toContain("[secrets-and-variables](references/commands/secrets-and-variables.md)");
+    expect(raw).toContain("[gists](references/commands/gists.md)");
+    expect(raw).toContain("[search](references/commands/search.md)");
+    expect(raw).toContain("[api-access](references/commands/api-access.md)");
   });
 
   it("includes quick examples with full env sourcing in every recipe", async () => {
     const raw = await fs.readFile(new URL("../skills/github/SKILL.md", import.meta.url), "utf8");
+    const quickExamples = await fs.readFile(
+      new URL("../skills/github/references/commands/quick-examples.md", import.meta.url),
+      "utf8",
+    );
 
-    expect(raw).toContain("## Quick Examples");
-    expect(raw).toContain("List repositories for an owner");
-    expect(raw).toContain("View a specific repository");
-    expect(raw).toContain("Create a private repository");
-    expect(raw).toContain("List issues with labels");
-    expect(raw).toContain("Create an issue");
-    expect(raw).toContain("Create and merge a pull request");
-    expect(raw).toContain("Create a release with notes");
-    expect(raw).toContain("View and rerun a failed workflow");
-    expect(raw).toContain("Set a repository secret");
-    expect(raw).toContain("Search code across repositories");
-    expect(raw).toContain("Create and view a gist");
-    expect(raw).toContain("Trigger a workflow dispatch");
+    expect(raw).toContain("[quick-examples](references/commands/quick-examples.md)");
+    expect(raw).toContain("[list-repositories-for-an-owner](references/commands/list-repositories-for-an-owner.md)");
+    expect(raw).toContain("[view-a-specific-repository](references/commands/view-a-specific-repository.md)");
+    expect(raw).toContain("[create-a-private-repository](references/commands/create-a-private-repository.md)");
+    expect(raw).toContain("[list-issues-with-labels](references/commands/list-issues-with-labels.md)");
+    expect(raw).toContain("[create-an-issue](references/commands/create-an-issue.md)");
+    expect(raw).toContain("[create-and-merge-a-pull-request](references/commands/create-and-merge-a-pull-request.md)");
+    expect(raw).toContain("[create-a-release-with-notes](references/commands/create-a-release-with-notes.md)");
+    expect(raw).toContain("[view-and-rerun-a-failed-workflow](references/commands/view-and-rerun-a-failed-workflow.md)");
+    expect(raw).toContain("[set-a-repository-secret](references/commands/set-a-repository-secret.md)");
+    expect(raw).toContain("[search-code-across-repositories](references/commands/search-code-across-repositories.md)");
+    expect(raw).toContain("[create-and-view-a-gist](references/commands/create-and-view-a-gist.md)");
+    expect(raw).toContain("[trigger-a-workflow-dispatch](references/commands/trigger-a-workflow-dispatch.md)");
 
-    expect(raw).toContain("Copy the full sequence");
+    expect(quickExamples).toContain("Copy the full sequence");
   });
 
   it("includes cross-skill routing convention", async () => {

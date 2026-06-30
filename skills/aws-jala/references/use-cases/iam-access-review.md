@@ -4,9 +4,9 @@
 Use this recipe when the user asks to inspect IAM users, access keys, attached policies, broad permissions, inactive keys, or access risk.
 
 ## Permission
-Required permission: `aws-jala:aws.read`.
+Required permission: `aws.read`.
 
-Use `aws-jala:aws.write` only if the user explicitly asks to change IAM state, such as deactivating a key, detaching a policy, deleting a user, or revoking access.
+Use `aws.write` only if the user explicitly asks to change IAM state, such as deactivating a key, detaching a policy, deleting a user, or revoking access.
 
 ## Inputs
 Optional:

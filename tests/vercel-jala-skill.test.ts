@@ -2,13 +2,14 @@ import fs from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
 describe("vercel-jala skill", () => {
-  it("namespaces permissions under vercel-jala", async () => {
+  it("uses bare Vercel permissions for the vercel-jala skill id", async () => {
     const raw = await fs.readFile(new URL("../skills/vercel-jala/SKILL.md", import.meta.url), "utf8");
 
     expect(raw).toContain("vercel.read");
     expect(raw).toContain("vercel.write");
-    expect(raw).toContain("vercel-jala:vercel.read");
-    expect(raw).toContain("vercel-jala:vercel.write");
+    expect(raw).not.toContain("vercel-jala:vercel.read");
+    expect(raw).not.toContain("vercel-jala:vercel.write");
+    expect(raw).toContain("Request the bare permission shown below");
   });
 
   it("uses VERCEL_JALA_TOKEN and maps it to VERCEL_TOKEN", async () => {
@@ -26,11 +27,11 @@ describe("vercel-jala skill", () => {
   it("references the base vercel skill for operation documentation", async () => {
     const raw = await fs.readFile(new URL("../skills/vercel-jala/SKILL.md", import.meta.url), "utf8");
 
-    expect(raw).toContain("skills/vercel/SKILL.md");
+    expect(raw).toContain("../vercel/SKILL.md");
     expect(raw).toContain("extends the base `vercel` skill");
     expect(raw).toContain("only overrides the credential contract");
     expect(raw).toContain("Do not duplicate operation documentation");
-    expect(raw).toContain("Read `skills/vercel/SKILL.md` for any operation not documented here");
+    expect(raw).toContain("Read [../vercel/SKILL.md](../vercel/SKILL.md) for any operation not documented here");
   });
 
   it("keeps destructive gating consistent with base skill", async () => {

@@ -65,10 +65,12 @@ Activate when the user asks to deploy, manage domains/DNS, set environment varia
 
 Use the requested intent and the likely Vercel effect to choose the required permission:
 
-- `vercel:vercel.read` — inspection, listing, viewing, pulling, and commands whose purpose is to observe existing state. Examples: `ls`, `list`, `inspect`, `logs`, `whoami`, `env ls`, `env pull`, `domains ls`, `domains inspect`, `certs ls`, `projects ls`, `alias ls`, `teams ls`, `dns ls`, `integration ls`, `integration-resource ls`, `billing ls`, `target ls`.
-- `vercel:vercel.write` — deploy, create, add, remove, set, delete, promote, rollback, link, unlink, switch, verify, issue, buy, transfer, and any other operation that can change remote Vercel state.
+Request the bare permission shown below; Felix stores grants under this skill id.
 
-If an operation is ambiguous, treat it as `vercel:vercel.write` unless the user is only asking to inspect or explain current state.
+- `vercel.read` — inspection, listing, viewing, pulling, and commands whose purpose is to observe existing state. Examples: `ls`, `list`, `inspect`, `logs`, `whoami`, `env ls`, `env pull`, `domains ls`, `domains inspect`, `certs ls`, `projects ls`, `alias ls`, `teams ls`, `dns ls`, `integration ls`, `integration-resource ls`, `billing ls`, `target ls`.
+- `vercel.write` — deploy, create, add, remove, set, delete, promote, rollback, link, unlink, switch, verify, issue, buy, transfer, and any other operation that can change remote Vercel state.
+
+If an operation is ambiguous, treat it as `vercel.write` unless the user is only asking to inspect or explain current state.
 
 Destructive operations are allowed only when the user explicitly asks for the specific destructive intent: `unlink`, `domains rm`, `projects rm`, `certs rm`, `env rm`, `alias rm`, `dns rm`, `integration rm`, `teams rm`, `rollback` to a specific deployment.
 
@@ -117,511 +119,44 @@ If a `vercel` command fails because the binary is missing (exit code 127, "comma
 
 Do not pre-emptively check for the CLI. Do not gate the workflow on CLI presence. Let vercel commands fail naturally and handle the failure. The only gate in this skill is the permission gate.
 
-## Operations
-
-### Auth & Identity
-Read-only (`vercel:vercel.read`):
-
-```bash
-vercel whoami
-```
-
-Returns the authenticated user or team. Use this to confirm the token works.
-
-### Deployments
-
-**List deployments** (`vercel:vercel.read`):
-
-```bash
-vercel ls [project-name] $VERCEL_SCOPE
-vercel list [project-name] $VERCEL_SCOPE --prod
-```
-
-**Inspect a deployment** (`vercel:vercel.read`):
-
-```bash
-vercel inspect <deployment-url-or-id> $VERCEL_SCOPE
-```
-
-**Deploy** (`vercel:vercel.write`):
-
-```bash
-vercel $VERCEL_SCOPE
-vercel deploy $VERCEL_SCOPE
-vercel deploy --prod $VERCEL_SCOPE
-vercel deploy --prebuilt $VERCEL_SCOPE
-vercel deploy --archive=tgz $VERCEL_SCOPE
-```
-
-Options:
-- `--prod` — promote immediately to production
-- `--prebuilt` — skip build step, use prebuilt output
-- `--archive=tgz` — deploy from a pre-packaged archive
-- `--env KEY=value` — set env variable for this deployment only
-
-**Rollback** (`vercel:vercel.write`):
-
-```bash
-vercel rollback [deployment-url-or-id] $VERCEL_SCOPE
-vercel rollback --prod $VERCEL_SCOPE  # rollback production to previous
-```
-
-This is destructive. Only run when the user explicitly asks for a rollback. Confirm the target deployment before proceeding.
-
-**Promote a deployment** (`vercel:vercel.write`):
-
-```bash
-vercel promote <deployment-url-or-id> $VERCEL_SCOPE
-```
-
-**View logs** (`vercel:vercel.read`):
-
-```bash
-vercel logs <deployment-url-or-id> $VERCEL_SCOPE
-vercel logs <deployment-url-or-id> --follow $VERCEL_SCOPE
-vercel logs <deployment-url-or-id> --since 1h $VERCEL_SCOPE
-vercel logs <deployment-url-or-id> --until 2024-01-01T00:00:00Z $VERCEL_SCOPE
-vercel logs <deployment-url-or-id> --json $VERCEL_SCOPE
-vercel logs <deployment-url-or-id> --limit 100 $VERCEL_SCOPE
-```
-
-Limit log output to a reasonable number of lines (default 100). Use `--follow` only when the user explicitly asks to tail logs.
-
-### Environment Variables
-
-**List env vars** (`vercel:vercel.read`):
-
-```bash
-vercel env ls $VERCEL_SCOPE
-vercel env ls <environment> $VERCEL_SCOPE  # production, preview, development
-```
-
-**Pull env vars** (`vercel:vercel.read`):
-
-```bash
-vercel env pull [file] $VERCEL_SCOPE
-vercel env pull [file] --environment=<production|preview|development> $VERCEL_SCOPE
-```
-
-**Add an env var** (`vercel:vercel.write`):
-
-```bash
-vercel env add <key> <environment> $VERCEL_SCOPE
-# Prompts for value. For non-interactive, use:
-echo "<value>" | vercel env add <key> <environment> $VERCEL_SCOPE
-```
-
-Or use the `--yes` flag with stdin:
-
-```bash
-vercel env add <key> --environment=<production|preview|development> --yes $VERCEL_SCOPE <<< "<value>"
-```
-
-Never print env var values in replies. Refer to them by key name only.
-
-**Remove an env var** (`vercel:vercel.write`):
-
-```bash
-vercel env rm <key> <environment> $VERCEL_SCOPE --yes
-```
-
-This is destructive. Only run when the user explicitly asks.
-
-### Domains
-
-**List domains** (`vercel:vercel.read`):
-
-```bash
-vercel domains ls $VERCEL_SCOPE
-vercel domains inspect <domain> $VERCEL_SCOPE
-```
-
-**Add a domain** (`vercel:vercel.write`):
-
-```bash
-vercel domains add <domain> $VERCEL_SCOPE
-```
-
-**Remove a domain** (`vercel:vercel.write`):
-
-```bash
-vercel domains rm <domain> $VERCEL_SCOPE --yes
-```
-
-This is destructive. Only run when the user explicitly asks.
-
-**Buy a domain** (`vercel:vercel.write`):
-
-```bash
-vercel domains buy <domain> $VERCEL_SCOPE
-```
-
-**Move a domain** (`vercel:vercel.write`):
-
-```bash
-vercel domains move <domain> $VERCEL_SCOPE
-```
-
-**Transfer a domain in** (`vercel:vercel.write`):
-
-```bash
-vercel domains transfer-in <domain> $VERCEL_SCOPE
-```
-
-**Verify a domain** (`vercel:vercel.write`):
-
-```bash
-vercel domains verify <domain> $VERCEL_SCOPE
-```
-
-### DNS Records
-
-**List DNS records** (`vercel:vercel.read`):
-
-```bash
-vercel dns ls <domain> $VERCEL_SCOPE
-```
-
-**Add a DNS record** (`vercel:vercel.write`):
-
-```bash
-vercel dns add <domain> <subdomain> <type> <value> $VERCEL_SCOPE
-```
-
-**Remove a DNS record** (`vercel:vercel.write`):
-
-```bash
-vercel dns rm <record-id> $VERCEL_SCOPE --yes
-```
-
-This is destructive. Only run when the user explicitly asks.
-
-### SSL Certificates
-
-**List certificates** (`vercel:vercel.read`):
-
-```bash
-vercel certs ls $VERCEL_SCOPE
-```
-
-**Issue a certificate** (`vercel:vercel.write`):
-
-```bash
-vercel certs issue <cn> [domains...] $VERCEL_SCOPE
-```
-
-**Remove a certificate** (`vercel:vercel.write`):
-
-```bash
-vercel certs rm <cn> $VERCEL_SCOPE --yes
-```
-
-This is destructive. Only run when the user explicitly asks.
-
-### Projects
-
-**List projects** (`vercel:vercel.read`):
-
-```bash
-vercel projects ls $VERCEL_SCOPE
-```
-
-**Add a project** (`vercel:vercel.write`):
-
-```bash
-vercel projects add <project-name> $VERCEL_SCOPE
-```
-
-**Remove a project** (`vercel:vercel.write`):
-
-```bash
-vercel projects rm <project-name> $VERCEL_SCOPE --yes
-```
-
-This is destructive. Only run when the user explicitly asks.
-
-### Project Linking
-
-**Link current directory to a Vercel project** (`vercel:vercel.write`):
-
-```bash
-vercel link $VERCEL_SCOPE
-```
-
-**Unlink current directory** (`vercel:vercel.write`):
-
-```bash
-vercel unlink $VERCEL_SCOPE --yes
-```
-
-This is destructive. Only run when the user explicitly asks.
-
-### Aliases
-
-**List aliases** (`vercel:vercel.read`):
-
-```bash
-vercel alias ls $VERCEL_SCOPE
-```
-
-**Set an alias** (`vercel:vercel.write`):
-
-```bash
-vercel alias set <deployment-url> <alias> $VERCEL_SCOPE
-```
-
-**Remove an alias** (`vercel:vercel.write`):
-
-```bash
-vercel alias rm <alias> $VERCEL_SCOPE --yes
-```
-
-This is destructive. Only run when the user explicitly asks.
-
-### Teams
-
-**List teams** (`vercel:vercel.read`):
-
-```bash
-vercel teams ls
-```
-
-**Add a team** (`vercel:vercel.write`):
-
-```bash
-vercel teams add
-```
-
-**Remove a team** (destructive, `vercel:vercel.write`):
-
-Only through the Vercel dashboard. The CLI does not support `teams rm`.
-
-**Switch team scope** (`vercel:vercel.write`):
-
-```bash
-vercel switch <team-slug>
-```
-
-This changes the active scope for subsequent commands. Use `VERCEL_SCOPE` to scope individual commands instead.
-
-### Integrations
-
-**List integrations** (`vercel:vercel.read`):
-
-```bash
-vercel integration ls $VERCEL_SCOPE
-```
-
-**Add an integration** (`vercel:vercel.write`):
-
-```bash
-vercel integration add <name> $VERCEL_SCOPE
-```
-
-**Remove an integration** (`vercel:vercel.write`):
-
-```bash
-vercel integration rm <name> $VERCEL_SCOPE --yes
-```
-
-This is destructive. Only run when the user explicitly asks.
-
-**List integration resources** (`vercel:vercel.read`):
-
-```bash
-vercel integration-resource ls $VERCEL_SCOPE
-```
-
-**Add integration resource** (`vercel:vercel.write`):
-
-```bash
-vercel integration-resource add <name> $VERCEL_SCOPE
-```
-
-**Remove integration resource** (`vercel:vercel.write`):
-
-```bash
-vercel integration-resource rm <name> $VERCEL_SCOPE --yes
-```
-
-### Billing
-
-**View billing** (`vercel:vercel.read`):
-
-```bash
-vercel billing ls $VERCEL_SCOPE
-```
-
-**Add billing** (`vercel:vercel.write`):
-
-```bash
-vercel billing add $VERCEL_SCOPE
-```
-
-### Local Development
-
-**Run local dev server** (`vercel:vercel.write`):
-
-```bash
-vercel dev $VERCEL_SCOPE
-vercel dev --listen <port> $VERCEL_SCOPE
-```
-
-**Initialize a new Vercel project** (`vercel:vercel.write`):
-
-```bash
-vercel init [example-name] $VERCEL_SCOPE
-```
-
-### Targets
-
-**List deployment targets** (`vercel:vercel.read`):
-
-```bash
-vercel target ls <project> $VERCEL_SCOPE
-```
-
-### Git Integration
-
-**Connect a Git repository** (`vercel:vercel.write`):
-
-```bash
-vercel git connect <git-url> $VERCEL_SCOPE
-```
-
-**Disconnect Git** (`vercel:vercel.write`):
-
-```bash
-vercel git disconnect $VERCEL_SCOPE --yes
-```
-
-## Command Reference
-
-### Global Flags
-Apply these to any `vercel` command:
-
-| Flag | Usage |
-|---|---|
-| `--scope <slug>` | Team or user scope |
-| `--token <token>` | Override token (prefer env var) |
-| `--cwd <path>` | Working directory |
-| `--debug` | Verbose debug output |
-| `-y, --yes` | Skip confirmation prompts |
-| `--local-config <path>` | Path to local config file |
-| `--global-config <path>` | Path to global config file |
-
-### Output Flags
-When the user wants structured output:
-
-```bash
-vercel ls --json $VERCEL_SCOPE
-```
-
-## Quick Examples
-Every example includes the required env setup. Copy the full sequence.
-
-### Deploy from scratch
-```bash
-export VERCEL_TOKEN="$VERCEL_TOKEN"
-# Verify
-vercel whoami
-# Link current directory to a Vercel project
-vercel link
-# Deploy to preview
-vercel deploy
-# Or deploy straight to production
-vercel deploy --prod
-```
-
-### Deploy and promote to production alias
-```bash
-export VERCEL_TOKEN="$VERCEL_TOKEN"
-vercel whoami
-vercel deploy --prod
-```
-
-### Add an environment variable
-```bash
-export VERCEL_TOKEN="$VERCEL_TOKEN"
-vercel whoami
-vercel env add DATABASE_URL production
-# When prompted, paste or pipe the value. Never echo it in the reply.
-```
-
-### Inspect a deployment and tail logs
-```bash
-export VERCEL_TOKEN="$VERCEL_TOKEN"
-vercel whoami
-vercel inspect <deployment-url>
-vercel logs <deployment-url> --limit 50
-```
-
-### Add a custom domain
-```bash
-export VERCEL_TOKEN="$VERCEL_TOKEN"
-vercel whoami
-vercel domains add <domain>
-vercel domains verify <domain>
-```
-
-### Rollback a production deployment
-```bash
-export VERCEL_TOKEN="$VERCEL_TOKEN"
-vercel whoami
-vercel rollback --prod
-```
-
-### List all projects and their latest deployments
-```bash
-export VERCEL_TOKEN="$VERCEL_TOKEN"
-vercel whoami
-vercel projects ls
-```
-
-### List environment variables for production
-```bash
-export VERCEL_TOKEN="$VERCEL_TOKEN"
-vercel whoami
-vercel env ls production
-```
-
-### Build a workspace project without deploying
-```bash
-export VERCEL_TOKEN="$VERCEL_TOKEN"
-cd <project-directory>
-vercel whoami
-vercel link
-vercel build --prod
-```
-
-### Deploy a workspace project (linked, with vercel.json)
-```bash
-export VERCEL_TOKEN="$VERCEL_TOKEN"
-cd <project-directory>
-vercel whoami
-vercel deploy --prod
-```
-
-### Set an alias to point a deployment to a domain
-```bash
-export VERCEL_TOKEN="$VERCEL_TOKEN"
-vercel whoami
-vercel alias set <deployment-url> <alias-domain>
-```
-
-### Team-scoped deployment
-```bash
-export VERCEL_TOKEN="$VERCEL_TOKEN"
-vercel whoami
-vercel deploy --scope <team-slug> --prod
-```
-
-### Pull env vars to local .env file
-```bash
-export VERCEL_TOKEN="$VERCEL_TOKEN"
-vercel whoami
-vercel env pull .env.local --environment=production
-```
+## Operation references
+
+Keep this file for routing, permission policy, environment setup, output rules, and completion checks. Load only the reference needed for the requested branch:
+
+- **Auth & Identity** — read [auth-and-identity](references/commands/auth-and-identity.md).
+- **Deployments** — read [deployments](references/commands/deployments.md).
+- **Environment Variables** — read [environment-variables](references/commands/environment-variables.md).
+- **Domains** — read [domains](references/commands/domains.md).
+- **DNS Records** — read [dns-records](references/commands/dns-records.md).
+- **SSL Certificates** — read [ssl-certificates](references/commands/ssl-certificates.md).
+- **Projects** — read [projects](references/commands/projects.md).
+- **Project Linking** — read [project-linking](references/commands/project-linking.md).
+- **Aliases** — read [aliases](references/commands/aliases.md).
+- **Teams** — read [teams](references/commands/teams.md).
+- **Integrations** — read [integrations](references/commands/integrations.md).
+- **Billing** — read [billing](references/commands/billing.md).
+- **Local Development** — read [local-development](references/commands/local-development.md).
+- **Targets** — read [targets](references/commands/targets.md).
+- **Git Integration** — read [git-integration](references/commands/git-integration.md).
+- **Command Reference** — read [command-reference](references/commands/command-reference.md).
+- **Global Flags** — read [global-flags](references/commands/global-flags.md).
+- **Output Flags** — read [output-flags](references/commands/output-flags.md).
+- **Quick Examples** — read [quick-examples](references/commands/quick-examples.md).
+- **Deploy from scratch** — read [deploy-from-scratch](references/commands/deploy-from-scratch.md).
+- **Deploy and promote to production alias** — read [deploy-and-promote-to-production-alias](references/commands/deploy-and-promote-to-production-alias.md).
+- **Add an environment variable** — read [add-an-environment-variable](references/commands/add-an-environment-variable.md).
+- **Inspect a deployment and tail logs** — read [inspect-a-deployment-and-tail-logs](references/commands/inspect-a-deployment-and-tail-logs.md).
+- **Add a custom domain** — read [add-a-custom-domain](references/commands/add-a-custom-domain.md).
+- **Rollback a production deployment** — read [rollback-a-production-deployment](references/commands/rollback-a-production-deployment.md).
+- **List all projects and their latest deployments** — read [list-all-projects-and-their-latest-deployments](references/commands/list-all-projects-and-their-latest-deployments.md).
+- **List environment variables for production** — read [list-environment-variables-for-production](references/commands/list-environment-variables-for-production.md).
+- **Build a workspace project without deploying** — read [build-a-workspace-project-without-deploying](references/commands/build-a-workspace-project-without-deploying.md).
+- **Deploy a workspace project (linked, with vercel.json)** — read [deploy-a-workspace-project-linked-with-vercel-json](references/commands/deploy-a-workspace-project-linked-with-vercel-json.md).
+- **Set an alias to point a deployment to a domain** — read [set-an-alias-to-point-a-deployment-to-a-domain](references/commands/set-an-alias-to-point-a-deployment-to-a-domain.md).
+- **Team-scoped deployment** — read [team-scoped-deployment](references/commands/team-scoped-deployment.md).
+- **Pull env vars to local .env file** — read [pull-env-vars-to-local-env-file](references/commands/pull-env-vars-to-local-env-file.md).
+
+For any mutating branch, completion requires the requested remote state to be observed directly or by a follow-up read when the platform exposes one.
 
 ## Output
 

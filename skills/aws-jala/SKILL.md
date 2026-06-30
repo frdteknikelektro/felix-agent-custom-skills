@@ -69,10 +69,12 @@ Use cases are repeatable operating recipes. They may produce artifacts, but they
 
 Use the user's requested intent and the likely AWS effect to choose the required permission:
 
-- `aws-jala:aws.read` — inspection, inventory, diagnostics, billing lookups, Cost Explorer reads, and commands whose purpose is to observe existing state. Examples: `list`, `get`, `describe`, `show`, `head`, `sts get-caller-identity`, `ce get-cost-and-usage`.
-- `aws-jala:aws.write` — create, update, delete, attach, detach, put, revoke, terminate, deploy, restore, modify, or any other operation that can change remote AWS state.
+Request the bare permission shown below; Felix stores grants under this skill id.
 
-If an operation is ambiguous, treat it as `aws-jala:aws.write` unless the user is only asking to inspect or explain current state.
+- `aws.read` — inspection, inventory, diagnostics, billing lookups, Cost Explorer reads, and commands whose purpose is to observe existing state. Examples: `list`, `get`, `describe`, `show`, `head`, `sts get-caller-identity`, `ce get-cost-and-usage`.
+- `aws.write` — create, update, delete, attach, detach, put, revoke, terminate, deploy, restore, modify, or any other operation that can change remote AWS state.
+
+If an operation is ambiguous, treat it as `aws.write` unless the user is only asking to inspect or explain current state.
 
 Destructive operations are allowed only when the user explicitly asks for the specific destructive intent, such as deleting a bucket object, terminating an instance, deleting a stack, revoking IAM access, or removing a policy.
 
@@ -118,7 +120,7 @@ aws sts get-caller-identity
 Never print credential values, secret-derived env, or full signed request material.
 
 ## Quick Examples
-Read-only inventory uses `aws-jala:aws.read`:
+Read-only inventory uses `aws.read`:
 
 ```bash
 aws ec2 describe-instances \
@@ -127,7 +129,7 @@ aws ec2 describe-instances \
   --output table
 ```
 
-Remote-state changes use `aws-jala:aws.write`:
+Remote-state changes use `aws.write`:
 
 ```bash
 aws lambda update-function-configuration \

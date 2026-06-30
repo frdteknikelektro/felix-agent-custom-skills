@@ -28,7 +28,7 @@ match:
 
 ## Purpose
 
-Operate Jala's separate Vercel account through the `vercel` CLI. This skill extends the base `vercel` skill. Every operation, permission policy, destructive-operation gate, CLI availability check, and command reference is identical — read `skills/vercel/SKILL.md` for the full reference. This skill only overrides the credential contract and team/scope defaults.
+Operate Jala's separate Vercel account through the `vercel` CLI. This skill extends the base `vercel` skill. Every operation, permission policy, destructive-operation gate, CLI availability check, and command reference is identical — read [../vercel/SKILL.md](../vercel/SKILL.md) for the full reference. This skill only overrides the credential contract and team/scope defaults.
 
 Do not duplicate operation documentation. If you need the full command reference for a Vercel operation, read the base `vercel` SKILL.md. This file documents only what is different.
 
@@ -50,12 +50,12 @@ Activate when the user asks to operate specifically on Jala's Vercel account. Tr
 
 ## Permissions
 
-Same text-based read/write split as the base `vercel` skill, namespaced under `vercel-jala`:
+Same text-based read/write split as the base `vercel` skill. Request the bare permission shown below; Felix stores grants under this skill id.
 
-- `vercel-jala:vercel.read` — inspection, listing, viewing, pulling (same scope as base).
-- `vercel-jala:vercel.write` — deploy, create, add, remove, set, delete, promote, rollback, link, unlink (same scope as base).
+- `vercel.read` — inspection, listing, viewing, pulling (same scope as base).
+- `vercel.write` — deploy, create, add, remove, set, delete, promote, rollback, link, unlink (same scope as base).
 
-If an operation is ambiguous, treat it as `vercel-jala:vercel.write` unless the user is only asking to inspect or explain current state.
+If an operation is ambiguous, treat it as `vercel.write` unless the user is only asking to inspect or explain current state.
 
 Destructive operations are allowed only when the user explicitly asks — same gating as the base skill.
 
@@ -97,7 +97,7 @@ If a `vercel` command fails because the binary is missing, report it as a runtim
 
 ## Operations
 
-All operations are identical to the base `vercel` skill. Read `skills/vercel/SKILL.md` for the full operation reference covering Deployments, Environment Variables, Domains, DNS, SSL Certificates, Projects, Aliases, Teams, Integrations, Billing, Local Development, Git Integration, and Targets.
+All operations are identical to the base `vercel` skill. Read [../vercel/SKILL.md](../vercel/SKILL.md) for the full operation reference covering Deployments, Environment Variables, Domains, DNS, SSL Certificates, Projects, Aliases, Teams, Integrations, Billing, Local Development, Git Integration, and Targets.
 
 Every command must be preceded by using `VERCEL_TOKEN="$VERCEL_JALA_TOKEN"`.
 
@@ -163,7 +163,7 @@ Same as base `vercel` skill. Keep replies concise and operational. Include proje
 - Always export `VERCEL_TOKEN="$VERCEL_JALA_TOKEN"` before any Vercel command.
 - Always verify the token with `vercel whoami` before doing real work.
 - Never print `VERCEL_JALA_TOKEN`, `VERCEL_TOKEN`, or any env var values.
-- Read `skills/vercel/SKILL.md` for any operation not documented here.
+- Read [../vercel/SKILL.md](../vercel/SKILL.md) for any operation not documented here.
 - If the `vercel` CLI binary is missing, tell the user to use `install-tool` first.
 - Destructive operations must be explicitly requested by the user before proceeding.
 - Tokens are in the environment.

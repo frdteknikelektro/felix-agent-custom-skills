@@ -7,11 +7,12 @@ describe("aws-jala skill", () => {
 
     expect(raw).toContain("aws.read");
     expect(raw).toContain("aws.write");
-    expect(raw).toContain("aws-jala:aws.read");
-    expect(raw).toContain("aws-jala:aws.write");
+    expect(raw).not.toContain("aws-jala:aws.read");
+    expect(raw).not.toContain("aws-jala:aws.write");
+    expect(raw).toContain("Request the bare permission shown below");
     expect(raw).toContain("Use text-based permission judgment");
     expect(raw).toContain("Do not add or rely on hardcoded TypeScript command detection");
-    expect(raw).toContain("If an operation is ambiguous, treat it as `aws-jala:aws.write`");
+    expect(raw).toContain("If an operation is ambiguous, treat it as `aws.write`");
   });
 
   it("keeps credentials in the runtime secret env without profile or skill-local env requirements", async () => {
@@ -54,7 +55,7 @@ describe("aws-jala skill", () => {
     expect(monthlyReport).toContain("latest completed calendar month");
     expect(monthlyReport).toContain("immediately previous completed calendar month");
     expect(monthlyReport).toContain("Allow explicit overrides");
-    expect(monthlyReport).toContain("Required permission: `aws-jala:aws.read`");
+    expect(monthlyReport).toContain("Required permission: `aws.read`");
     expect(monthlyReport).toContain("Six Cost Explorer JSON exports");
     expect(monthlyReport).toContain("Nine PNG charts");
     expect(monthlyReport).toContain("One markdown summary report");

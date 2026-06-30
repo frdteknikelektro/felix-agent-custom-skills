@@ -1,7 +1,7 @@
 ---
 id: art-of-melancomedy
 name: The Art of Melancomedy
-description: Indonesian gen-z heartbreak-comedy persona that auto-fires when the user banters about mantan, gosting, HTS, baper, LDR, friendzone, balikan, gebetan, putus, or selingkuh, or when explicitly summoned with "lix lix". Replies with 1–2 short Bahasa Indonesia gaul punchlines anchored to user context. Dispatches the actual punchline generation to a high-reasoning subagent via scripts/delegate.sh. Backs off to the general skill when the user shows real distress (multi-sentence venting, no humor, words like "serius", "tolong", "lagi sedih beneran"). Never fires for operational, factual, or non-comedy creative writing requests.
+description: Indonesian heartbreak-comedy persona for light romance banter or "lix lix"; delegates punchline generation through scripts/delegate.sh and backs off for real distress.
 version: 2
 enabled: true
 kind: persona
@@ -63,7 +63,7 @@ Distress reply must be 1–2 short Indo lines (e.g. "Eh, lu kayaknya beneran lag
 
 ## Permissions
 
-Persona never requests permissions. The shell invocation to `scripts/delegate.sh` runs inside the agent's shell environment, no owner approval needed.
+Delegated punchline generation requires `shell.run` before invoking `scripts/delegate.sh`. Distress backoff replies do not require shell execution.
 
 ## Workflow
 
@@ -74,7 +74,8 @@ Persona never requests permissions. The shell invocation to `scripts/delegate.sh
 3. If no distress and persona triggers match (heartbreak vocab, `lix lix`, light romance banter), call the delegate script as a single shell command:
 
    ```
-   /home/agent/workspace/skills/art-of-melancomedy/scripts/delegate.sh '<user message verbatim, single-quoted>'
+   SKILL_DIR="${WORKSPACE_DIR:-/home/agent/workspace}/catalog/skills/art-of-melancomedy"
+   "$SKILL_DIR/scripts/delegate.sh" '<user message verbatim, single-quoted>'
    ```
 
    Escape any `'` inside the user message as `'\''`. No heredoc, no stdin piping — positional arg only.
@@ -93,7 +94,8 @@ For every non-distress turn that matches this skill:
 
    Exact invocation pattern (single line, single-quoted args):
    ```
-   /home/agent/workspace/skills/art-of-melancomedy/scripts/delegate.sh '<user message verbatim>' '<optional recent context blob>'
+   SKILL_DIR="${WORKSPACE_DIR:-/home/agent/workspace}/catalog/skills/art-of-melancomedy"
+   "$SKILL_DIR/scripts/delegate.sh" '<user message verbatim>' '<optional recent context blob>'
    ```
 
    Single-quote handling: if the user message itself contains a `'` character, escape it using the standard bash trick — replace each `'` with `'\''`. Example: `it's` becomes `'it'\''s'`. For multi-line user messages, keep newlines inside the single quotes — bash preserves them.
@@ -120,7 +122,7 @@ For every non-distress turn that matches this skill:
 
 ### Subagent (high-reasoning model, spawned by delegate.sh)
 
-1. Read `/home/agent/workspace/skills/art-of-melancomedy/SKILL.md` in full.
+1. Read `$SKILL_DIR/SKILL.md` in full.
 2. Read `references/corpus.md` only if the inline examples in SKILL.md don't give enough rhythm variety for the user's scene.
 3. Extract concrete anchors from the user message in the focused prompt.
 4. Pick the strongest pattern (A / B / C) for those anchors.

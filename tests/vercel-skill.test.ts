@@ -7,11 +7,12 @@ describe("vercel skill", () => {
 
     expect(raw).toContain("vercel.read");
     expect(raw).toContain("vercel.write");
-    expect(raw).toContain("vercel:vercel.read");
-    expect(raw).toContain("vercel:vercel.write");
+    expect(raw).not.toContain("vercel:vercel.read");
+    expect(raw).not.toContain("vercel:vercel.write");
+    expect(raw).toContain("Request the bare permission shown below");
     expect(raw).toContain("Use text-based permission judgment");
     expect(raw).toContain("Do not add or rely on hardcoded TypeScript command detection");
-    expect(raw).toContain("If an operation is ambiguous, treat it as `vercel:vercel.write`");
+    expect(raw).toContain("If an operation is ambiguous, treat it as `vercel.write`");
   });
 
   it("keeps credentials in the runtime secret env without local env files", async () => {
@@ -28,6 +29,7 @@ describe("vercel skill", () => {
 
   it("preserves explicit destructive-operation gating", async () => {
     const raw = await fs.readFile(new URL("../skills/vercel/SKILL.md", import.meta.url), "utf8");
+    const domains = await fs.readFile(new URL("../skills/vercel/references/commands/domains.md", import.meta.url), "utf8");
 
     expect(raw).toContain("Destructive operations are allowed only when the user explicitly asks");
     expect(raw).toContain("domains rm");
@@ -36,7 +38,7 @@ describe("vercel skill", () => {
     expect(raw).toContain("env rm");
     expect(raw).toContain("alias rm");
     expect(raw).toContain("certificates");
-    expect(raw).toContain("Only run when the user explicitly asks");
+    expect(domains).toContain("Only run when the user explicitly asks");
   });
 
   it("checks for vercel CLI and defers to install-tool when missing", async () => {
@@ -50,24 +52,31 @@ describe("vercel skill", () => {
 
   it("includes quick examples with full env sourcing in every recipe", async () => {
     const raw = await fs.readFile(new URL("../skills/vercel/SKILL.md", import.meta.url), "utf8");
+    const quickExamples = await fs.readFile(
+      new URL("../skills/vercel/references/commands/quick-examples.md", import.meta.url),
+      "utf8",
+    );
+    const buildExample = await fs.readFile(
+      new URL("../skills/vercel/references/commands/build-a-workspace-project-without-deploying.md", import.meta.url),
+      "utf8",
+    );
 
-    expect(raw).toContain("## Quick Examples");
-    expect(raw).toContain("Deploy from scratch");
-    expect(raw).toContain("Deploy and promote to production alias");
-    expect(raw).toContain("Add an environment variable");
-    expect(raw).toContain("Inspect a deployment and tail logs");
-    expect(raw).toContain("Add a custom domain");
-    expect(raw).toContain("Rollback a production deployment");
-    expect(raw).toContain("List all projects");
-    expect(raw).toContain("List environment variables for production");
-    expect(raw).toContain("Set an alias");
-    expect(raw).toContain("Team-scoped deployment");
-    expect(raw).toContain("Pull env vars to local");
-    expect(raw).toContain("Build a workspace project without deploying");
-    expect(raw).toContain("Deploy a workspace project");
-    expect(raw).toContain("vercel build --prod");
+    expect(raw).toContain("[quick-examples](references/commands/quick-examples.md)");
+    expect(raw).toContain("[deploy-from-scratch](references/commands/deploy-from-scratch.md)");
+    expect(raw).toContain("[deploy-and-promote-to-production-alias](references/commands/deploy-and-promote-to-production-alias.md)");
+    expect(raw).toContain("[add-an-environment-variable](references/commands/add-an-environment-variable.md)");
+    expect(raw).toContain("[inspect-a-deployment-and-tail-logs](references/commands/inspect-a-deployment-and-tail-logs.md)");
+    expect(raw).toContain("[add-a-custom-domain](references/commands/add-a-custom-domain.md)");
+    expect(raw).toContain("[rollback-a-production-deployment](references/commands/rollback-a-production-deployment.md)");
+    expect(raw).toContain("[list-all-projects-and-their-latest-deployments]");
+    expect(raw).toContain("[list-environment-variables-for-production]");
+    expect(raw).toContain("[set-an-alias-to-point-a-deployment-to-a-domain]");
+    expect(raw).toContain("[team-scoped-deployment]");
+    expect(raw).toContain("[pull-env-vars-to-local-env-file]");
+    expect(raw).toContain("[build-a-workspace-project-without-deploying]");
+    expect(raw).toContain("[deploy-a-workspace-project-linked-with-vercel-json]");
+    expect(buildExample).toContain("vercel build --prod");
 
-    // Every example includes env sourcing
-    expect(raw).toContain("Copy the full sequence");
+    expect(quickExamples).toContain("Copy the full sequence");
   });
 });
