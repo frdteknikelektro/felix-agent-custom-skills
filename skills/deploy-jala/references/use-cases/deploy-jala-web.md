@@ -40,7 +40,7 @@ ssh ubuntu@db.jala.tech
 cd Code/Web/jala-web
 git pull
 composer install
-php artisan app:update --no-downtime
+/usr/bin/php7.3 artisan app:update --no-downtime
 ```
 
 ### Production (branches `release/*` or `master`)
@@ -50,7 +50,7 @@ ssh ubuntu@db.jala.tech
 cd Code/Web/jala-web
 git pull
 composer install --no-dev
-php artisan app:update --no-downtime --production
+/usr/bin/php7.3 artisan app:update --no-downtime --production
 ```
 
 ## Verify
@@ -58,7 +58,7 @@ php artisan app:update --no-downtime --production
 After deploy, confirm the application is responding:
 
 ```sh
-ssh ubuntu@db.jala.tech "cd Code/Web/jala-web && php artisan --version"
+ssh ubuntu@db.jala.tech "cd Code/Web/jala-web && /usr/bin/php7.3 artisan --version"
 ```
 
 If the command returns a version, the application is up. For a fuller check, hit the application's HTTP endpoint.
