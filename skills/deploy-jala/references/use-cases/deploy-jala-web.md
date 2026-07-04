@@ -43,7 +43,7 @@ git status --porcelain | grep -q . && git stash push -m "deploy-stash"
 git pull
 /usr/bin/php7.3 composer install
 /usr/bin/php7.3 artisan app:update --no-downtime
-git stash list | grep -q deploy-stash && git stash pop || true
+if git stash list | grep -q deploy-stash; then git stash pop || git checkout --theirs . && git add .; fi
 ```
 
 ### Production (branches `release/*` or `master`)
@@ -55,7 +55,7 @@ git status --porcelain | grep -q . && git stash push -m "deploy-stash"
 git pull
 /usr/bin/php7.3 composer install --no-dev
 /usr/bin/php7.3 artisan app:update --no-downtime --production
-git stash list | grep -q deploy-stash && git stash pop || true
+if git stash list | grep -q deploy-stash; then git stash pop || git checkout --theirs . && git add .; fi
 ```
 
 ## Verify
@@ -74,7 +74,7 @@ Where `<server>` is `db.jala.tech` for staging or `app.jala.tech` for production
 - **git pull fails** — branch may not exist locally or remote has changed. Check branch name and remote state.
 - **composer install fails** — dependency conflict or missing lock file. Report the error output.
 - **artisan app:update fails** — migration or cache issue. Report the error; do not retry destructive steps automatically.
-- **stash pop conflict** — if `git stash pop` has conflicts, report the conflicting files and ask the user how to resolve. Do not force-push or auto-resolve.
+- **stash pop conflict** — if `git stash pop` has conflicts, resolve by keeping the deployed code (theirs) for structural files (config, migrations) and the stashed changes (ours) for business logic. If a file is too complex to auto-resolve, save it as a patch: `git stash show -p > /tmp/unstashed.patch` and report it.
 
 ## Recovery
 

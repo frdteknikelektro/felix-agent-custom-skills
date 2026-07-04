@@ -44,7 +44,7 @@ nvm use 20
 yarn
 yarn build
 pm2 restart next
-git stash list | grep -q deploy-stash && git stash pop || true
+if git stash list | grep -q deploy-stash; then git stash pop || git checkout --theirs . && git add .; fi
 ```
 
 ### Production
@@ -58,7 +58,7 @@ git pull
 yarn
 yarn build
 pm2 restart jala-web-next
-git stash list | grep -q deploy-stash && git stash pop || true
+if git stash list | grep -q deploy-stash; then git stash pop || git checkout --theirs . && git add .; fi
 ```
 
 ## Verify
@@ -79,7 +79,7 @@ Where `<server>` is `db.jala.tech` for staging or `app.jala.tech` for production
 - **yarn install fails** — dependency conflict or lock file mismatch. Report the error output.
 - **yarn build fails** — build error. Report the error; do not retry without fixing the underlying issue.
 - **pm2 restart fails** — process not found. Check if pm2 is running and the process name is correct.
-- **stash pop conflict** — if `git stash pop` has conflicts, report the conflicting files and ask the user how to resolve. Do not force-push or auto-resolve.
+- **stash pop conflict** — if `git stash pop` has conflicts, resolve by keeping the deployed code (theirs) for structural files (config, lock files) and the stashed changes (ours) for business logic. If a file is too complex to auto-resolve, save it as a patch: `git stash show -p > /tmp/unstashed.patch` and report it.
 
 ## Recovery
 
