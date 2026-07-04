@@ -2,7 +2,7 @@
 
 ## When to use
 
-Use this recipe when the user asks to deploy, ship, or release jala-odoo-custom-addons (or odoo-custom-addons) to staging or production.
+Use this recipe when the user asks to deploy, ship, or release jala-odoo-custom-addons to staging or production.
 
 ## Permission
 
