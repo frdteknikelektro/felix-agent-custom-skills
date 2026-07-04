@@ -61,4 +61,5 @@ Keep replies concise and operational. Show the commands being run, the environme
 
 - If SSH fails, report the connection error and stop.
 - If a deploy command fails, stop and report — do not skip to the next step.
-- If a verification check fails, report the failure and do not proceed to other work.
+- If a verification check fails, rollback to the saved commit before reporting the failure.
+- Always capture the current commit hash before deploying, so rollback is possible.

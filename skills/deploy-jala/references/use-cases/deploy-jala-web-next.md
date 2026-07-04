@@ -27,8 +27,9 @@ Derived:
 1. Confirm the environment with the user.
 2. Determine the command order and pm2 process name from the environment.
 3. Show the full command sequence and get explicit confirmation.
-4. SSH into the server and execute the deploy.
-5. Verify the application is responding after deploy.
+4. SSH into the server, capture current commit hash for rollback, then execute the deploy.
+5. Verify the application is responding after deploy. If verification fails, rollback to the saved commit.
+6. On rollback, rebuild and restart pm2 with the previous code.
 
 ## Commands
 
@@ -74,3 +75,19 @@ Where `<server>` is `db.jala.tech` for staging or `app.jala.tech` for production
 - **yarn install fails** — dependency conflict or lock file mismatch. Report the error output.
 - **yarn build fails** — build error. Report the error; do not retry without fixing the underlying issue.
 - **pm2 restart fails** — process not found. Check if pm2 is running and the process name is correct.
+
+## Recovery
+
+If deploy fails or verification fails, rollback to the commit before the pull:
+
+```sh
+ssh ubuntu@<server>
+cd Code/Web/jala-web-next
+git checkout <previous-commit-hash>
+nvm use 20
+yarn
+yarn build
+pm2 restart <process-name>
+```
+
+The previous commit hash is captured before the deploy starts. Use the same pm2 process name as the original deploy (`next` for staging, `jala-web-next` for production).
