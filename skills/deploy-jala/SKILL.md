@@ -50,8 +50,11 @@ Request the bare permission shown below; Felix stores grants under this skill id
 2. **Identify product and environment.** From the user's request, determine which product (jala-web, jala-web-next) and which environment (staging, production). Both must be known before proceeding — if either is unclear, ask and wait for the answer.
 3. **Load the use case.** Read the matching use case file. It holds the exact steps, branch rules, and commands.
 4. **Confirm before deploy.** Show the user the commands that will run and the target environment. Proceed only after explicit confirmation.
-5. **Execute the deploy.** Run the commands in order. Report each step's outcome.
-6. **Verify.** Confirm the deploy succeeded — check process status, HTTP response, or relevant health indicator.
+5. **Capture commit hash.** Before deploying, SSH into the server and capture `git rev-parse HEAD`. Save this value — it is the rollback target.
+6. **Execute the deploy.** Run the commands in order. Report each step's outcome.
+7. **Verify.** Confirm the deploy succeeded — check process status, HTTP response, or relevant health indicator.
+8. **On failure, rollback.** If verification fails, SSH into the server, checkout the saved commit, and re-run the install/build commands. The use case file has the exact recovery commands.
+9. **Resolve stash conflicts.** If `git stash pop` has conflicts, read each conflicted file, understand what the stashed change was doing and what the deployed code changed, then merge both sides — keep the deployed code for structural changes (config, migrations), keep the stashed changes for business logic. If a conflict is irreconcilable, save to a patch file and report it.
 
 ## Output
 

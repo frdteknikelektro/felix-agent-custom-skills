@@ -27,49 +27,90 @@ Derived:
 1. Confirm the environment with the user.
 2. Determine the command order and pm2 process name from the environment.
 3. Show the full command sequence and get explicit confirmation.
-4. SSH into the server, capture current commit hash for rollback, then execute the deploy.
-5. Verify the application is responding after deploy. If verification fails, rollback to the saved commit.
+4. SSH into the server, capture current commit hash for rollback (`ssh ubuntu@<server> "cd Code/Web/jala-web-next && git rev-parse HEAD"`), then execute the deploy.
+5. Verify the application is responding after deploy. If verification fails, rollback to the captured commit.
 6. On rollback, rebuild and restart pm2 with the previous code.
 
 ## Commands
 
 ### Staging
 
+Capture commit hash:
+
+```sh
+ssh ubuntu@db.jala.tech "cd Code/Web/jala-web-next && git rev-parse HEAD"
+```
+
+Save the output — it is the rollback target.
+
+Deploy:
+
 ```sh
 ssh ubuntu@db.jala.tech
 cd Code/Web/jala-web-next
-git status --porcelain | grep -q . && git stash push -m "deploy-stash"
-git pull
+
+# try pull — if uncommitted changes block it, stash first
+git pull || {
+  git stash push -m "deploy-stash"
+  git pull
+}
+
+# restore stashed changes if any
+git stash list | grep -q deploy-stash && git stash pop
+
+# build and restart
 nvm use 20
 yarn
 yarn build
 pm2 restart next
-if git stash list | grep -q deploy-stash; then git stash pop || git checkout --theirs . && git add .; fi
 ```
 
+If `git stash pop` has conflicts, resolve by reading each conflicted file and merging both sides.
+
+Verify — run `ssh ubuntu@db.jala.tech "pm2 status"`. If the process is not online, go to Recovery.
+
 ### Production
+
+Capture commit hash:
+
+```sh
+ssh ubuntu@app.jala.tech "cd Code/Web/jala-web-next && git rev-parse HEAD"
+```
+
+Save the output — it is the rollback target.
+
+Deploy:
 
 ```sh
 ssh ubuntu@app.jala.tech
 cd Code/Web/jala-web-next
 nvm use 20
-git status --porcelain | grep -q . && git stash push -m "deploy-stash"
-git pull
+
+# try pull — if uncommitted changes block it, stash first
+git pull || {
+  git stash push -m "deploy-stash"
+  git pull
+}
+
+# restore stashed changes if any
+git stash list | grep -q deploy-stash && git stash pop
+
+# build and restart
 yarn
 yarn build
 pm2 restart jala-web-next
-if git stash list | grep -q deploy-stash; then git stash pop || git checkout --theirs . && git add .; fi
 ```
+
+If `git stash pop` has conflicts, resolve by reading each conflicted file and merging both sides.
+
+Verify — run `ssh ubuntu@app.jala.tech "pm2 status"`. If the process is not online, go to Recovery.
 
 ## Verify
 
 After deploy, confirm the application is responding on the deployed server:
 
-```sh
-ssh ubuntu@<server> "pm2 status"
-```
-
-Where `<server>` is `db.jala.tech` for staging or `app.jala.tech` for production. Check that the pm2 process is `online`.
+- **jala-web-next**: `ssh ubuntu@<server> "pm2 status"` — check that the process is `online`.
+- If the process is not online, go to Recovery.
 
 ## Failure modes
 
@@ -79,21 +120,22 @@ Where `<server>` is `db.jala.tech` for staging or `app.jala.tech` for production
 - **yarn install fails** — dependency conflict or lock file mismatch. Report the error output.
 - **yarn build fails** — build error. Report the error; do not retry without fixing the underlying issue.
 - **pm2 restart fails** — process not found. Check if pm2 is running and the process name is correct.
-- **stash pop conflict** — if `git stash pop` has conflicts, resolve by keeping the deployed code (theirs) for structural files (config, lock files) and the stashed changes (ours) for business logic. If a file is too complex to auto-resolve, save it as a patch: `git stash show -p > /tmp/unstashed.patch` and report it.
+- **stash pop conflict** — `git stash pop` has conflicts. Felix will read each conflicted file, understand both sides, and merge intelligently — keep the deployed code for structural changes (config, lock files), keep the stashed changes for business logic. If irreconcilable, save to `/tmp/unstashed.patch` and report.
 
 ## Recovery
 
-If deploy fails or verification fails, rollback to the commit before the pull:
+If deploy fails or verification fails, rollback to the commit hash captured before the deploy. Pass it to the recovery command.
 
 ```sh
 ssh ubuntu@<server>
 cd Code/Web/jala-web-next
-git stash list | grep -q deploy-stash && git stash drop || true
-git checkout <previous-commit-hash>
+
+# rollback
+git checkout <commit-hash-from-above>
 nvm use 20
 yarn
 yarn build
 pm2 restart <process-name>
 ```
 
-The previous commit hash is captured before the deploy starts. Use the same pm2 process name as the original deploy (`next` for staging, `jala-web-next` for production). Drop the stash on rollback since the uncommitted changes are no longer compatible.
+Use the same pm2 process name as the original deploy (`next` for staging, `jala-web-next` for production).

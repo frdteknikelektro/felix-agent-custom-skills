@@ -28,45 +28,86 @@ Derived:
 1. Confirm the environment with the user.
 2. Determine the branch and command flags from the environment.
 3. Show the full command sequence and get explicit confirmation.
-4. SSH into the server, capture current commit hash for rollback, then execute the deploy.
-5. Verify the application is responding after deploy. If verification fails, rollback to the saved commit.
+4. SSH into the server, capture current commit hash for rollback (`ssh ubuntu@<server> "cd Code/Web/jala-web && git rev-parse HEAD"`), then execute the deploy.
+5. Verify the application is responding after deploy. If verification fails, rollback to the captured commit.
 6. On rollback, re-run composer install and artisan with the previous code.
 
 ## Commands
 
 ### Staging (branch `feature/compile-to-test`)
 
+Capture commit hash:
+
+```sh
+ssh ubuntu@db.jala.tech "cd Code/Web/jala-web && git rev-parse HEAD"
+```
+
+Save the output — it is the rollback target.
+
+Deploy:
+
 ```sh
 ssh ubuntu@db.jala.tech
 cd Code/Web/jala-web
-git status --porcelain | grep -q . && git stash push -m "deploy-stash"
-git pull
+
+# try pull — if uncommitted changes block it, stash first
+git pull || {
+  git stash push -m "deploy-stash"
+  git pull
+}
+
+# restore stashed changes if any
+git stash list | grep -q deploy-stash && git stash pop
+
+# build and apply
 /usr/bin/php7.3 composer install
 /usr/bin/php7.3 artisan app:update --no-downtime
-if git stash list | grep -q deploy-stash; then git stash pop || git checkout --theirs . && git add .; fi
 ```
 
+If `git stash pop` has conflicts, resolve by reading each conflicted file and merging both sides.
+
+Verify — run `ssh ubuntu@db.jala.tech "cd Code/Web/jala-web && /usr/bin/php7.3 artisan --version"`. If it fails, go to Recovery.
+
 ### Production (branches `release/*` or `master`)
+
+Capture commit hash:
+
+```sh
+ssh ubuntu@app.jala.tech "cd Code/Web/jala-web && git rev-parse HEAD"
+```
+
+Save the output — it is the rollback target.
+
+Deploy:
 
 ```sh
 ssh ubuntu@app.jala.tech
 cd Code/Web/jala-web
-git status --porcelain | grep -q . && git stash push -m "deploy-stash"
-git pull
+
+# try pull — if uncommitted changes block it, stash first
+git pull || {
+  git stash push -m "deploy-stash"
+  git pull
+}
+
+# restore stashed changes if any
+git stash list | grep -q deploy-stash && git stash pop
+
+# build and apply
 /usr/bin/php7.3 composer install --no-dev
 /usr/bin/php7.3 artisan app:update --no-downtime --production
-if git stash list | grep -q deploy-stash; then git stash pop || git checkout --theirs . && git add .; fi
 ```
+
+If `git stash pop` has conflicts, resolve by reading each conflicted file and merging both sides.
+
+Verify — run `ssh ubuntu@app.jala.tech "cd Code/Web/jala-web && /usr/bin/php7.3 artisan --version"`. If it fails, go to Recovery.
 
 ## Verify
 
 After deploy, confirm the application is responding on the deployed server:
 
-```sh
-ssh ubuntu@<server> "cd Code/Web/jala-web && /usr/bin/php7.3 artisan --version"
-```
-
-Where `<server>` is `db.jala.tech` for staging or `app.jala.tech` for production. If the command returns a version, the application is up.
+- **jala-web**: `ssh ubuntu@<server> "cd Code/Web/jala-web && /usr/bin/php7.3 artisan --version"` — returns a version string if up.
+- If the command fails or returns an error, go to Recovery.
 
 ## Failure modes
 
@@ -74,19 +115,20 @@ Where `<server>` is `db.jala.tech` for staging or `app.jala.tech` for production
 - **git pull fails** — branch may not exist locally or remote has changed. Check branch name and remote state.
 - **composer install fails** — dependency conflict or missing lock file. Report the error output.
 - **artisan app:update fails** — migration or cache issue. Report the error; do not retry destructive steps automatically.
-- **stash pop conflict** — if `git stash pop` has conflicts, resolve by keeping the deployed code (theirs) for structural files (config, migrations) and the stashed changes (ours) for business logic. If a file is too complex to auto-resolve, save it as a patch: `git stash show -p > /tmp/unstashed.patch` and report it.
+- **stash pop conflict** — `git stash pop` has conflicts. Felix will read each conflicted file, understand both sides, and merge intelligently — keep the deployed code for structural changes (config, migrations), keep the stashed changes for business logic. If irreconcilable, save to `/tmp/unstashed.patch` and report.
 
 ## Recovery
 
-If deploy fails or verification fails, rollback to the commit before the pull:
+If deploy fails or verification fails, rollback to the commit hash captured before the deploy. Pass it to the recovery command.
 
 ```sh
 ssh ubuntu@<server>
 cd Code/Web/jala-web
-git stash list | grep -q deploy-stash && git stash drop || true
-git checkout <previous-commit-hash>
+
+# rollback
+git checkout <commit-hash-from-above>
 /usr/bin/php7.3 composer install [--no-dev]
 /usr/bin/php7.3 artisan app:update --no-downtime [--production]
 ```
 
-The previous commit hash is captured before the deploy starts. Use the same flags as the original deploy command (with `--no-dev` and `--production` for production). Drop the stash on rollback since the uncommitted changes are no longer compatible.
+Use the same flags as the original deploy command (with `--no-dev` and `--production` for production).
