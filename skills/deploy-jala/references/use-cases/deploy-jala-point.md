@@ -14,6 +14,7 @@ Required:
 - Environment: `staging` or `production`.
 
 Derived:
+- Branch: staging uses `develop`; production uses `release/*` or `master`.
 - pm2 process name: `jala-points`.
 
 ## Prerequisites

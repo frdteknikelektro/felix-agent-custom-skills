@@ -28,7 +28,7 @@ Orchestrate deployment of Jala products to staging or production. Each product h
 
 ## When to use
 
-Activate when the user asks to deploy, ship, or release any Jala product. Trigger words include "deploy jala", "deploy jala-web", "deploy jala-web-next", "deploy staging", "deploy production".
+Activate when the user asks to deploy, ship, or release any Jala product. Trigger words include "deploy jala", "deploy jala-web", "deploy jala-web-next", "deploy jala-point", "deploy odoo-custom-addons", "deploy staging", "deploy production".
 
 ## Out of scope
 
@@ -52,7 +52,7 @@ Request the bare permission shown below; Felix stores grants under this skill id
 ## Workflow
 
 1. **Resolve permissions.** Before anything else, check that the required permission is granted. If missing, emit PERMISSION_REQUIRED.
-2. **Identify product and environment.** From the user's request, determine which product (jala-web, jala-web-next) and which environment (staging, production). Both must be known before proceeding — if either is unclear, ask and wait for the answer.
+2. **Identify product and environment.** From the user's request, determine which product (jala-web, jala-web-next, jala-point, odoo-custom-addons) and which environment (staging, production). Both must be known before proceeding — if either is unclear, ask and wait for the answer.
 3. **Load the use case.** Read the matching use case file. It holds the exact steps, branch rules, and commands.
 4. **Confirm before deploy.** Show the user the commands that will run and the target environment. Proceed only after explicit confirmation.
 5. **Capture commit hash.** Before deploying, SSH into the server and capture `git rev-parse HEAD`. Save this value — it is the rollback target.
