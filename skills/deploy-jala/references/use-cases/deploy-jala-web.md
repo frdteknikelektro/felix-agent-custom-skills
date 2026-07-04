@@ -39,9 +39,11 @@ Derived:
 ```sh
 ssh ubuntu@db.jala.tech
 cd Code/Web/jala-web
+git status --porcelain | grep -q . && git stash push -m "deploy-stash"
 git pull
 /usr/bin/php7.3 composer install
 /usr/bin/php7.3 artisan app:update --no-downtime
+git stash list | grep -q deploy-stash && git stash pop || true
 ```
 
 ### Production (branches `release/*` or `master`)
@@ -49,9 +51,11 @@ git pull
 ```sh
 ssh ubuntu@app.jala.tech
 cd Code/Web/jala-web
+git status --porcelain | grep -q . && git stash push -m "deploy-stash"
 git pull
 /usr/bin/php7.3 composer install --no-dev
 /usr/bin/php7.3 artisan app:update --no-downtime --production
+git stash list | grep -q deploy-stash && git stash pop || true
 ```
 
 ## Verify
@@ -67,9 +71,10 @@ Where `<server>` is `db.jala.tech` for staging or `app.jala.tech` for production
 ## Failure modes
 
 - **SSH connection refused** — check network connectivity and server status. Do not retry without user confirmation.
-- **git pull fails** — branch may not exist locally or remote may have changed. Check branch name and remote state.
+- **git pull fails** — branch may not exist locally or remote has changed. Check branch name and remote state.
 - **composer install fails** — dependency conflict or missing lock file. Report the error output.
 - **artisan app:update fails** — migration or cache issue. Report the error; do not retry destructive steps automatically.
+- **stash pop conflict** — if `git stash pop` has conflicts, report the conflicting files and ask the user how to resolve. Do not force-push or auto-resolve.
 
 ## Recovery
 
@@ -78,9 +83,10 @@ If deploy fails or verification fails, rollback to the commit before the pull:
 ```sh
 ssh ubuntu@<server>
 cd Code/Web/jala-web
+git stash list | grep -q deploy-stash && git stash drop || true
 git checkout <previous-commit-hash>
 /usr/bin/php7.3 composer install [--no-dev]
 /usr/bin/php7.3 artisan app:update --no-downtime [--production]
 ```
 
-The previous commit hash is captured before the deploy starts. Use the same flags as the original deploy command (with `--no-dev` and `--production` for production).
+The previous commit hash is captured before the deploy starts. Use the same flags as the original deploy command (with `--no-dev` and `--production` for production). Drop the stash on rollback since the uncommitted changes are no longer compatible.

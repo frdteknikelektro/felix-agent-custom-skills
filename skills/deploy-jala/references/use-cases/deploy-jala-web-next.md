@@ -38,11 +38,13 @@ Derived:
 ```sh
 ssh ubuntu@db.jala.tech
 cd Code/Web/jala-web-next
+git status --porcelain | grep -q . && git stash push -m "deploy-stash"
 git pull
 nvm use 20
 yarn
 yarn build
 pm2 restart next
+git stash list | grep -q deploy-stash && git stash pop || true
 ```
 
 ### Production
@@ -51,10 +53,12 @@ pm2 restart next
 ssh ubuntu@app.jala.tech
 cd Code/Web/jala-web-next
 nvm use 20
+git status --porcelain | grep -q . && git stash push -m "deploy-stash"
 git pull
 yarn
 yarn build
 pm2 restart jala-web-next
+git stash list | grep -q deploy-stash && git stash pop || true
 ```
 
 ## Verify
@@ -75,6 +79,7 @@ Where `<server>` is `db.jala.tech` for staging or `app.jala.tech` for production
 - **yarn install fails** — dependency conflict or lock file mismatch. Report the error output.
 - **yarn build fails** — build error. Report the error; do not retry without fixing the underlying issue.
 - **pm2 restart fails** — process not found. Check if pm2 is running and the process name is correct.
+- **stash pop conflict** — if `git stash pop` has conflicts, report the conflicting files and ask the user how to resolve. Do not force-push or auto-resolve.
 
 ## Recovery
 
@@ -83,6 +88,7 @@ If deploy fails or verification fails, rollback to the commit before the pull:
 ```sh
 ssh ubuntu@<server>
 cd Code/Web/jala-web-next
+git stash list | grep -q deploy-stash && git stash drop || true
 git checkout <previous-commit-hash>
 nvm use 20
 yarn
@@ -90,4 +96,4 @@ yarn build
 pm2 restart <process-name>
 ```
 
-The previous commit hash is captured before the deploy starts. Use the same pm2 process name as the original deploy (`next` for staging, `jala-web-next` for production).
+The previous commit hash is captured before the deploy starts. Use the same pm2 process name as the original deploy (`next` for staging, `jala-web-next` for production). Drop the stash on rollback since the uncommitted changes are no longer compatible.
