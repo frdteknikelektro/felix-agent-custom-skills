@@ -1,7 +1,7 @@
 ---
 id: deploy-jala
 name: Deploy Jala
-description: "Deploy Jala products to staging or production. Use when the user says 'deploy jala', 'deploy jala-web', 'deploy jala-web-next', 'deploy staging', 'deploy production', or asks to ship a Jala product."
+description: "Deploy Jala products to staging or production. Use when the user says 'deploy jala', 'deploy jala-web', 'deploy jala-web-next', 'deploy jala-point', 'deploy staging', 'deploy production', or asks to ship a Jala product."
 version: 1
 enabled: true
 kind: operational
@@ -11,6 +11,7 @@ match:
   - deploy jala
   - deploy jala-web
   - deploy jala-web-next
+  - deploy jala-point
   - deploy staging
   - deploy production
   - ship jala
@@ -37,6 +38,7 @@ Activate when the user asks to deploy, ship, or release any Jala product. Trigge
 
 - **Deploy jala-web** — read `references/use-cases/deploy-jala-web.md` when the user asks to deploy jala-web, ship jala-web, or release jala-web to staging or production.
 - **Deploy jala-web-next** — read `references/use-cases/deploy-jala-web-next.md` when the user asks to deploy jala-web-next, ship jala-web-next, or release jala-web-next to staging or production.
+- **Deploy jala-point** — read `references/use-cases/deploy-jala-point.md` when the user asks to deploy jala-point, ship jala-point, or release jala-point to staging or production.
 
 ## Permissions
 
