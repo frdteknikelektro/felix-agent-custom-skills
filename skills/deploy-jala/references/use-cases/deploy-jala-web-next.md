@@ -19,7 +19,7 @@ Derived:
 
 ## Prerequisites
 
-- SSH access to `ubuntu@db.jala.tech`
+- SSH access to `ubuntu@db.jala.tech` (staging) or `ubuntu@app.jala.tech` (production)
 - Node 20 available via nvm on the server
 
 ## Workflow
@@ -47,7 +47,7 @@ pm2 restart next
 ### Production
 
 ```sh
-ssh ubuntu@db.jala.tech
+ssh ubuntu@app.jala.tech
 cd Code/Web/jala-web-next
 nvm use 20
 git pull
@@ -58,13 +58,13 @@ pm2 restart jala-web-next
 
 ## Verify
 
-After deploy, confirm the application is responding:
+After deploy, confirm the application is responding on the deployed server:
 
 ```sh
-ssh ubuntu@db.jala.tech "pm2 status"
+ssh ubuntu@<server> "pm2 status"
 ```
 
-Check that the pm2 process is `online`. For a fuller check, hit the application's HTTP endpoint.
+Where `<server>` is `db.jala.tech` for staging or `app.jala.tech` for production. Check that the pm2 process is `online`.
 
 ## Failure modes
 

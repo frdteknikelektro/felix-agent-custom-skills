@@ -20,7 +20,7 @@ Derived:
 
 ## Prerequisites
 
-- SSH access to `ubuntu@db.jala.tech`
+- SSH access to `ubuntu@db.jala.tech` (staging) or `ubuntu@app.jala.tech` (production)
 - The target branch must exist and be pushed
 
 ## Workflow
@@ -46,7 +46,7 @@ git pull
 ### Production (branches `release/*` or `master`)
 
 ```sh
-ssh ubuntu@db.jala.tech
+ssh ubuntu@app.jala.tech
 cd Code/Web/jala-web
 git pull
 /usr/bin/php7.3 composer install --no-dev
@@ -55,13 +55,13 @@ git pull
 
 ## Verify
 
-After deploy, confirm the application is responding:
+After deploy, confirm the application is responding on the deployed server:
 
 ```sh
-ssh ubuntu@db.jala.tech "cd Code/Web/jala-web && /usr/bin/php7.3 artisan --version"
+ssh ubuntu@<server> "cd Code/Web/jala-web && /usr/bin/php7.3 artisan --version"
 ```
 
-If the command returns a version, the application is up. For a fuller check, hit the application's HTTP endpoint.
+Where `<server>` is `db.jala.tech` for staging or `app.jala.tech` for production. If the command returns a version, the application is up.
 
 ## Failure modes
 
