@@ -39,7 +39,7 @@ Derived:
 ssh ubuntu@db.jala.tech
 cd Code/Web/jala-web
 git pull
-composer install
+/usr/bin/php7.3 composer install
 /usr/bin/php7.3 artisan app:update --no-downtime
 ```
 
@@ -49,7 +49,7 @@ composer install
 ssh ubuntu@db.jala.tech
 cd Code/Web/jala-web
 git pull
-composer install --no-dev
+/usr/bin/php7.3 composer install --no-dev
 /usr/bin/php7.3 artisan app:update --no-downtime --production
 ```
 
