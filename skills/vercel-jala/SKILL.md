@@ -1,7 +1,7 @@
 ---
 id: vercel-jala
 name: Vercel Jala Management
-description: "Jala-specific Vercel account management. Extends the base vercel skill — all operations, permission policy, destructive gating, and CLI checks are identical. The only difference is the credential: VERCEL_JALA_TOKEN (available in environment) replaces VERCEL_TOKEN."
+description: "Manage Jala's Vercel account via the vercel CLI — deploy, domains, env vars, projects, logs, rollback."
 version: 1
 enabled: true
 kind: operational
@@ -28,9 +28,11 @@ match:
 
 ## Purpose
 
-Operate Jala's separate Vercel account through the `vercel` CLI. This skill extends the base `vercel` skill. Every operation, permission policy, destructive-operation gate, CLI availability check, and command reference is identical — read [../vercel/SKILL.md](../vercel/SKILL.md) for the full reference. This skill only overrides the credential contract and team/scope defaults.
+Operate Jala's separate Vercel account through the `vercel` CLI. This skill extends the base `vercel` skill. Every operation, permission policy, destructive-operation gate, CLI availability check, and command reference is identical. This skill only overrides the credential contract and team/scope defaults.
 
-Do not duplicate operation documentation. If you need the full command reference for a Vercel operation, read the base `vercel` SKILL.md. This file documents only what is different.
+**Execution:** Resolve permissions first (emit PERMISSION_REQUIRED if missing). Export `VERCEL_TOKEN="$VERCEL_JALA_TOKEN"` and verify with `vercel whoami` before any command. Then follow the base `vercel` skill's execution steps.
+
+Do not duplicate operation documentation. This file documents only what is different.
 
 ## When to use
 
@@ -50,18 +52,14 @@ Activate when the user asks to operate specifically on Jala's Vercel account. Tr
 
 ## Permissions
 
-Same text-based read/write split as the base `vercel` skill. Request the bare permission shown below; Felix stores grants under this skill id.
+Same permission policy as the base `vercel` skill. Request the bare permission shown below; Felix stores grants under this skill id.
 
-- `vercel.read` — inspection, listing, viewing, pulling (same scope as base).
-- `vercel.write` — deploy, create, add, remove, set, delete, promote, rollback, link, unlink (same scope as base).
+- `vercel.read` — inspection, listing, viewing, pulling.
+- `vercel.write` — deploy, create, add, remove, set, delete, promote, rollback, link, unlink.
 
 If an operation is ambiguous, treat it as `vercel.write` unless the user is only asking to inspect or explain current state.
 
 Destructive operations are allowed only when the user explicitly asks — same gating as the base skill.
-
-## Workflow
-
-**Resolve permissions FIRST.** Before doing anything else — before checking CLI availability, before running any command — resolve permissions. If permission is missing, emit PERMISSION_REQUIRED. Never skip this. The only gate in this skill is the permission gate.
 
 ## Environment (overrides base)
 
@@ -97,73 +95,26 @@ If a `vercel` command fails because the binary is missing, report it as a runtim
 
 ## Operations
 
-All operations are identical to the base `vercel` skill. Read [../vercel/SKILL.md](../vercel/SKILL.md) for the full operation reference covering Deployments, Environment Variables, Domains, DNS, SSL Certificates, Projects, Aliases, Teams, Integrations, Billing, Local Development, Git Integration, and Targets.
+Read [../vercel/SKILL.md](../vercel/SKILL.md) for any operation not documented here.
 
 Every command must be preceded by using `VERCEL_TOKEN="$VERCEL_JALA_TOKEN"`.
 
 ## Quick Examples
-Every example maps `VERCEL_JALA_TOKEN` to `VERCEL_TOKEN`.
 
-### Deploy a Jala project
+Every example maps `VERCEL_JALA_TOKEN` to `VERCEL_TOKEN`:
+
 ```bash
 export VERCEL_TOKEN="$VERCEL_JALA_TOKEN"
 vercel whoami
-vercel deploy --prod
 ```
 
-### List Jala environment variables
-```bash
-export VERCEL_TOKEN="$VERCEL_JALA_TOKEN"
-vercel whoami
-vercel env ls production
-```
-
-### Add a Jala environment variable
-```bash
-export VERCEL_TOKEN="$VERCEL_JALA_TOKEN"
-vercel whoami
-vercel env add DATABASE_URL production
-```
-
-### Inspect a Jala deployment
-```bash
-export VERCEL_TOKEN="$VERCEL_JALA_TOKEN"
-vercel whoami
-vercel inspect <deployment-url>
-vercel logs <deployment-url> --limit 50
-```
-
-### Add a custom domain to a Jala project
-```bash
-export VERCEL_TOKEN="$VERCEL_JALA_TOKEN"
-vercel whoami
-vercel domains add <domain>
-```
-
-### Rollback a Jala production deployment
-```bash
-export VERCEL_TOKEN="$VERCEL_JALA_TOKEN"
-vercel whoami
-vercel rollback --prod
-```
-
-### List all Jala projects
-```bash
-export VERCEL_TOKEN="$VERCEL_JALA_TOKEN"
-vercel whoami
-vercel projects ls
-```
+- `vercel deploy --prod` — deploy to production
+- `vercel env ls production` — list production env vars
+- `vercel env add DATABASE_URL production` — add an env var
+- `vercel inspect <url>` — inspect a deployment
+- `vercel domains add <domain>` — add a custom domain
+- `vercel rollback --prod` — rollback production
 
 ## Output
 
 Same as base `vercel` skill. Keep replies concise and operational. Include project name, deployment URL, domain, env key names (values redacted), and scope. Never print the `VERCEL_JALA_TOKEN` value, any env var values, or full signed request material.
-
-## Checks
-
-- Always export `VERCEL_TOKEN="$VERCEL_JALA_TOKEN"` before any Vercel command.
-- Always verify the token with `vercel whoami` before doing real work.
-- Never print `VERCEL_JALA_TOKEN`, `VERCEL_TOKEN`, or any env var values.
-- Read [../vercel/SKILL.md](../vercel/SKILL.md) for any operation not documented here.
-- If the `vercel` CLI binary is missing, tell the user to use `install-tool` first.
-- Destructive operations must be explicitly requested by the user before proceeding.
-- Tokens are in the environment.

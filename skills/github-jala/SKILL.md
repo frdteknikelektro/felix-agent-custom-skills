@@ -1,7 +1,7 @@
 ---
 id: github-jala
 name: GitHub Jala Management
-description: "Jala-specific GitHub account management. Extends the base github skill — all operations, permission policy, destructive gating, and CLI checks are identical. The only difference is the credential: GITHUB_JALA_TOKEN (available in environment) replaces GITHUB_TOKEN."
+description: "Manage Jala's GitHub account (Atnic org, jalaproduct user) via the gh CLI — repos, issues, PRs, releases, workflows, secrets."
 version: 1
 enabled: true
 kind: operational
@@ -32,11 +32,13 @@ match:
 
 ## Purpose
 
-Operate Jala's GitHub account (user `jalaproduct`, org `Atnic`) through the `gh` CLI. This skill extends the base `github` skill. Every operation, permission policy, destructive-operation gate, CLI availability check, and command reference is identical — read [../github/SKILL.md](../github/SKILL.md) for the full reference. This skill only overrides the credential contract and the default organization context.
+Operate Jala's GitHub account (user `jalaproduct`, org `Atnic`) through the `gh` CLI. This skill extends the base `github` skill. Every operation, permission policy, destructive-operation gate, CLI availability check, and command reference is identical. This skill only overrides the credential contract and the default organization context.
+
+**Execution:** Resolve permissions first (emit PERMISSION_REQUIRED if missing). Export `GITHUB_TOKEN="$GITHUB_JALA_TOKEN"` and verify with `gh auth status` before any command. Then follow the base `github` skill's execution steps.
 
 **Default org**: All Jala repositories live under the `Atnic` GitHub organization. When no specific owner is provided, default to `Atnic`. For repo-scoped operations, use `--repo Atnic/<repo-name>`. To list all Jala repos, use `gh repo list Atnic`.
 
-Do not duplicate operation documentation. If you need the full command reference for a GitHub operation, read the base `github` SKILL.md. This file documents only what is different.
+Do not duplicate operation documentation. This file documents only what is different.
 
 ## When to use
 
@@ -56,19 +58,15 @@ Activate when the user asks to interact with Jala's specific GitHub account (Atn
 
 ## Permissions
 
-Same text-based read/write split as the base `github` skill. Request the bare permission shown below; Felix stores grants under this skill id.
+Same permission policy as the base `github` skill. Request the bare permission shown below; Felix stores grants under this skill id.
 
-- `github.read` — inspection, listing, viewing, searching, downloading (same scope as base).
-- `github.review` — adding comments, approving pull requests, merging pull requests, and other collaborative review actions (same scope as base).
-- `github.write` — create, edit, close, reopen, fork, archive, rename, delete, rerun, cancel, set (same scope as base).
+- `github.read` — inspection, listing, viewing, searching, downloading.
+- `github.review` — adding comments, approving pull requests, merging pull requests.
+- `github.write` — create, edit, close, reopen, fork, archive, rename, delete, rerun, cancel, set.
 
 If an operation is ambiguous, treat it as `github.write` unless the user is only asking to inspect or explain current state.
 
 Destructive operations are allowed only when the user explicitly asks — same gating as the base skill.
-
-## Workflow
-
-**Resolve permissions FIRST.** Before doing anything else — before checking CLI availability, before running any command — resolve permissions. If permission is missing, emit PERMISSION_REQUIRED. Never skip this. The only gate in this skill is the permission gate.
 
 ## Environment (overrides base)
 
@@ -98,74 +96,27 @@ If a `gh` command fails because the binary is missing, report it as a runtime er
 
 ## Operations
 
-All operations are identical to the base `github` skill. Read [../github/SKILL.md](../github/SKILL.md) for the full operation reference covering Repositories, Issues, Pull Requests, Releases, Actions/Workflows, Secrets & Variables, Gists, Search, and API Access.
+Read [../github/SKILL.md](../github/SKILL.md) for any operation not documented here.
 
 Every command must be preceded by using `GITHUB_TOKEN="$GITHUB_JALA_TOKEN"`.
 
 For local operations (clone, edit, PRs), use the project workspace directory (`workspace/projects/<owner>/<repo>/`) exactly as documented in the base github skill. Always `cd` into the repo directory before running git or repo-local gh commands.
 
 ## Quick Examples
-Every example maps `GITHUB_JALA_TOKEN` to `GITHUB_TOKEN`.
 
-### List Jala repositories
+Every example maps `GITHUB_JALA_TOKEN` to `GITHUB_TOKEN`:
+
 ```bash
 export GITHUB_TOKEN="$GITHUB_JALA_TOKEN"
 gh auth status
-gh repo list Atnic --limit 50
 ```
 
-### View a Jala repository
-```bash
-export GITHUB_TOKEN="$GITHUB_JALA_TOKEN"
-gh auth status
-gh repo view Atnic/jala-web-next --json name,description,url,defaultBranchRef
-```
-
-### Create a Jala repository
-```bash
-export GITHUB_TOKEN="$GITHUB_JALA_TOKEN"
-gh auth status
-gh repo create Atnic/new-service --private --description "New Jala microservice"
-```
-
-### List Jala issues
-```bash
-export GITHUB_TOKEN="$GITHUB_JALA_TOKEN"
-gh auth status
-gh issue list --repo Atnic/jala-web-next --state open --limit 20
-```
-
-### Create a Jala pull request
-```bash
-export GITHUB_TOKEN="$GITHUB_JALA_TOKEN"
-gh auth status
-gh pr create --repo Atnic/jala-web-next --title "Fix API timeout" --body "Increases timeout to 30s" --base main --head fix-timeout
-```
-
-### Set a Jala repository secret
-```bash
-export GITHUB_TOKEN="$GITHUB_JALA_TOKEN"
-gh auth status
-gh secret set DATABASE_URL --repo Atnic/jala-web-next --body "<secret-value>"
-```
-
-### Create a Jala release
-```bash
-export GITHUB_TOKEN="$GITHUB_JALA_TOKEN"
-gh auth status
-gh release create v1.2.0 --repo Atnic/jala-web-next --title "v1.2.0" --generate-notes
-```
+- `gh repo list Atnic --limit 50` — list Jala repos
+- `gh repo view Atnic/jala-web-next` — view a Jala repo
+- `gh issue list --repo Atnic/jala-web-next --state open` — list Jala issues
+- `gh pr create --repo Atnic/jala-web-next --title "Fix" --body "..." --base main --head fix` — create a PR
+- `gh release create v1.2.0 --repo Atnic/jala-web-next --generate-notes` — create a release
 
 ## Output
 
 Same as base `github` skill. Keep replies concise and operational. Include repo name, issue/PR number, release tag, workflow name, and relevant identifiers. Never print the `GITHUB_JALA_TOKEN` value, secret values, or full signed request material.
-
-## Checks
-
-- Always export `GITHUB_TOKEN="$GITHUB_JALA_TOKEN"` before any GitHub command.
-- Always verify the token with `gh auth status` before doing real work.
-- Never print `GITHUB_JALA_TOKEN`, `GITHUB_TOKEN`, or any secret values.
-- Read [../github/SKILL.md](../github/SKILL.md) for any operation not documented here.
-- If the `gh` CLI binary is missing, tell the user to use `install-tool` first.
-- Destructive operations must be explicitly requested by the user before proceeding.
-- Tokens are in the environment.

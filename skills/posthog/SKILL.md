@@ -80,19 +80,19 @@ If an operation is ambiguous, treat it as `posthog.write` unless the user is onl
 
 **Destructive operations** are allowed only when the user explicitly asks for the specific destructive intent: `DELETE` on feature flags, insights, dashboards, cohorts, surveys, experiments, annotations, or persons. These must be explicitly named by the user — never infer deletion.
 
-## Workflow
+## Execution
 
 0. **Resolve permissions FIRST.** Before doing anything else — before running any API call — determine whether the user has permission for the requested work. If permission is missing, emit PERMISSION_REQUIRED. Never skip this step.
 1. Classify the requested work as read or write using the permission policy above.
 2. Export `POSTHOG_PERSONAL_KEY`, and verify with `GET /api/users/@me/`. If the key is invalid, report it and stop.
-3. Discover the project context. Most endpoints require a `project_id` in the URL. Never guess a project ID. List projects with `GET /api/projects/` and let the user confirm. Optionally scope by organization first with `GET /api/organizations/`.
-4. Execute the operation. Include `-H "Authorization: Bearer $POSTHOG_PERSONAL_KEY"` and `-H "Content-Type: application/json"` on every request.
-5. Report results concisely. Include project name, ID, relevant counts, and key values.
-6. Follow cursor pagination automatically for small result sets (under ~500 items). For large sets, tell the user how many pages remain and ask if they want to continue.
+3. Discover the project context. Most endpoints require a `project_id` in the URL. Never guess a project ID. List projects with `GET /api/projects/` and let the user confirm. Optionally scope by organization first with `GET /api/organizations/`. Completion: a valid `project_id` is confirmed and cached for the session.
+4. Execute the operation. Include `-H "Authorization: Bearer $POSTHOG_PERSONAL_KEY"` and `-H "Content-Type: application/json"` on every request. Use `--data-urlencode` for JSON query parameters in GET requests to avoid curl escaping issues. PostHog enforces a time window on queries — default to last 7 days if the user doesn't specify. Completion: the API returned HTTP 2xx with the expected response body.
+5. Report results concisely. Include project name, ID, relevant counts, and key values. Completion: every value reported is directly from the API response — no inferred state.
+6. Follow cursor pagination automatically for small result sets (under ~500 items). For large sets, tell the user how many pages remain and ask if they want to continue. Completion: all requested pages have been fetched or the user has declined to continue.
 
 ## Environment
 
-Use tokens from the environment before every PostHog API call. Do not use credential files.
+Tokens are in the environment. Use tokens from the environment before every PostHog API call. Do not use credential files.
 
 Required variable:
 - `POSTHOG_PERSONAL_KEY` — private API key for management CRUD (prefix `phx_`)
@@ -166,22 +166,16 @@ For any mutating branch, completion requires the requested remote state to be ob
 - For lists, use a compact format: one line per item with ID + name + key detail.
 - When listing events, include timestamp and event name. For large result sets, summarize with counts.
 - Report errors with the exact `curl` method + URL attempted, the HTTP status code, and the PostHog error detail (if available in the response body).
+- Never print credential values.
 - Never print the `POSTHOG_PERSONAL_KEY`, `POSTHOG_PROJECT_KEY`, or any credential value.
 - Separate confirmed PostHog facts from assumptions or conclusions.
 - If blocked by missing key or API errors, state the blocker and the smallest next step.
 
-## Checks
+## Constraints
 
-- Always export `POSTHOG_PERSONAL_KEY` before any API call.
-- Always verify the key with `GET /api/users/@me/` before doing real work.
-- Always confirm the `project_id` before running a project-scoped operation. Never guess.
-- Never print credential values, tokens, or API key values.
-- Destructive operations (any `DELETE`) must be explicitly requested by the user before proceeding.
-- Use `--data-urlencode` for JSON query parameters in GET requests to avoid curl escaping issues.
-- PostHog enforces a time window on queries. Default to last 7 days if the user doesn't specify.
-- HogQL queries against `persons` or `events` tables may contain PII. Warn the user.
-- Feature flag changes take effect instantly. The permission gate must be strict.
-- Tokens are in the environment.
+- HogQL queries against `persons` or `events` tables may contain PII — warn the user before executing.
+- Feature flag changes take effect instantly — the permission gate must be strict.
+- Destructive operations must be explicitly requested by the user before proceeding.
 
 ## Cross-skill convention
 

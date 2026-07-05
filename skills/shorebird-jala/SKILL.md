@@ -70,7 +70,7 @@ Do not read a live repo `shorebird.yaml`, `pubspec.yaml`, platform folders, or C
 
 This skill uses `shell.run` permission. All track-change operations require the user to explicitly ask for the change. The skill will report what would be changed before running any mutating management command.
 
-## Workflow
+## Execution
 
 ### Inspection workflow
 1. Use environment variables and verify the required `SHOREBIRD_JALA_*` variables for the chosen command are present without printing secret values.
@@ -189,7 +189,7 @@ Useful docs:
 - Separate confirmed facts from assumptions.
 - If blocked by missing required env values, missing CLI/API coverage, or missing release identifiers, state the blocker and the smallest next step.
 
-## Checks
+## Constraints
 
 - Always export `SHOREBIRD_TOKEN="$SHOREBIRD_JALA_TOKEN"` before any Shorebird command.
 - Always verify `SHOREBIRD_JALA_TOKEN` and `SHOREBIRD_JALA_APP_ID` are set before doing real work.

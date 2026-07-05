@@ -1,7 +1,7 @@
 ---
 id: clickup-jala
 name: ClickUp Jala Management
-description: "Jala-specific ClickUp workspace management. Extends the base clickup skill — all operations are identical. The only difference is the credential: CLICKUP_JALA_API_TOKEN replaces CLICKUP_API_TOKEN."
+description: "Manage Jala's ClickUp workspace — tasks, documents, team collaboration."
 version: 1
 enabled: true
 kind: operational
@@ -16,9 +16,7 @@ env:
     required: true
 match:
   - clickup jala
-  - jala clickup
   - jala task
-  - jala clickup task
 ---
 
 # ClickUp Jala Management
@@ -37,8 +35,30 @@ Always export `CLICKUP_API_TOKEN` from `CLICKUP_JALA_API_TOKEN` before any Click
 
 ## When to use
 
-Activate when the user asks to interact with Jala's ClickUp workspace. Trigger words include "clickup jala", "jala clickup", "jala task".
+Activate when the user asks to interact with Jala's ClickUp workspace. Trigger words include "clickup jala", "jala task".
+
+## Permissions
+
+Same permission policy as the base `clickup` skill. Request the bare permission shown below; Felix stores grants under this skill id.
+
+- `tasks.read` — inspect, list, view, search tasks and their fields.
+- `tasks.write` — create, update, delete, comment on tasks, change status, set fields.
+- `docs.read` — view, list, search documents and pages.
+- `docs.write` — create, update, delete documents and pages.
+
+If an operation is ambiguous, treat it as `tasks.write` or `docs.write` unless the user is only asking to inspect current state.
 
 ## Out of scope
 
 - Non-Jala ClickUp workspaces — route to the base `clickup` skill
+
+## Execution
+
+1. Export `CLICKUP_API_TOKEN` from `CLICKUP_JALA_API_TOKEN`.
+   Completion: `echo -n "$CLICKUP_API_TOKEN" | wc -c` returns a non-zero length.
+2. Delegate to the base `clickup` skill for the actual operation.
+   Completion: the base skill reports its result.
+
+## Constraints
+
+- All operations, command references, and behavior come from the base `clickup` skill — do not duplicate them here.

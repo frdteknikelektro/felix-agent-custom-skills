@@ -48,7 +48,7 @@ Request the bare permission shown below; Felix stores grants under this skill id
 
 - `deploy.write` — execute deploy commands, restart services, pull code on servers.
 
-## Workflow
+## Execution
 
 1. **Resolve permissions.** Before anything else, check that the required permission is granted. If missing, emit PERMISSION_REQUIRED.
 2. **Identify product and environment.** From the user's request, determine which product (jala-web, jala-web-next, jala-point, jala-odoo-custom-addons) and which environment (staging, production). Both must be known before proceeding — if either is unclear, ask and wait for the answer.
@@ -64,7 +64,7 @@ Request the bare permission shown below; Felix stores grants under this skill id
 
 Keep replies concise and operational. Show the commands being run, the environment targeted, and the outcome. Flag any step that fails before continuing.
 
-## Checks
+## Constraints
 
 - If SSH fails, report the connection error and stop.
 - If a deploy command fails, stop and report — do not skip to the next step.

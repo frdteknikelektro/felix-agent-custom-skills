@@ -78,7 +78,7 @@ If an operation is ambiguous, treat it as `aws.write` unless the user is only as
 
 Destructive operations are allowed only when the user explicitly asks for the specific destructive intent, such as deleting a bucket object, terminating an instance, deleting a stack, revoking IAM access, or removing a policy.
 
-## Workflow
+## Execution
 
 1. Classify the requested work as read or write using the permission policy above.
 2. Export standard AWS CLI variables from `AWS_JALA_*`, and verify required credentials are present without exposing values.
@@ -148,7 +148,7 @@ aws lambda update-function-configuration \
 - Include exact commands run or command summaries, with secrets redacted.
 - If blocked by missing env, missing AWS CLI, missing region, permissions, or AWS API errors, state the blocker and the smallest next step.
 
-## Checks
+## Constraints
 
 - Always export AWS CLI variables from `AWS_JALA_*` before any command.
 - Always verify credentials with `aws sts get-caller-identity` before doing real work.

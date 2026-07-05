@@ -1,7 +1,7 @@
 ---
 id: posthog-jala
 name: PostHog Jala Management
-description: Jala-specific PostHog analytics management. Extends the base posthog skill — all operations, permission policy, destructive gating, and API patterns are identical. The only difference is the credential (POSTHOG_JALA_PERSONAL_KEY) and the Jala org/project context (orgs 10590 and 28053).
+description: "Query and manage Jala's PostHog analytics (orgs 10590, 28053) via REST API — events, feature flags, dashboards, HogQL."
 version: 1
 enabled: true
 kind: operational
@@ -35,7 +35,9 @@ match:
 
 ## Purpose
 
-Operate Jala's PostHog analytics through the REST API. This skill extends the base `posthog` skill. Every operation, permission policy, destructive-operation gate, and API pattern is identical — read [../posthog/SKILL.md](../posthog/SKILL.md) for the full reference. This skill only overrides the credential contract, the Jala organization/project context, and qualified match rules.
+Operate Jala's PostHog analytics through the REST API. This skill extends the base `posthog` skill. Every operation, permission policy, destructive-operation gate, and API pattern is identical. This skill only overrides the credential contract, the Jala organization/project context, and qualified match rules.
+
+**Execution:** Resolve permissions first (emit PERMISSION_REQUIRED if missing). Map `POSTHOG_JALA_PERSONAL_KEY` → `POSTHOG_PERSONAL_KEY` and verify with `GET /api/users/@me/` before any API call. Then follow the base `posthog` skill's execution steps.
 
 **Jala organizations**:
 - **Jala** — org ID `10590`
@@ -43,7 +45,7 @@ Operate Jala's PostHog analytics through the REST API. This skill extends the ba
 
 The Jala personal key (`POSTHOG_JALA_PERSONAL_KEY`) has access to both organizations. Detailed project listings are in `references/jala-context.md`.
 
-Do not duplicate operation documentation. If you need the full operation reference for a PostHog operation, read the base `posthog` SKILL.md. This file documents only what is different.
+Do not duplicate operation documentation. This file documents only what is different.
 
 ## When to use
 
@@ -63,22 +65,18 @@ Activate when the user asks to query PostHog specifically for Jala's organizatio
 
 ## Permissions
 
-Same text-based read/write split as the base `posthog` skill. Request the bare permission shown below; Felix stores grants under this skill id.
+Same permission policy as the base `posthog` skill. Request the bare permission shown below; Felix stores grants under this skill id.
 
-- `posthog.read` — inspection, listing, viewing, searching, querying, downloads (same scope as base).
-- `posthog.write` — create, update, delete, toggle, launch, patch (same scope as base).
+- `posthog.read` — inspection, listing, viewing, searching, querying, downloading.
+- `posthog.write` — create, update, delete, toggle, launch, patch.
 
 If an operation is ambiguous, treat it as `posthog.write` unless the user is only asking to inspect or explain current state.
 
 Destructive operations are allowed only when the user explicitly asks — same gating as the base skill.
 
-## Workflow
-
-**Resolve permissions FIRST.** Before doing anything else — before running any API call — resolve permissions. If permission is missing, emit PERMISSION_REQUIRED. Never skip this. The only gate in this skill is the permission gate.
-
 ## Environment (overrides base)
 
-Tokens are already in the environment. The Jala org uses its own API keys:
+Tokens are in the environment. The Jala org uses its own API keys:
 
 - `POSTHOG_JALA_PERSONAL_KEY` — Jala-specific private API key for management CRUD (prefix `phx_`)
 - `POSTHOG_JALA_PROJECT_KEY` — Jala-specific project key (only for capture endpoints, optional)
@@ -129,81 +127,26 @@ When listing projects, include the org name so the user can disambiguate between
 
 ## Operations
 
-All operations are identical to the base `posthog` skill. Read [../posthog/SKILL.md](../posthog/SKILL.md) for the full operation reference covering Events, Feature Flags, Insights, Dashboards, Persons, Cohorts, Annotations, Surveys, Experiments, Session Recordings, HogQL Queries, Schema & Taxonomy, and Groups.
+Read [../posthog/SKILL.md](../posthog/SKILL.md) for any operation not documented here.
 
 Every `curl` command must map `POSTHOG_JALA_PERSONAL_KEY` → `POSTHOG_PERSONAL_KEY`.
 
 ## Quick Examples
-Every example maps `POSTHOG_JALA_PERSONAL_KEY` to `POSTHOG_PERSONAL_KEY`.
 
-### Verify Jala auth
+Every example maps `POSTHOG_JALA_PERSONAL_KEY` to `POSTHOG_PERSONAL_KEY`:
+
 ```bash
 export POSTHOG_PERSONAL_KEY="$POSTHOG_JALA_PERSONAL_KEY"
-curl -s -H "Authorization: Bearer $POSTHOG_PERSONAL_KEY" \
-  "https://app.posthog.com/api/users/@me/"
 ```
 
-### List Jala projects across both orgs
-```bash
-export POSTHOG_PERSONAL_KEY="$POSTHOG_JALA_PERSONAL_KEY"
-echo "=== Jala (10590) ==="
-curl -s -H "Authorization: Bearer $POSTHOG_PERSONAL_KEY" \
-  "https://app.posthog.com/api/organizations/10590/projects/" | python3 -c "import json,sys; [print(f'  {p[\"id\"]:>6}  {p[\"name\"]}') for p in json.load(sys.stdin).get('results',[])]"
-echo "=== Jala Widget (28053) ==="
-curl -s -H "Authorization: Bearer $POSTHOG_PERSONAL_KEY" \
-  "https://app.posthog.com/api/organizations/28053/projects/" | python3 -c "import json,sys; [print(f'  {p[\"id\"]:>6}  {p[\"name\"]}') for p in json.load(sys.stdin).get('results',[])]"
-```
+- `GET /api/users/@me/` — verify auth
+- `GET /api/projects/{project_id}/events/?after=-1d&limit=10` — query events
+- `GET /api/projects/{project_id}/feature_flags/` — list feature flags
+- `POST /api/projects/{project_id}/feature_flags/` — create a feature flag
+- `POST /api/projects/{project_id}/query/` — run HogQL query
 
-### Query Jala events from yesterday
-```bash
-export POSTHOG_PERSONAL_KEY="$POSTHOG_JALA_PERSONAL_KEY"
-curl -s -G \
-  -H "Authorization: Bearer $POSTHOG_PERSONAL_KEY" \
-  --data-urlencode 'after=-1d' \
-  --data-urlencode 'limit=10' \
-  "https://app.posthog.com/api/projects/{project_id}/events/"
-```
-
-### List Jala feature flags
-```bash
-export POSTHOG_PERSONAL_KEY="$POSTHOG_JALA_PERSONAL_KEY"
-curl -s -H "Authorization: Bearer $POSTHOG_PERSONAL_KEY" \
-  "https://app.posthog.com/api/projects/{project_id}/feature_flags/" | python3 -c "import json,sys; [print(f'{f[\"id\"]:>6}  {f[\"key\"]:<35}  active={f[\"active\"]}') for f in json.load(sys.stdin).get('results',[])]"
-```
-
-### Create Jala feature flag
-```bash
-export POSTHOG_PERSONAL_KEY="$POSTHOG_JALA_PERSONAL_KEY"
-curl -s -X POST \
-  -H "Authorization: Bearer $POSTHOG_PERSONAL_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"key":"new_feature","name":"New Feature","active":false,"filters":{"groups":[{"properties":[],"rollout_percentage":0}]}}' \
-  "https://app.posthog.com/api/projects/{project_id}/feature_flags/"
-```
-
-### Query Jala events with time range
-```bash
-export POSTHOG_PERSONAL_KEY="$POSTHOG_JALA_PERSONAL_KEY"
-curl -s -G \
-  -H "Authorization: Bearer $POSTHOG_PERSONAL_KEY" \
-  --data-urlencode 'after=2024-06-01T00:00:00Z' \
-  --data-urlencode 'before=2024-06-02T00:00:00Z' \
-  --data-urlencode 'event=$pageview' \
-  --data-urlencode 'limit=50' \
-  "https://app.posthog.com/api/projects/{project_id}/events/"
-```
+See base `posthog` SKILL.md for full curl syntax and response handling.
 
 ## Output
 
 Same as base `posthog` skill. Keep replies concise and operational. Include project name, ID, and relevant counts. Never print `POSTHOG_JALA_PERSONAL_KEY`, `POSTHOG_PERSONAL_KEY`, or any credential value.
-
-## Checks
-
-- Always map `POSTHOG_JALA_PERSONAL_KEY` → `POSTHOG_PERSONAL_KEY` before any API call.
-- Always verify the key with `GET /api/users/@me/` before doing real work.
-- Never print `POSTHOG_JALA_PERSONAL_KEY` or any credential value.
-- For project-scoped operations, default to Jala orgs (10590, 28053) when the user doesn't specify.
-- Read [../posthog/SKILL.md](../posthog/SKILL.md) for any operation not documented here.
-- Read `references/jala-context.md` for Jala org/project details — but verify with API if a reference ID returns 404.
-- Destructive operations must be explicitly requested by the user before proceeding.
-- Tokens are in the environment.

@@ -43,21 +43,16 @@ describe("gitlab-jala skill", () => {
     expect(raw).toContain("same gating as the base skill");
   });
 
-  it("includes Jala-specific quick examples with env sourcing", async () => {
+  it("includes compact Jala-specific quick examples with env sourcing", async () => {
     const raw = await fs.readFile(new URL("../skills/gitlab-jala/SKILL.md", import.meta.url), "utf8");
 
     expect(raw).toContain("## Quick Examples");
-    expect(raw).toContain("List Jala repositories");
-    expect(raw).toContain("View a Jala repository");
-    expect(raw).toContain("Create a Jala repository");
-    expect(raw).toContain("List Jala issues");
-    expect(raw).toContain("Create a Jala merge request");
-    expect(raw).toContain("Set a Jala CI/CD variable");
-    expect(raw).toContain("Create a Jala release");
-    // Every example maps GITLAB_JALA_TOKEN
-    const examples = raw.split("```bash");
-    const jalaExamples = examples.filter((b) => b.includes("GITLAB_JALA_TOKEN"));
-    expect(jalaExamples.length).toBeGreaterThanOrEqual(7);
+    expect(raw).toContain('export GITLAB_TOKEN="$GITLAB_JALA_TOKEN"');
+    expect(raw).toContain("glab repo list --group atnic");
+    expect(raw).toContain("glab repo view atnic/core");
+    expect(raw).toContain("glab issue list --repo atnic/core --state opened");
+    expect(raw).toContain("glab mr create --repo atnic/core");
+    expect(raw).toContain("glab release create v1.2.0 --repo atnic/core");
   });
 
   it("has Jala-specific match terms", async () => {

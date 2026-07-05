@@ -95,7 +95,7 @@ If an operation is ambiguous, treat it as `odoo.write` unless the user is only a
 
 Destructive operations are allowed only when the user explicitly asks for the specific destructive intent: `unlink` (delete records) or `write` that removes data.
 
-## Workflow
+## Execution
 
 1. Classify the requested work as read or write using the permission policy above.
 2. Export Odoo connection variables from `ODOO_JALA_*` env vars. Verify the connection by calling `authenticate()` without printing secrets.
@@ -181,7 +181,7 @@ For any mutating branch, completion requires the requested remote state to be ob
 - Default target is `https://odoo.jala.tech` unless `ODOO_JALA_URL` overrides it.
 - For custom Jala modules, discover model names at runtime via `ir.model` search rather than guessing.
 
-## Checks
+## Constraints
 
 - Always export `ODOO_JALA_*` env vars before any XML-RPC call.
 - Always verify the connection by calling `authenticate()` before doing real work.

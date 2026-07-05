@@ -43,21 +43,16 @@ describe("github-jala skill", () => {
     expect(raw).toContain("same gating as the base skill");
   });
 
-  it("includes Jala-specific quick examples with env sourcing", async () => {
+  it("includes compact Jala-specific quick examples with env sourcing", async () => {
     const raw = await fs.readFile(new URL("../skills/github-jala/SKILL.md", import.meta.url), "utf8");
 
     expect(raw).toContain("## Quick Examples");
-    expect(raw).toContain("List Jala repositories");
-    expect(raw).toContain("View a Jala repository");
-    expect(raw).toContain("Create a Jala repository");
-    expect(raw).toContain("List Jala issues");
-    expect(raw).toContain("Create a Jala pull request");
-    expect(raw).toContain("Set a Jala repository secret");
-    expect(raw).toContain("Create a Jala release");
-    // Every example maps GITHUB_JALA_TOKEN
-    const examples = raw.split("```bash");
-    const jalaExamples = examples.filter((b) => b.includes("GITHUB_JALA_TOKEN"));
-    expect(jalaExamples.length).toBeGreaterThanOrEqual(7);
+    expect(raw).toContain('export GITHUB_TOKEN="$GITHUB_JALA_TOKEN"');
+    expect(raw).toContain("gh repo list Atnic --limit 50");
+    expect(raw).toContain("gh repo view Atnic/jala-web-next");
+    expect(raw).toContain("gh issue list --repo Atnic/jala-web-next --state open");
+    expect(raw).toContain("gh pr create --repo Atnic/jala-web-next");
+    expect(raw).toContain("gh release create v1.2.0 --repo Atnic/jala-web-next");
   });
 
   it("has Jala-specific match terms", async () => {

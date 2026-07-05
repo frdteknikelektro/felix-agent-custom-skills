@@ -41,21 +41,16 @@ describe("vercel-jala skill", () => {
     expect(raw).toContain("same gating as the base skill");
   });
 
-  it("includes Jala-specific quick examples with env sourcing", async () => {
+  it("includes compact Jala-specific quick examples with env sourcing", async () => {
     const raw = await fs.readFile(new URL("../skills/vercel-jala/SKILL.md", import.meta.url), "utf8");
 
     expect(raw).toContain("## Quick Examples");
-    expect(raw).toContain("Deploy a Jala project");
-    expect(raw).toContain("List Jala environment variables");
-    expect(raw).toContain("Add a Jala environment variable");
-    expect(raw).toContain("Inspect a Jala deployment");
-    expect(raw).toContain("Add a custom domain to a Jala project");
-    expect(raw).toContain("Rollback a Jala production deployment");
-    expect(raw).toContain("List all Jala projects");
-    // Every example maps VERCEL_JALA_TOKEN
-    const examples = raw.split("```bash");
-    const jalaExamples = examples.filter((b) => b.includes("VERCEL_JALA_TOKEN"));
-    expect(jalaExamples.length).toBeGreaterThanOrEqual(7);
+    expect(raw).toContain('export VERCEL_TOKEN="$VERCEL_JALA_TOKEN"');
+    expect(raw).toContain("vercel deploy --prod");
+    expect(raw).toContain("vercel env ls production");
+    expect(raw).toContain("vercel env add DATABASE_URL production");
+    expect(raw).toContain("vercel inspect <url>");
+    expect(raw).toContain("vercel rollback --prod");
   });
 
   it("has Jala-specific match terms", async () => {

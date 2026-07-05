@@ -120,15 +120,15 @@ describe("odoo-jala skill", () => {
     const out = raw.indexOf("## Out of scope");
     const useCases = raw.indexOf("## Use cases");
     const permissions = raw.indexOf("## Permissions");
-    const workflow = raw.indexOf("## Workflow");
-    const checks = raw.indexOf("## Checks");
+    const execution = raw.indexOf("## Execution");
+    const constraints = raw.indexOf("## Constraints");
 
     expect(purpose).toBeGreaterThan(0);
     expect(when).toBeGreaterThan(purpose);
     expect(out).toBeGreaterThan(when);
     expect(useCases).toBeGreaterThan(out);
     expect(permissions).toBeGreaterThan(useCases);
-    expect(workflow).toBeGreaterThan(permissions);
-    expect(checks).toBeGreaterThan(workflow);
+    expect(execution).toBeGreaterThan(permissions);
+    expect(constraints).toBeGreaterThan(execution);
   });
 });

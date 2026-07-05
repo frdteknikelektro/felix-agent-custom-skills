@@ -29,14 +29,14 @@ Manage ClickUp workspace: tasks, documents, and team collaboration.
 
 **Workspace hierarchy:** Workspace → Space → Folder → List → Task → Subtask
 
-## Permission boundary
+## Permissions
 
-- Read tasks/docs: require `tasks.read`
-- Create/update: require `tasks.write`
-- Docs read: require `docs.read`
-- Docs write: require `docs.write`
+- `tasks.read` — inspect, list, view, search tasks and their fields.
+- `tasks.write` — create, update, delete, comment on tasks, change status, set fields.
+- `docs.read` — view, list, search documents and pages.
+- `docs.write` — create, update, delete documents and pages.
 
-Stop at the standard permission flow until the required permission is granted.
+If an operation is ambiguous, treat it as `tasks.write` or `docs.write` unless the user is only asking to inspect current state.
 
 ## Branches
 

@@ -74,19 +74,19 @@ If an operation is ambiguous, treat it as `vercel.write` unless the user is only
 
 Destructive operations are allowed only when the user explicitly asks for the specific destructive intent: `unlink`, `domains rm`, `projects rm`, `certs rm`, `env rm`, `alias rm`, `dns rm`, `integration rm`, `teams rm`, `rollback` to a specific deployment.
 
-## Workflow
+## Execution
 
 0. **Resolve permissions FIRST.** Before doing anything else — before checking CLI availability, before running any command — determine whether the user has permission for the requested work. If permission is missing, emit PERMISSION_REQUIRED. Never skip this step. Never run operational checks (CLI, token, env) before the permission gate.
 1. Classify the requested work as read or write using the permission policy above.
 2. Export `VERCEL_TOKEN`, and verify with `vercel whoami` without exposing the token value. Determine active scope if needed.
-3. Run direct `vercel` CLI commands. If the `vercel` binary is not found (exit code 127, "command not found"), tell the user to install it with `install-tool` and stop — do not retry.
-4. For read tasks, return confirmed Vercel facts and include the relevant command summary.
-5. For write tasks, perform only the requested change. For destructive work, proceed only when the user's request explicitly names the destructive intent.
-6. Report command outcomes concisely, including the project name, deployment URL or ID, domain, env key names (values redacted), scope, and any Vercel errors.
+3. Run direct `vercel` CLI commands. If the `vercel` binary is not found (exit code 127, "command not found"), tell the user to install it with `install-tool` and stop — do not retry. When the user mentions a specific team, include `--scope <team-slug>`. For non-interactive environments (CI), always use `--yes` flag to skip prompts. Completion: the command has exited and produced output or an error.
+4. For read tasks, return confirmed Vercel facts and include the relevant command summary. Completion: every fact reported is directly visible in the command output — no inferred state.
+5. For write tasks, perform only the requested change. For destructive work, proceed only when the user's request explicitly names the destructive intent. Completion: the command exited 0 and the remote state changed (verify with a follow-up read if the platform exposes one).
+6. Report command outcomes concisely, including the project name, deployment URL or ID, domain, env key names (values redacted), scope, and any Vercel errors. Completion: every output identifier matches the command output exactly.
 
 ## Environment
 
-Use tokens from the environment before every `vercel` CLI command. Do not use credential files.
+Tokens are in the environment. Use tokens from the environment before every `vercel` CLI command. Do not use credential files.
 
 Required variable:
 - `VERCEL_TOKEN` — Vercel personal access token or team-scoped token
@@ -166,19 +166,8 @@ For any mutating branch, completion requires the requested remote state to be ob
 - Report errors with the exact `vercel` command attempted and the error message.
 - Separate confirmed Vercel facts from assumptions.
 - If blocked by missing token, missing CLI, scope mismatch, or Vercel API errors, state the blocker and the smallest next step.
+- Never print credential values.
 - Never print the `VERCEL_TOKEN` value, any env var values, or full signed request material.
-
-## Checks
-
-- Always export `VERCEL_TOKEN` before any Vercel command.
-- Always verify the token with `vercel whoami` before doing real work.
-- Never print credential values, token, or env var values.
-- If the `vercel` CLI binary is missing, tell the user to use `install-tool` first.
-- If an operation is ambiguous, treat it as write.
-- Destructive operations must be explicitly requested by the user before proceeding.
-- When the user mentions a specific team, include `--scope <team-slug>`.
-- For non-interactive environments (CI), always use `--yes` flag to skip prompts.
-- Tokens are in the environment.
 
 ## Cross-skill convention
 

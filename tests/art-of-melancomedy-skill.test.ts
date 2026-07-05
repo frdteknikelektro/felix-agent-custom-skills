@@ -2,32 +2,33 @@ import fs from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
 describe("art-of-melancomedy skill", () => {
-  it("requires shell.run for delegation and keeps distress replies local", async () => {
+  it("is a text-only persona handled by Felix directly", async () => {
     const raw = await fs.readFile(new URL("../skills/art-of-melancomedy/SKILL.md", import.meta.url), "utf8");
 
-    expect(raw).toContain("- shell.run");
-    expect(raw).toContain("Delegated punchline generation requires `shell.run`");
-    expect(raw).toContain("Distress backoff replies do not require shell execution");
-    expect(raw).toContain("do NOT call the subagent");
+    expect(raw).toContain("permissions: []");
+    expect(raw).toContain("No permissions are required");
+    expect(raw).toContain("Felix writes the reply directly");
+    expect(raw).not.toContain("shell.run");
+    expect(raw).not.toContain("delegate.sh");
+    expect(raw).not.toContain("subagent");
   });
 
-  it("uses catalog skill paths instead of the old workspace skills path", async () => {
+  it("keeps distress replies local and non-comedic", async () => {
     const raw = await fs.readFile(new URL("../skills/art-of-melancomedy/SKILL.md", import.meta.url), "utf8");
-    const script = await fs.readFile(new URL("../skills/art-of-melancomedy/scripts/delegate.sh", import.meta.url), "utf8");
 
-    expect(raw).toContain("/catalog/skills/art-of-melancomedy");
-    expect(script).toContain("/catalog/skills/art-of-melancomedy");
-    expect(script).toContain("MELANCOMEDY_SKILL_DIR");
-    expect(raw).not.toContain("/home/agent/workspace/skills");
-    expect(script).not.toContain("/home/agent/workspace/skills");
+    expect(raw).toContain("## Distress safety");
+    expect(raw).toContain("No analogy, backronym, rhyme, or jokes");
+    expect(raw).toContain("Completion: distress reply is 1-2 short Indonesian lines");
   });
 
-  it("does not bypass permissions or persist full prompt dumps", async () => {
-    const script = await fs.readFile(new URL("../skills/art-of-melancomedy/scripts/delegate.sh", import.meta.url), "utf8");
+  it("preserves anchored punchline quality constraints", async () => {
+    const raw = await fs.readFile(new URL("../skills/art-of-melancomedy/SKILL.md", import.meta.url), "utf8");
 
-    expect(script).not.toContain("--dangerously-skip-permissions");
-    expect(script).not.toContain("--dangerously-bypass-approvals-and-sandbox");
-    expect(script).not.toContain("PROMPT_DUMP");
-    expect(script).not.toContain('printf \'%s\' "$PROMPT"');
+    expect(raw).toContain("## Pattern A - Bedanya");
+    expect(raw).toContain("## Pattern B - Backronym & Etymology");
+    expect(raw).toContain("## Pattern C - Rhyming Couplet");
+    expect(raw).toContain("Every punchline anchors to a concrete noun, verb, or scene");
+    expect(raw).toContain("Never copy examples or `references/corpus.md` lines verbatim");
+    expect(raw).toContain("Reject flat literal opposites");
   });
 });

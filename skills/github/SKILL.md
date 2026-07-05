@@ -78,19 +78,19 @@ If an operation is ambiguous, treat it as `github.write` unless the user is only
 
 Destructive operations are allowed only when the user explicitly asks for the specific destructive intent: `repo delete`, `release delete`, `secret delete`, `variable delete`, `gist delete`, `pr close` without merge, merging conflicting PRs.
 
-## Workflow
+## Execution
 
 0. **Resolve permissions FIRST.** Before doing anything else — before checking CLI availability, before running any command — determine whether the user has permission for the requested work. If permission is missing, emit PERMISSION_REQUIRED. Never skip this step. Never run operational checks (CLI, token, env) before the permission gate.
 1. Classify the requested work as read or write using the permission policy above.
 2. Export `GITHUB_TOKEN`, and verify with `gh auth status` without exposing the token value. Determine the target repo with `gh repo view` or `gh repo list` if needed.
-3. Run direct `gh` CLI commands. If the `gh` binary is not found (exit code 127, "command not found"), tell the user to install it with `install-tool` and stop — do not retry.
-4. For read tasks, return confirmed GitHub facts and include the relevant command summary.
-5. For write tasks, perform only the requested change. For destructive work, proceed only when the user's request explicitly names the destructive intent.
-6. Report command outcomes concisely, including the repo name, issue/PR number, release tag, workflow name, secret/variable key (values redacted), and any GitHub errors.
+3. Run direct `gh` CLI commands. If the `gh` binary is not found (exit code 127, "command not found"), tell the user to install it with `install-tool` and stop — do not retry. Use `--repo owner/repo` explicitly when the current working directory is not a git clone of the target. Completion: the command has exited and produced output or an error.
+4. For read tasks, return confirmed GitHub facts and include the relevant command summary. Completion: every fact reported is directly visible in the command output — no inferred state.
+5. For write tasks, perform only the requested change. For destructive work, proceed only when the user's request explicitly names the destructive intent. Completion: the command exited 0 and the remote state changed (verify with a follow-up read if the platform exposes one).
+6. Report command outcomes concisely, including the repo name, issue/PR number, release tag, workflow name, secret/variable key (values redacted), and any GitHub errors. Completion: every output identifier matches the command output exactly.
 
 ## Environment
 
-Use tokens from the environment before every `gh` CLI command. Do not use credential files.
+Tokens are in the environment. Use tokens from the environment before every `gh` CLI command. Do not use credential files.
 
 Required variable:
 - `GITHUB_TOKEN` — GitHub personal access token (classic or fine-grained)
@@ -165,18 +165,8 @@ For any mutating branch, completion requires the requested remote state to be ob
 - Report errors with the exact `gh` command attempted and the error message.
 - Separate confirmed GitHub facts from assumptions.
 - If blocked by missing token, missing CLI, or API errors, state the blocker and the smallest next step.
+- Never print credential values.
 - Never print the `GITHUB_TOKEN` value, secret values, or full signed request material.
-
-## Checks
-
-- Always export `GITHUB_TOKEN` before any GitHub command.
-- Always verify the token with `gh auth status` before doing real work.
-- Never print credential values, tokens, or secret values.
-- If the `gh` CLI binary is missing, tell the user to use `install-tool` first.
-- If an operation is ambiguous, treat it as write.
-- Destructive operations must be explicitly requested by the user before proceeding.
-- Use `--repo owner/repo` explicitly when the current working directory is not a git clone of the target.
-- Tokens are in the environment.
 
 ## Cross-skill convention
 
