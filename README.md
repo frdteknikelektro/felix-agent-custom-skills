@@ -39,6 +39,7 @@ npm test
 | 🦊 `gitlab-jala` | `gitlab` | Jala GitLab account (atnic group) — same operations with `GITLAB_JALA_TOKEN` |
 | 📊 `posthog-jala` | `posthog` | Jala PostHog orgs (10590, 28053) — same operations with `POSTHOG_JALA_PERSONAL_KEY` |
 | ⚡ `vercel-jala` | `vercel` | Jala Vercel account — same operations with `VERCEL_JALA_TOKEN` |
+| 🛠️ `software-development-jala` | `software-development` | Jala software-development overlay — routes repo work through project workflow profiles |
 
 ### ⚙️ Standalone Jala Skills
 
