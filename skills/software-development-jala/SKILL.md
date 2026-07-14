@@ -1,24 +1,12 @@
 ---
-id: software-development-jala
-name: Software Development Jala
+name: software-development-jala
 description: Jala-specific software development overlay. Routes project work through base software-development and per-project workflow profiles.
-version: 1
-enabled: true
-kind: operational
-permissions:
-  - repo.write
-match:
-  - software development jala
-  - jala software development
-  - jala code
-  - jala implement
-  - jala feature
-  - jala bug fix
-  - jala debug
-  - jala refactor
-  - jala test
-  - jala build
-  - jala review code
+metadata:
+  author: felix-agent
+  kind: operational
+  version: "1.0.0"
+  permissions: repo.write
+  match: software development jala, jala software development, jala code, jala implement, jala feature, jala bug fix, jala debug, jala refactor, jala test, jala build, jala review code
 ---
 
 # Software Development Jala

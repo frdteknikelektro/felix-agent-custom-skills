@@ -1,13 +1,12 @@
 ---
-id: aws-jala
-name: AWS Jala Management
+name: aws-jala
 description: Use for broad Jala AWS account administration through the AWS CLI, including read-only inspection, billing lookups, and explicitly requested remote-state changes. Uses text-based read/write permission guidance with the project-level AWS_JALA_* secret env contract.
-version: 1
-enabled: true
-kind: operational
-permissions:
-  - aws.read
-  - aws.write
+metadata:
+  author: felix-agent
+  kind: operational
+  version: "1.0.0"
+  permissions: aws.read, aws.write
+  match: aws, aws jala, jala aws, s3, ec2, iam, lambda, cloudformation, billing, cost explorer, cost and usage, rds, ecs, ecr, cloudwatch
 env:
   - key: AWS_JALA_ACCESS_KEY_ID
     description: AWS IAM access key for Jala account
@@ -21,22 +20,6 @@ env:
   - key: AWS_JALA_REGION
     description: AWS region override (e.g. ap-southeast-1)
     required: false
-match:
-  - aws
-  - aws jala
-  - jala aws
-  - s3
-  - ec2
-  - iam
-  - lambda
-  - cloudformation
-  - billing
-  - cost explorer
-  - cost and usage
-  - rds
-  - ecs
-  - ecr
-  - cloudwatch
 ---
 
 # AWS Jala Management

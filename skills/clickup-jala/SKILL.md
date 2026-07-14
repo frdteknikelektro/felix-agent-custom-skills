@@ -1,22 +1,16 @@
 ---
-id: clickup-jala
-name: ClickUp Jala Management
+name: clickup-jala
 description: "Manage Jala's ClickUp workspace — tasks, documents, team collaboration."
-version: 1
-enabled: true
-kind: operational
-permissions:
-  - tasks.read
-  - tasks.write
-  - docs.read
-  - docs.write
+metadata:
+  author: felix-agent
+  kind: operational
+  version: "1.0.0"
+  permissions: tasks.read, tasks.write, docs.read, docs.write
+  match: clickup jala, jala task
 env:
   - key: CLICKUP_JALA_API_TOKEN
     description: ClickUp API token for Jala workspace (exported as CLICKUP_API_TOKEN)
     required: true
-match:
-  - clickup jala
-  - jala task
 ---
 
 # ClickUp Jala Management

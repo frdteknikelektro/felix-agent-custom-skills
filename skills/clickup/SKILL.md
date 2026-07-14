@@ -1,22 +1,12 @@
 ---
-id: clickup
-name: ClickUp
+name: clickup
 description: ClickUp workspace and task management. Use when the user mentions ClickUp tasks, URLs, IDs, or wants to create/update/query ClickUp items.
-version: 1
-enabled: true
-kind: operational
-permissions:
-  - tasks.read
-  - tasks.write
-  - docs.read
-  - docs.write
-match:
-  - clickup
-  - click up
-  - my tasks
-  - create task
-  - task status
-  - clickup task
+metadata:
+  author: felix-agent
+  kind: operational
+  version: "1.0.0"
+  permissions: tasks.read, tasks.write, docs.read, docs.write
+  match: clickup, click up, my tasks, create task, task status, clickup task
 env:
   - key: CLICKUP_API_TOKEN
     description: Personal API token (pk_...) from ClickUp Settings > Apps

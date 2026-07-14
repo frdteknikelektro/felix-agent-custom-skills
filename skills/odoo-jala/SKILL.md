@@ -1,13 +1,12 @@
 ---
-id: odoo-jala
-name: Odoo Jala ERP Management
+name: odoo-jala
 description: Jala Odoo 16.0 ERP interaction via XML-RPC — search, read, create, update, delete records, download reports, inspect models. Supports all standard and custom modules (including Jala-specific modules). Uses ODOO_JALA_* environment variables. Uses text-based read/write permission guidance.
-version: 1
-enabled: true
-kind: operational
-permissions:
-  - odoo.read
-  - odoo.write
+metadata:
+  author: felix-agent
+  kind: operational
+  version: "1.0.0"
+  permissions: odoo.read, odoo.write
+  match: odoo, odoo jala, jala odoo, erp, sale order, invoice, product, stock, crm, hr, purchase, partner, report, quotation, bill, lead, employee, inventory, accounting
 env:
   - key: ODOO_JALA_URL
     description: Jala Odoo server URL (default https://odoo.jala.tech)
@@ -24,26 +23,6 @@ env:
   - key: ODOO_JALA_PASSWORD
     description: Plain password for XML-RPC authentication (fallback if no API key)
     required: false
-match:
-  - odoo
-  - odoo jala
-  - jala odoo
-  - erp
-  - sale order
-  - invoice
-  - product
-  - stock
-  - crm
-  - hr
-  - purchase
-  - partner
-  - report
-  - quotation
-  - bill
-  - lead
-  - employee
-  - inventory
-  - accounting
 ---
 
 # Odoo Jala ERP Management

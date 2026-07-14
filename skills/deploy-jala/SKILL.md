@@ -1,22 +1,12 @@
 ---
-id: deploy-jala
-name: Deploy Jala
+name: deploy-jala
 description: "Deploy Jala products to staging or production. Use when the user says 'deploy jala', 'deploy jala-web', 'deploy jala-web-next', 'deploy jala-point', 'deploy jala-odoo-custom-addons', 'deploy staging', 'deploy production', or asks to ship a Jala product."
-version: 1
-enabled: true
-kind: operational
-permissions:
-  - deploy.write
-match:
-  - deploy jala
-  - deploy jala-web
-  - deploy jala-web-next
-  - deploy jala-point
-  - deploy jala-odoo-custom-addons
-  - deploy staging
-  - deploy production
-  - ship jala
-  - release jala
+metadata:
+  author: felix-agent
+  kind: operational
+  version: "1.0.0"
+  permissions: deploy.write
+  match: deploy jala, deploy jala-web, deploy jala-web-next, deploy jala-point, deploy jala-odoo-custom-addons, deploy staging, deploy production, ship jala, release jala
 ---
 
 # Deploy Jala

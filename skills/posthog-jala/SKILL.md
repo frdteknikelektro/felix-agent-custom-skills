@@ -1,13 +1,12 @@
 ---
-id: posthog-jala
-name: PostHog Jala Management
+name: posthog-jala
 description: "Query and manage Jala's PostHog analytics (orgs 10590, 28053) via REST API — events, feature flags, dashboards, HogQL."
-version: 1
-enabled: true
-kind: operational
-permissions:
-  - posthog.read
-  - posthog.write
+metadata:
+  author: felix-agent
+  kind: operational
+  version: "1.0.0"
+  permissions: posthog.read, posthog.write
+  match: posthog jala, jala posthog, jala analytics, jala event, jala feature flag, jala dashboard, jala insight, jala cohort, jala session, jala capture, jala hogql, jala survey, jala experiment
 env:
   - key: POSTHOG_JALA_PERSONAL_KEY
     description: PostHog personal API key for Jala org (exported as POSTHOG_PERSONAL_KEY)
@@ -15,20 +14,6 @@ env:
   - key: POSTHOG_JALA_PROJECT_KEY
     description: PostHog project key for Jala (exported as POSTHOG_PROJECT_KEY)
     required: false
-match:
-  - posthog jala
-  - jala posthog
-  - jala analytics
-  - jala event
-  - jala feature flag
-  - jala dashboard
-  - jala insight
-  - jala cohort
-  - jala session
-  - jala capture
-  - jala hogql
-  - jala survey
-  - jala experiment
 ---
 
 # PostHog Jala Management

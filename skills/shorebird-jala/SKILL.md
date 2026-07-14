@@ -1,12 +1,12 @@
 ---
-id: shorebird-jala
-name: Shorebird Jala Management
+name: shorebird-jala
 description: Use for Jala Shorebird remote inspection and existing patch track management through npx Shorebird or verified API calls. Do not create, build, upload, push, or publish release or patch artifacts.
-version: 1
-enabled: true
-kind: operational
-permissions:
-  - shell.run
+metadata:
+  author: felix-agent
+  kind: operational
+  version: "1.0.0"
+  permissions: shell.run
+  match: shorebird, shorebird jala, jala shorebird, code push, release track, patch track, staging, stable, rollback patch
 env:
   - key: SHOREBIRD_JALA_TOKEN
     description: Shorebird token for Jala account
@@ -20,16 +20,6 @@ env:
   - key: SHOREBIRD_JALA_ORG_ID
     description: Shorebird organization ID for Jala
     required: false
-match:
-  - shorebird
-  - shorebird jala
-  - jala shorebird
-  - code push
-  - release track
-  - patch track
-  - staging
-  - stable
-  - rollback patch
 ---
 
 # Shorebird Jala Management

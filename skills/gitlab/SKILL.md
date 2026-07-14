@@ -1,28 +1,16 @@
 ---
-id: gitlab
-name: GitLab Management
+name: gitlab
 description: Full GitLab management via the glab CLI — repos, issues, merge requests, releases, pipelines, variables, snippets, API, and auth. Uses GITLAB_TOKEN (available in environment). Uses text-based read/write permission guidance.
-version: 1
-enabled: true
-kind: operational
-permissions:
-  - gitlab.read
-  - gitlab.review
-  - gitlab.write
+metadata:
+  author: felix-agent
+  kind: operational
+  version: "1.0.0"
+  permissions: gitlab.read, gitlab.review, gitlab.write
+  match: gitlab, glab, merge request, mr, pipeline, ci/cd, snippet, gitlab ci, gitlab variable
 env:
   - key: GITLAB_TOKEN
     description: GitLab personal access token or group access token for glab CLI
     required: true
-match:
-  - gitlab
-  - glab
-  - merge request
-  - mr
-  - pipeline
-  - ci/cd
-  - snippet
-  - gitlab ci
-  - gitlab variable
 ---
 
 # GitLab Management

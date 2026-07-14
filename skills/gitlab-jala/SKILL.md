@@ -1,27 +1,16 @@
 ---
-id: gitlab-jala
-name: GitLab Jala Management
+name: gitlab-jala
 description: "Manage Jala's GitLab account (atnic group) via the glab CLI — repos, issues, merge requests, pipelines, variables, releases."
-version: 1
-enabled: true
-kind: operational
-permissions:
-  - gitlab.read
-  - gitlab.review
-  - gitlab.write
+metadata:
+  author: felix-agent
+  kind: operational
+  version: "1.0.0"
+  permissions: gitlab.read, gitlab.review, gitlab.write
+  match: gitlab jala, jala gitlab, jala glab, jala merge request, jala mr, jala pipeline, atnic, atnic gitlab
 env:
   - key: GITLAB_JALA_TOKEN
     description: GitLab token for atnic group (exported as GITLAB_TOKEN for the glab CLI)
     required: true
-match:
-  - gitlab jala
-  - jala gitlab
-  - jala glab
-  - jala merge request
-  - jala mr
-  - jala pipeline
-  - atnic
-  - atnic gitlab
 ---
 
 # GitLab Jala Management

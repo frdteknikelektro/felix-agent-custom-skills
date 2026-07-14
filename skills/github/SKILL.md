@@ -1,39 +1,16 @@
 ---
-id: github
-name: GitHub Management
+name: github
 description: Full GitHub management via the gh CLI — repos, issues, PRs, releases, workflows, secrets, variables, gists, search, and auth. Uses GITHUB_TOKEN (available in environment). Uses text-based read/write permission guidance.
-version: 1
-enabled: true
-kind: operational
-permissions:
-  - github.read
-  - github.review
-  - github.write
+metadata:
+  author: felix-agent
+  kind: operational
+  version: "1.0.0"
+  permissions: github.read, github.review, github.write
+  match: github, repo, repository, issue, issues, pr, pull request, release, workflow, actions, gist, secret, variable, code search, codespace, git clone, git branch, git commit, git push, git checkout
 env:
   - key: GITHUB_TOKEN
     description: GitHub personal access token or fine-grained token for gh CLI
     required: true
-match:
-  - github
-  - repo
-  - repository
-  - issue
-  - issues
-  - pr
-  - pull request
-  - release
-  - workflow
-  - actions
-  - gist
-  - secret
-  - variable
-  - code search
-  - codespace
-  - git clone
-  - git branch
-  - git commit
-  - git push
-  - git checkout
 ---
 
 # GitHub Management

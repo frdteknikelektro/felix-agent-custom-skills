@@ -1,27 +1,16 @@
 ---
-id: vercel-jala
-name: Vercel Jala Management
+name: vercel-jala
 description: "Manage Jala's Vercel account via the vercel CLI — deploy, domains, env vars, projects, logs, rollback."
-version: 1
-enabled: true
-kind: operational
-permissions:
-  - vercel.read
-  - vercel.write
+metadata:
+  author: felix-agent
+  kind: operational
+  version: "1.0.0"
+  permissions: vercel.read, vercel.write
+  match: vercel jala, jala vercel, jala deploy, jala domain, jala env, jala logs, jala rollback, jala project, jala alias
 env:
   - key: VERCEL_JALA_TOKEN
     description: Vercel token for Jala account (exported as VERCEL_TOKEN for the vercel CLI)
     required: true
-match:
-  - vercel jala
-  - jala vercel
-  - jala deploy
-  - jala domain
-  - jala env
-  - jala logs
-  - jala rollback
-  - jala project
-  - jala alias
 ---
 
 # Vercel Jala Management

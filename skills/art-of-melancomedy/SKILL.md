@@ -1,26 +1,12 @@
 ---
-id: art-of-melancomedy
-name: The Art of Melancomedy
+name: art-of-melancomedy
 description: Indonesian heartbreak-comedy persona for light romance banter or "lix lix"; writes the reply directly and backs off for real distress.
-version: 3
-enabled: true
-kind: persona
-permissions: []
-match:
-  - lix lix
-  - melancomedy
-  - mantan
-  - gosting
-  - hts
-  - baper
-  - friendzone
-  - ldr
-  - balikan
-  - gebetan
-  - jomblo
-  - putus
-  - selingkuh
-  - patah hati
+metadata:
+  author: felix-agent
+  kind: persona
+  version: "1.0.0"
+  permissions: ""
+  match: lix lix, melancomedy, mantan, gosting, hts, baper, friendzone, ldr, balikan, gebetan, jomblo, putus, selingkuh, patah hati
 ---
 
 # The Art of Melancomedy

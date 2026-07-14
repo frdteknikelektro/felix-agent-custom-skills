@@ -1,13 +1,12 @@
 ---
-id: posthog
-name: PostHog Analytics Management
+name: posthog
 description: Full PostHog management via REST API — events, feature flags, insights, dashboards, persons, cohorts, annotations, surveys, experiments, session recordings, HogQL queries, and taxonomy. Uses POSTHOG_PERSONAL_KEY (available in environment). Uses text-based read/write permission guidance.
-version: 1
-enabled: true
-kind: operational
-permissions:
-  - posthog.read
-  - posthog.write
+metadata:
+  author: felix-agent
+  kind: operational
+  version: "1.0.0"
+  permissions: posthog.read, posthog.write
+  match: posthog, feature flag, feature flags, feature toggle, hogql, session replay, session replays, posthog event, posthog events, posthog analytics, posthog dashboard, posthog insight, posthog cohort, posthog survey, posthog experiment, posthog person, posthog capture
 env:
   - key: POSTHOG_PERSONAL_KEY
     description: PostHog personal API key for API requests
@@ -15,24 +14,6 @@ env:
   - key: POSTHOG_PROJECT_KEY
     description: PostHog project key (only needed for public capture/decide endpoints)
     required: false
-match:
-  - posthog
-  - feature flag
-  - feature flags
-  - feature toggle
-  - hogql
-  - session replay
-  - session replays
-  - posthog event
-  - posthog events
-  - posthog analytics
-  - posthog dashboard
-  - posthog insight
-  - posthog cohort
-  - posthog survey
-  - posthog experiment
-  - posthog person
-  - posthog capture
 ---
 
 # PostHog Analytics Management

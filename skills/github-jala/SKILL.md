@@ -1,31 +1,16 @@
 ---
-id: github-jala
-name: GitHub Jala Management
+name: github-jala
 description: "Manage Jala's GitHub account (Atnic org, jalaproduct user) via the gh CLI — repos, issues, PRs, releases, workflows, secrets."
-version: 1
-enabled: true
-kind: operational
-permissions:
-  - github.read
-  - github.review
-  - github.write
+metadata:
+  author: felix-agent
+  kind: operational
+  version: "1.0.0"
+  permissions: github.read, github.review, github.write
+  match: github jala, jala github, jala repo, jala issue, jala pr, jala release, jala workflow, jala actions, jala secret, jala gist, atnic, jalaproduct
 env:
   - key: GITHUB_JALA_TOKEN
     description: GitHub token for Jala org account (exported as GITHUB_TOKEN for the gh CLI)
     required: true
-match:
-  - github jala
-  - jala github
-  - jala repo
-  - jala issue
-  - jala pr
-  - jala release
-  - jala workflow
-  - jala actions
-  - jala secret
-  - jala gist
-  - atnic
-  - jalaproduct
 ---
 
 # GitHub Jala Management

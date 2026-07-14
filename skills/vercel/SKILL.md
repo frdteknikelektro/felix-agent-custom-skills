@@ -1,36 +1,16 @@
 ---
-id: vercel
-name: Vercel Management
+name: vercel
 description: Full Vercel platform management via the vercel CLI — deploy, domains, environment variables, projects, logs, rollback, aliases, DNS, SSL certificates, teams, and integrations. Uses VERCEL_TOKEN (available in environment). Uses text-based read/write permission guidance.
-version: 1
-enabled: true
-kind: operational
-permissions:
-  - vercel.read
-  - vercel.write
+metadata:
+  author: felix-agent
+  kind: operational
+  version: "1.0.0"
+  permissions: vercel.read, vercel.write
+  match: vercel, deploy, deployment, domain, env var, environment variable, logs, rollback, promote, project, alias, dns, ssl, cert, certificate, team, integration, billing
 env:
   - key: VERCEL_TOKEN
     description: Vercel personal access token or team-scoped token for vercel CLI
     required: true
-match:
-  - vercel
-  - deploy
-  - deployment
-  - domain
-  - env var
-  - environment variable
-  - logs
-  - rollback
-  - promote
-  - project
-  - alias
-  - dns
-  - ssl
-  - cert
-  - certificate
-  - team
-  - integration
-  - billing
 ---
 
 # Vercel Management
