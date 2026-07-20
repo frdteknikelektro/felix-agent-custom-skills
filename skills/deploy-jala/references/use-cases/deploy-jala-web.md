@@ -62,6 +62,14 @@ git stash list | grep -q deploy-stash && git stash pop
 # build and apply
 /usr/bin/php7.3 composer install
 /usr/bin/php7.3 artisan app:update --no-downtime
+
+# restart workers
+sudo supervisorctl restart jala-staging-long-worker:*
+sudo supervisorctl restart jala-staging-worker:*
+sudo supervisorctl restart jala-staging-worker-analytic:*
+sudo supervisorctl restart jala-staging-worker-campaign:*
+sudo supervisorctl restart jala-staging-worker-import:*
+sudo supervisorctl restart jala-staging-worker-points:*
 ```
 
 If `git stash pop` has conflicts, resolve by reading each conflicted file and merging both sides.
@@ -96,6 +104,14 @@ git stash list | grep -q deploy-stash && git stash pop
 # build and apply
 /usr/bin/php7.3 composer install --no-dev
 /usr/bin/php7.3 artisan app:update --no-downtime --production
+
+# restart workers
+sudo supervisorctl restart jala-long-worker:*
+sudo supervisorctl restart jala-worker:*
+sudo supervisorctl restart jala-worker-analytic:*
+sudo supervisorctl restart jala-worker-campaign:*
+sudo supervisorctl restart jala-worker-import:*
+sudo supervisorctl restart jala-worker-points:*
 ```
 
 If `git stash pop` has conflicts, resolve by reading each conflicted file and merging both sides.

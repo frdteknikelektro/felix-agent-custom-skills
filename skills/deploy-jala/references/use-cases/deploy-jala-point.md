@@ -48,6 +48,10 @@ Deploy:
 ssh ubuntu@db.jala.tech
 cd Code/Web/jala-point
 
+# source nvm for non-interactive SSH
+source ~/.nvm/nvm.sh
+nvm use 20
+
 # try pull — if uncommitted changes block it, stash first
 git pull || {
   git stash push -m "deploy-stash"
@@ -58,9 +62,8 @@ git pull || {
 git stash list | grep -q deploy-stash && git stash pop
 
 # build and restart
-nvm use 20
-yarn
-yarn build
+pnpm install
+pnpm build
 pm2 restart jala-points
 ```
 
@@ -83,6 +86,9 @@ Deploy:
 ```sh
 ssh ubuntu@app.jala.tech
 cd Code/Web/jala-point
+
+# source nvm for non-interactive SSH
+source ~/.nvm/nvm.sh
 nvm use 20
 
 # try pull — if uncommitted changes block it, stash first
@@ -95,8 +101,8 @@ git pull || {
 git stash list | grep -q deploy-stash && git stash pop
 
 # build and restart
-yarn
-yarn build
+pnpm install
+pnpm build
 pm2 restart jala-points
 ```
 
@@ -116,8 +122,8 @@ After deploy, confirm the application is responding on the deployed server:
 - **SSH connection refused** — check network connectivity and server status. Do not retry without user confirmation.
 - **nvm use 20 fails** — Node 20 not installed on server. Report the error.
 - **git pull fails** — branch may not exist or remote has changed. Check branch name.
-- **yarn install fails** — dependency conflict or lock file mismatch. Report the error output.
-- **yarn build fails** — build error. Report the error; do not retry without fixing the underlying issue.
+- **pnpm install fails** — dependency conflict or lock file mismatch. Report the error output.
+- **pnpm build fails** — build error. Report the error; do not retry without fixing the underlying issue.
 - **pm2 restart fails** — process not found. Check if pm2 is running.
 - **stash pop conflict** — `git stash pop` has conflicts. Felix will read each conflicted file, understand both sides, and merge intelligently — keep the deployed code for structural changes (config, lock files), keep the stashed changes for business logic. If irreconcilable, save to `/tmp/unstashed.patch` and report.
 
@@ -131,8 +137,9 @@ cd Code/Web/jala-point
 
 # rollback
 git checkout <commit-hash-from-above>
+source ~/.nvm/nvm.sh
 nvm use 20
-yarn
-yarn build
+pnpm install
+pnpm build
 pm2 restart jala-points
 ```
