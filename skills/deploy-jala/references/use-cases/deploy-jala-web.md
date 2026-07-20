@@ -107,7 +107,6 @@ git stash list | grep -q deploy-stash && git stash pop
 
 # restart workers
 sudo supervisorctl restart jala-long-worker:*
-sudo supervisorctl restart jala-mqtt-worker:*
 sudo supervisorctl restart jala-worker:*
 sudo supervisorctl restart jala-worker-analytic:*
 sudo supervisorctl restart jala-worker-campaign:*
