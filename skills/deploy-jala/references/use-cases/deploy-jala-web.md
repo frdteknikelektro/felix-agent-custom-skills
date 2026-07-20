@@ -70,7 +70,6 @@ sudo supervisorctl restart jala-staging-worker-analytic:*
 sudo supervisorctl restart jala-staging-worker-campaign:*
 sudo supervisorctl restart jala-staging-worker-import:*
 sudo supervisorctl restart jala-staging-worker-points:*
-sudo supervisorctl restart jala-mqtt
 ```
 
 If `git stash pop` has conflicts, resolve by reading each conflicted file and merging both sides.
