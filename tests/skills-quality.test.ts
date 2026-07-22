@@ -51,7 +51,7 @@ function frontmatterValue(raw: string, key: string) {
 describe("skill quality guardrails", () => {
   it("keeps SKILL.md descriptions concise and ids aligned with directories", async () => {
     for (const skill of await readSkillFiles()) {
-      expect(frontmatterValue(skill.raw, "id")).toBe(skill.id);
+      expect(frontmatterValue(skill.raw, "name")).toBe(skill.id);
       expect(frontmatterValue(skill.raw, "description")?.length ?? 0, `${skill.id} description`).toBeLessThanOrEqual(300);
       expect(skill.raw.split(/\r?\n/).length, `${skill.id} line count`).toBeLessThanOrEqual(300);
     }

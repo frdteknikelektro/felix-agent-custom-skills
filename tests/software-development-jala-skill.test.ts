@@ -5,7 +5,7 @@ describe("software-development-jala skill", () => {
   it("documents itself as an overlay that depends on base software-development", async () => {
     const raw = await fs.readFile(new URL("../skills/software-development-jala/SKILL.md", import.meta.url), "utf8");
 
-    expect(raw).toContain("id: software-development-jala");
+    expect(raw).toContain("name: software-development-jala");
     expect(raw).toContain("This is an overlay skill");
     expect(raw).toContain("Deploy it with the base `software-development` skill");
     expect(raw).toContain("If the base skill is unavailable, stop and report the missing dependency");

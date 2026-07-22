@@ -5,7 +5,7 @@ describe("art-of-melancomedy skill", () => {
   it("is a text-only persona handled by Felix directly", async () => {
     const raw = await fs.readFile(new URL("../skills/art-of-melancomedy/SKILL.md", import.meta.url), "utf8");
 
-    expect(raw).toContain("permissions: []");
+    expect(raw).toContain('permissions: ""');
     expect(raw).toContain("No permissions are required");
     expect(raw).toContain("Felix writes the reply directly");
     expect(raw).not.toContain("shell.run");
