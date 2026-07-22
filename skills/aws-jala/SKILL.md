@@ -6,19 +6,19 @@ metadata:
   kind: operational
   version: "1.0.0"
   permissions: aws.read, aws.write
-  match: aws, aws jala, jala aws, s3, ec2, iam, lambda, cloudformation, billing, cost explorer, cost and usage, rds, ecs, ecr, cloudwatch
+  match: aws jala, jala aws, jala ec2, jala s3, jala iam, jala lambda, jala billing, jala cost explorer, jala rds, jala ecs, jala ecr, jala cloudwatch
 env:
   - key: AWS_JALA_ACCESS_KEY_ID
-    description: AWS IAM access key for Jala account
+    description: AWS IAM access key for Jala account (exported as AWS_ACCESS_KEY_ID)
     required: true
   - key: AWS_JALA_SECRET_ACCESS_KEY
-    description: AWS IAM secret access key for Jala account
+    description: AWS IAM secret access key for Jala account (exported as AWS_SECRET_ACCESS_KEY)
     required: true
   - key: AWS_JALA_SESSION_TOKEN
-    description: AWS STS session token (if using temporary credentials)
+    description: AWS STS session token for Jala account, if using temporary credentials (exported as AWS_SESSION_TOKEN)
     required: false
   - key: AWS_JALA_REGION
-    description: AWS region override (e.g. ap-southeast-1)
+    description: AWS region override for Jala account (exported as AWS_REGION)
     required: false
 ---
 
@@ -26,51 +26,41 @@ env:
 
 ## Purpose
 
-Operate Jala's configured AWS environment through the AWS CLI. This skill covers AWS inventory, diagnostics, billing lookups, and broad admin operations when the requester has the matching permission.
+Operate Jala's AWS account through the AWS CLI. This skill extends the base `aws` skill. Every operation, permission policy, destructive-operation gate, CLI availability check, and use-case reference is identical. This skill only overrides the credential contract.
 
-Use text-based permission judgment. Do not add or rely on hardcoded TypeScript command detection for AWS read/write classification.
+**Execution:** Resolve permissions first (emit PERMISSION_REQUIRED if missing). Map `AWS_JALA_*` to the native `AWS_*` variables and verify with `aws sts get-caller-identity` before any command. Then follow the base `aws` skill's execution steps.
+
+Do not duplicate operation documentation. This file documents only what is different.
 
 ## When to use
 
-Activate when the user asks about Jala's AWS account, resources, billing, or infrastructure. Trigger words include "aws", "ec2", "s3", "iam", "lambda", "rds", "billing", "cost explorer".
+Activate when the user asks to operate specifically on Jala's AWS account. Trigger words include "aws jala", "jala aws", "jala ec2", "jala s3", "jala billing".
 
 ## Out of scope
 
-- Non-Jala AWS accounts — Jala-specific credentials only
-- Creating AWS resources through CloudFormation/CDK templates (those require separate deployment tooling)
-- Operations requiring AWS console-only access
+- Non-Jala AWS accounts — route to the base `aws` skill
+- Operations not covered by the AWS CLI
 
 ## Use Cases
 
-Use cases are repeatable operating recipes. They may produce artifacts, but they do not have to. Load the relevant reference only when the user's request matches it.
+Same use-case recipes as the base `aws` skill, run against Jala's credentials:
 
-- **Monthly cost summary report** — read `references/use-cases/cost-summary-monthly-report.md` when the user asks for a monthly AWS cost summary report, billing report bundle, two-month cost comparison, service cost breakdown, Name-tag cost breakdown, no-credit view, charts, markdown summary, or monthly cost artifacts.
-- **EC2 inventory** — read `references/use-cases/ec2-inventory.md` when the user asks which EC2 instances are running, what instances exist, or needs a compact compute inventory.
-- **IAM access review** — read `references/use-cases/iam-access-review.md` when the user asks to inspect IAM users, access keys, attached policies, or broad access risk.
+- **Monthly cost summary report** — read [../aws/references/use-cases/cost-summary-monthly-report.md](../aws/references/use-cases/cost-summary-monthly-report.md) when the user asks for a Jala monthly AWS cost summary, billing report bundle, two-month cost comparison, or cost artifacts. Use `workspace/reports/aws-jala/cost-summary/...` as the working directory and prefix the markdown report `aws-jala-${PREFIX}-report.md`.
+- **EC2 inventory** — read [../aws/references/use-cases/ec2-inventory.md](../aws/references/use-cases/ec2-inventory.md) when the user asks which Jala EC2 instances exist or are running.
+- **IAM access review** — read [../aws/references/use-cases/iam-access-review.md](../aws/references/use-cases/iam-access-review.md) when the user asks to inspect Jala IAM users, access keys, or attached policies.
 
 ## Permissions
 
-Use the user's requested intent and the likely AWS effect to choose the required permission:
+Same permission policy as the base `aws` skill. Request the bare permission shown below; Felix stores grants under this skill id.
 
-Request the bare permission shown below; Felix stores grants under this skill id.
-
-- `aws.read` — inspection, inventory, diagnostics, billing lookups, Cost Explorer reads, and commands whose purpose is to observe existing state. Examples: `list`, `get`, `describe`, `show`, `head`, `sts get-caller-identity`, `ce get-cost-and-usage`.
-- `aws.write` — create, update, delete, attach, detach, put, revoke, terminate, deploy, restore, modify, or any other operation that can change remote AWS state.
+- `aws.read` — inspection, inventory, diagnostics, billing lookups, Cost Explorer reads.
+- `aws.write` — create, update, delete, attach, detach, put, revoke, terminate, deploy, restore, modify.
 
 If an operation is ambiguous, treat it as `aws.write` unless the user is only asking to inspect or explain current state.
 
-Destructive operations are allowed only when the user explicitly asks for the specific destructive intent, such as deleting a bucket object, terminating an instance, deleting a stack, revoking IAM access, or removing a policy.
+Destructive operations are allowed only when the user explicitly asks — same gating as the base skill.
 
-## Execution
-
-1. Classify the requested work as read or write using the permission policy above.
-2. Export standard AWS CLI variables from `AWS_JALA_*`, and verify required credentials are present without exposing values.
-3. Use direct `aws` CLI commands. If `aws` is missing, use the `install-tool` skill to install it before continuing.
-4. For read tasks, return confirmed AWS facts and include the relevant command summary.
-5. For write tasks, perform only the requested change. For destructive work, proceed only when the user's request explicitly names the destructive intent.
-6. Report command outcomes concisely, including the affected service, resource identifiers, region when known, and any AWS errors.
-
-## Environment
+## Environment (overrides base)
 
 Use credentials from the environment before every AWS CLI command. Do not use credential files, and do not require `AWS_JALA_PROFILE`.
 
@@ -92,51 +82,47 @@ if [ -n "${AWS_JALA_REGION:-}" ]; then export AWS_REGION="$AWS_JALA_REGION"; exp
 aws <service> <operation> ...
 ```
 
-Before AWS work, verify required values without printing secrets:
+Verify before any work:
 
 ```bash
 test -n "$AWS_JALA_ACCESS_KEY_ID" &&
 test -n "$AWS_JALA_SECRET_ACCESS_KEY" &&
+export AWS_ACCESS_KEY_ID="$AWS_JALA_ACCESS_KEY_ID" &&
+export AWS_SECRET_ACCESS_KEY="$AWS_JALA_SECRET_ACCESS_KEY" &&
 aws sts get-caller-identity
 ```
 
-Never print credential values, secret-derived env, or full signed request material.
+Note: the `aws` CLI reads native `AWS_*` variables. The Jala values are mapped in as shown above. Never print credential values, secret-derived env, or full signed request material.
+
+## Operations
+
+Read [../aws/SKILL.md](../aws/SKILL.md) for any operation not documented here.
+
+Every command must be preceded by mapping `AWS_JALA_*` to `AWS_*` as shown above.
 
 ## Quick Examples
-Read-only inventory uses `aws.read`:
 
 ```bash
-aws ec2 describe-instances \
-  --filters Name=instance-state-name,Values=running \
-  --query 'Reservations[].Instances[].{InstanceId:InstanceId,Name:Tags[?Key==`Name`]|[0].Value,Type:InstanceType,AZ:Placement.AvailabilityZone}' \
-  --output table
+export AWS_ACCESS_KEY_ID="$AWS_JALA_ACCESS_KEY_ID"
+export AWS_SECRET_ACCESS_KEY="$AWS_JALA_SECRET_ACCESS_KEY"
+aws sts get-caller-identity
 ```
 
-Remote-state changes use `aws.write`:
+- `aws ec2 describe-instances --filters Name=instance-state-name,Values=running` — running instances
+- `aws iam list-users --output table` — list IAM users
+- `aws ce get-cost-and-usage --time-period Start=...,End=... --granularity MONTHLY --metrics UnblendedCost` — cost lookup
 
-```bash
-aws lambda update-function-configuration \
-  --function-name <function-name> \
-  --environment Variables='{KEY=value}'
-```
-
-## References
-
-- `references/platform-context.md` — Jala AWS operating context, common service areas, and fallback notes.
+See base `aws` SKILL.md and its `references/use-cases/` for full command syntax.
 
 ## Output
 
-- Keep replies concise and operational.
-- Separate confirmed AWS facts from assumptions.
-- Include exact commands run or command summaries, with secrets redacted.
-- If blocked by missing env, missing AWS CLI, missing region, permissions, or AWS API errors, state the blocker and the smallest next step.
+Same as base `aws` skill. Keep replies concise and operational. Separate confirmed AWS facts from assumptions. Never print `AWS_JALA_ACCESS_KEY_ID`, `AWS_JALA_SECRET_ACCESS_KEY`, `AWS_JALA_SESSION_TOKEN`, or any mapped credential value.
 
 ## Constraints
 
-- Always export AWS CLI variables from `AWS_JALA_*` before any command.
+- Always map `AWS_JALA_*` to native `AWS_*` before any command.
 - Always verify credentials with `aws sts get-caller-identity` before doing real work.
 - Never print credential values, secret-derived env, or signed request material.
 - If the `aws` CLI binary is missing, tell the user to use `install-tool` first.
 - If an operation is ambiguous, treat it as write.
 - Destructive operations must be explicitly requested by the user before proceeding.
-- Tokens are in the environment.

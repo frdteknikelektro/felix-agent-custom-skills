@@ -18,7 +18,7 @@ npm test
 
 > 💡 Skills are loaded by Felix on boot. You can also create or remove skills via the Felix WebUI (`POST /api/skills` / `DELETE /api/skills/:id`).
 
-> 🔗 Overlay skills such as `github-jala`, `gitlab-jala`, `posthog-jala`, and `vercel-jala` depend on their matching base skill. Deploy both directories into the same `workspace/catalog/skills/` folder.
+> 🔗 Overlay skills such as `aws-jala`, `github-jala`, `gitlab-jala`, `posthog-jala`, and `vercel-jala` depend on their matching base skill. Deploy both directories into the same `workspace/catalog/skills/` folder.
 
 ## 🧩 Skills
 
@@ -26,6 +26,7 @@ npm test
 
 | Skill | Description |
 |---|---|
+| ☁️ `aws` | AWS account administration via `aws` CLI — EC2, IAM, Lambda, billing, Cost Explorer. Reference-backed use-case runbooks |
 | 🐙 `github` | Full GitHub management via `gh` CLI — repos, issues, PRs, releases, workflows, secrets, gists, search |
 | 🦊 `gitlab` | Full GitLab management via `glab` CLI — repos, issues, MRs, releases, pipelines, variables, snippets |
 | 📊 `posthog` | PostHog analytics via REST API — events, feature flags, dashboards, HogQL, cohorts, experiments |
@@ -35,6 +36,7 @@ npm test
 
 | Skill | Extends | Description |
 |---|---|---|
+| ☁️ `aws-jala` | `aws` | Jala AWS account — same operations with `AWS_JALA_*` credentials |
 | 🐙 `github-jala` | `github` | Jala GithHub account (Atnic org) — same operations with `GITHUB_JALA_TOKEN` |
 | 🦊 `gitlab-jala` | `gitlab` | Jala GitLab account (atnic group) — same operations with `GITLAB_JALA_TOKEN` |
 | 📊 `posthog-jala` | `posthog` | Jala PostHog orgs (10590, 28053) — same operations with `POSTHOG_JALA_PERSONAL_KEY` |
@@ -45,7 +47,6 @@ npm test
 
 | Skill | Description |
 |---|---|
-| ☁️ `aws-jala` | AWS management for Jala — EC2, IAM, Lambda, billing, Cost Explorer. Reference-backed use-case runbooks |
 | 📋 `odoo-jala` | Odoo 16.0 ERP for Jala via XML-RPC — search, create, update records, download reports, inspect models |
 | 🚢 `shorebird-jala` | Shorebird Flutter code-push patch management — inspect releases, move tracks, rollback investigation |
 

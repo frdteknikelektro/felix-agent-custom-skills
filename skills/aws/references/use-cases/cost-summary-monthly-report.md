@@ -1,9 +1,9 @@
 # Cost Summary Monthly Report
 
 ## When to use
-Use this recipe when the user asks for a monthly AWS cost summary report, billing report bundle, two-month cost comparison, service cost breakdown, Name-tag cost breakdown, credit-excluded view, charts, markdown summary, or monthly cost artifacts for Jala.
+Use this recipe when the user asks for a monthly AWS cost summary report, billing report bundle, two-month cost comparison, service cost breakdown, Name-tag cost breakdown, credit-excluded view, charts, markdown summary, or monthly cost artifacts.
 
-This use case is the `aws-jala` version of the standalone cost summary report skill. It keeps the same report depth, but it is implemented as a markdown runbook using direct AWS CLI commands and session-local snippets. Do not call checked-in shell orchestration scripts such as `build-two-month-report.sh`, and do not depend on `knowledge/platforms/...`.
+This is a markdown runbook using direct AWS CLI commands and session-local snippets. Do not call checked-in shell orchestration scripts such as `build-two-month-report.sh`, and do not depend on `knowledge/platforms/...`.
 
 Default period:
 - Summarize the latest completed calendar month.
@@ -30,7 +30,7 @@ Optional:
 - Tag key override. Default tag key is `Name`.
 
 ## Output contract
-Produce a full report artifact bundle by default. A quick chat-only billing lookup should use the main `aws-jala` billing workflow instead of this recipe.
+Produce a full report artifact bundle by default. A quick chat-only billing lookup should use the main `aws` billing workflow instead of this recipe.
 
 For the default two-month report, produce:
 - Six Cost Explorer JSON exports.
@@ -43,7 +43,7 @@ If charting fails after reasonable local setup, still produce the JSON exports a
 Write generated files under the active session directory when Felix exposes one. If no active session directory is available, create a timestamped directory under:
 
 ```text
-workspace/reports/aws-jala/cost-summary/<YYYYMMDDHHMMSS>-<older-month>-<latest-month>/
+workspace/reports/aws/cost-summary/<YYYYMMDDHHMMSS>-<older-month>-<latest-month>/
 ```
 
 Do not write generated report artifacts into `skills/` or `knowledge/`.
@@ -73,7 +73,7 @@ End=2026-06-01
 
 ## Workflow
 1. Resolve `START_DATE`, `END_DATE`, compared month labels, and `PREFIX`.
-2. Use environment variables and export standard AWS CLI variables from `AWS_JALA_*` as described in the main skill.
+2. Confirm required AWS credentials are present as described in the main skill.
 3. Run `aws sts get-caller-identity` once to confirm the active account without printing credentials.
 4. Create the report working directory.
 5. Export the six Cost Explorer JSON files listed below.
@@ -192,13 +192,13 @@ The chart script should read the six JSON exports and render:
 Generate one markdown report:
 
 ```text
-aws-jala-${PREFIX}-report.md
+aws-${PREFIX}-report.md
 ```
 
 Use this structure:
 
 ```markdown
-# AWS-Jala <Older Month> - <Latest Month> Cost Summary
+# AWS <Older Month> - <Latest Month> Cost Summary
 
 ## Account
 - Account: <account id or arn summary>
@@ -248,10 +248,10 @@ Before replying, verify the bundle contains:
 - `${PREFIX}-tag-name-stack-net.png`
 - `${PREFIX}-tag-name-stack-no-credit.png`
 - `${PREFIX}-tag-name-stack-credit-overlay.png`
-- `aws-jala-${PREFIX}-report.md`
+- `aws-${PREFIX}-report.md`
 
 ## Failure modes
-- Missing `AWS_JALA_*` env: report the missing variable names only.
+- Missing `AWS_*` env: report the missing variable names only.
 - Missing AWS CLI: use the `install-tool` skill.
 - Cost Explorer access denied: report the IAM permission blocker.
 - No tag data: explain that Cost Explorer tag activation or tagging coverage may be missing.

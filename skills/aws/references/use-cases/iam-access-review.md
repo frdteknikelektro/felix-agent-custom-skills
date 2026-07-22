@@ -14,11 +14,10 @@ Optional:
 - Review focus: access keys, attached policies, administrator access, inactive credentials, or all IAM users.
 
 ## Workflow
-1. Use environment variables and export AWS CLI variables from `AWS_JALA_*`.
-2. Confirm identity with `aws sts get-caller-identity`.
-3. For account-wide review, list users and collect access key metadata.
-4. For a principal-specific review, inspect attached managed policies and inline policies.
-5. Report findings as confirmed facts and separate any risk interpretation.
+1. Confirm identity with `aws sts get-caller-identity`.
+2. For account-wide review, list users and collect access key metadata.
+3. For a principal-specific review, inspect attached managed policies and inline policies.
+4. Report findings as confirmed facts and separate any risk interpretation.
 
 ## Commands
 List users:

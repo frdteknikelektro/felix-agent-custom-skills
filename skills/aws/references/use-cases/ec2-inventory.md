@@ -8,15 +8,14 @@ Required permission: `aws.read`.
 
 ## Inputs
 Optional:
-- Region. Use `AWS_JALA_REGION` or AWS CLI defaults when omitted.
+- Region. Use `AWS_REGION` or AWS CLI defaults when omitted.
 - State filter. Default to all states unless the user asks for running instances only.
 - Tag filter, commonly `Name`, `Environment`, or `Project`.
 
 ## Workflow
-1. Use environment variables and export AWS CLI variables from `AWS_JALA_*`.
-2. Confirm identity with `aws sts get-caller-identity`.
-3. Run `aws ec2 describe-instances` with the requested filters.
-4. Summarize instance id, Name tag, state, type, private IP, public IP, availability zone, launch time, and key security group names.
+1. Confirm identity with `aws sts get-caller-identity`.
+2. Run `aws ec2 describe-instances` with the requested filters.
+3. Summarize instance id, Name tag, state, type, private IP, public IP, availability zone, launch time, and key security group names.
 
 ## Commands
 Running instances:
