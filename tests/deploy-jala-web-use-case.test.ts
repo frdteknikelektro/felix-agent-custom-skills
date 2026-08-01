@@ -9,18 +9,18 @@ describe("deploy-jala web recipe", () => {
   it("uses the expected branch and Composer command for each environment", async () => {
     const raw = await fs.readFile(recipePath, "utf8");
 
-    expect(raw).toContain("git checkout feature/compile-to-test");
-    expect(raw).toContain("git checkout master");
+    expect(raw).toContain("Branch: staging uses `feature/compile-to-test`; production uses `release/*` or `master`.");
+    expect(raw).not.toContain("git checkout feature/compile-to-test");
+    expect(raw).not.toContain("git checkout master");
     expect(raw).not.toContain("/usr/bin/php7.3 composer");
-    expect(raw).toContain("/home/ubuntu/bin/composer install");
-    expect(raw).toContain("/home/ubuntu/bin/composer install --no-dev");
+    expect(raw).toContain("/usr/bin/php7.3 /home/ubuntu/bin/composer install");
+    expect(raw).toContain("/usr/bin/php7.3 /home/ubuntu/bin/composer install --no-dev");
   });
 
-  it("verifies the deployed branch before reporting success", async () => {
+  it("verifies the deployed application before reporting success", async () => {
     const raw = await fs.readFile(recipePath, "utf8");
 
-    expect(raw).toContain("git branch --show-current");
-    expect(raw).toContain("= feature/compile-to-test && /usr/bin/php7.3 artisan --version");
-    expect(raw).toContain("= master && /usr/bin/php7.3 artisan --version");
+    expect(raw).not.toContain("git branch --show-current");
+    expect(raw).toContain("/usr/bin/php7.3 artisan --version");
   });
 });

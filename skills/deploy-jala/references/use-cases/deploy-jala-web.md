@@ -14,7 +14,7 @@ Required:
 - Environment: `staging` or `production`.
 
 Derived:
-- Branch: staging uses `feature/compile-to-test`; production switches to `master`.
+- Branch: staging uses `feature/compile-to-test`; production uses `release/*` or `master`.
 - Composer flags: staging installs with dev dependencies; production uses `--no-dev`.
 - Artisan flags: staging runs `--no-downtime`; production runs `--no-downtime --production`.
 
@@ -50,8 +50,6 @@ Deploy:
 ssh ubuntu@db.jala.tech
 cd Code/Web/jala-web
 
-git checkout feature/compile-to-test
-
 # try pull — if uncommitted changes block it, stash first
 git pull || {
   git stash push -m "deploy-stash"
@@ -62,7 +60,7 @@ git pull || {
 git stash list | grep -q deploy-stash && git stash pop
 
 # build and apply
-/home/ubuntu/bin/composer install
+/usr/bin/php7.3 /home/ubuntu/bin/composer install
 /usr/bin/php7.3 artisan app:update --no-downtime
 
 # restart workers
@@ -76,9 +74,9 @@ sudo supervisorctl restart jala-staging-worker-points:*
 
 If `git stash pop` has conflicts, resolve by reading each conflicted file and merging both sides.
 
-Verify — run `ssh ubuntu@db.jala.tech "cd Code/Web/jala-web && test \"\$(git branch --show-current)\" = feature/compile-to-test && /usr/bin/php7.3 artisan --version"`. If it fails, go to Recovery.
+Verify — run `ssh ubuntu@db.jala.tech "cd Code/Web/jala-web && /usr/bin/php7.3 artisan --version"`. If it fails, go to Recovery.
 
-### Production (branch `master`)
+### Production (branches `release/*` or `master`)
 
 Capture commit hash:
 
@@ -94,8 +92,6 @@ Deploy:
 ssh ubuntu@app.jala.tech
 cd Code/Web/jala-web
 
-git checkout master
-
 # try pull — if uncommitted changes block it, stash first
 git pull || {
   git stash push -m "deploy-stash"
@@ -106,7 +102,7 @@ git pull || {
 git stash list | grep -q deploy-stash && git stash pop
 
 # build and apply
-/home/ubuntu/bin/composer install --no-dev
+/usr/bin/php7.3 /home/ubuntu/bin/composer install --no-dev
 /usr/bin/php7.3 artisan app:update --no-downtime --production
 
 # restart workers
@@ -120,13 +116,13 @@ sudo supervisorctl restart jala-worker-points:*
 
 If `git stash pop` has conflicts, resolve by reading each conflicted file and merging both sides.
 
-Verify — run `ssh ubuntu@app.jala.tech "cd Code/Web/jala-web && test \"\$(git branch --show-current)\" = master && /usr/bin/php7.3 artisan --version"`. If it fails, go to Recovery.
+Verify — run `ssh ubuntu@app.jala.tech "cd Code/Web/jala-web && /usr/bin/php7.3 artisan --version"`. If it fails, go to Recovery.
 
 ## Verify
 
 After deploy, confirm the application is responding on the deployed server:
 
-- **jala-web**: `ssh ubuntu@<server> "cd Code/Web/jala-web && test \"\$(git branch --show-current)\" = master && /usr/bin/php7.3 artisan --version"` — confirms the production branch and returns a version string if up.
+- **jala-web**: `ssh ubuntu@<server> "cd Code/Web/jala-web && /usr/bin/php7.3 artisan --version"` — returns a version string if up.
 - If the command fails or returns an error, go to Recovery.
 
 ## Failure modes
@@ -147,7 +143,7 @@ cd Code/Web/jala-web
 
 # rollback
 git checkout <commit-hash-from-above>
-/home/ubuntu/bin/composer install [--no-dev]
+/usr/bin/php7.3 /home/ubuntu/bin/composer install [--no-dev]
 /usr/bin/php7.3 artisan app:update --no-downtime [--production]
 ```
 
