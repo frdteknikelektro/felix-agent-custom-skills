@@ -60,7 +60,7 @@ git pull || {
 git stash list | grep -q deploy-stash && git stash pop
 
 # build and apply
-/usr/bin/php7.3 composer install
+/usr/bin/php7.3 /home/ubuntu/bin/composer install
 /usr/bin/php7.3 artisan app:update --no-downtime
 
 # restart workers
@@ -102,7 +102,7 @@ git pull || {
 git stash list | grep -q deploy-stash && git stash pop
 
 # build and apply
-/usr/bin/php7.3 composer install --no-dev
+/usr/bin/php7.3 /home/ubuntu/bin/composer install --no-dev
 /usr/bin/php7.3 artisan app:update --no-downtime --production
 
 # restart workers
@@ -143,7 +143,7 @@ cd Code/Web/jala-web
 
 # rollback
 git checkout <commit-hash-from-above>
-/usr/bin/php7.3 composer install [--no-dev]
+/usr/bin/php7.3 /home/ubuntu/bin/composer install [--no-dev]
 /usr/bin/php7.3 artisan app:update --no-downtime [--production]
 ```
 
