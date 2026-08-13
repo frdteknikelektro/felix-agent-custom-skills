@@ -30,6 +30,7 @@ npm test
 | 🐙 `github` | Full GitHub management via `gh` CLI — repos, issues, PRs, releases, workflows, secrets, gists, search |
 | 🦊 `gitlab` | Full GitLab management via `glab` CLI — repos, issues, MRs, releases, pipelines, variables, snippets |
 | 📊 `posthog` | PostHog analytics via REST API — events, feature flags, dashboards, HogQL, cohorts, experiments |
+| ✉️ `mailgun` | Mailgun email delivery via REST API — sending, domains, suppressions, routes, webhooks, templates, logs, and metrics |
 | ⚡ `vercel` | Vercel platform management via `vercel` CLI — deploy, domains, env vars, logs, rollback, SSL |
 
 ### 🏢 Organization-Specific Skills
@@ -39,6 +40,7 @@ npm test
 | ☁️ `aws-jala` | `aws` | Jala AWS account — same operations with `AWS_JALA_*` credentials |
 | 🐙 `github-jala` | `github` | Jala GithHub account (Atnic org) — same operations with `GITHUB_JALA_TOKEN` |
 | 🦊 `gitlab-jala` | `gitlab` | Jala GitLab account (atnic group) — same operations with `GITLAB_JALA_TOKEN` |
+| ✉️ `mailgun-jala` | `mailgun` | Jala Mailgun account — same operations with `MAILGUN_JALA_*` credentials |
 | 📊 `posthog-jala` | `posthog` | Jala PostHog orgs (10590, 28053) — same operations with `POSTHOG_JALA_PERSONAL_KEY` |
 | ⚡ `vercel-jala` | `vercel` | Jala Vercel account — same operations with `VERCEL_JALA_TOKEN` |
 | 🛠️ `software-development-jala` | `software-development` | Jala software-development overlay — routes repo work through project workflow profiles |
@@ -79,11 +81,13 @@ Each `SKILL.md` follows this template order:
 ## When to use   — 🔔 trigger phrases and activation conditions
 ## Out of scope  — 🚫 what this skill does NOT handle
 ## Use Cases     — 📝 concrete end-to-end scenarios
-## Permissions   — 🔐 bare {domain}.{action} permission names; Felix stores grants as {skill-id}:{permission}
+## Permissions   — 🔐 skill-local permission names; Felix adds the skill namespace
 ## Workflow      — 🔄 step-by-step operating procedure
 ## Environment   — 🔑 env vars the skill consumes (and their frontmatter `env:` contract)
 ## Checks        — ✅ pre/post execution checklist
 ```
+
+Declare permissions in the skill-local vocabulary (`read`, `write`, `send`, or a scoped form such as `read.<scope>`). Felix adds `<skill-id>:` when it stores and evaluates the grant. Existing skills retain their current declarations for compatibility.
 
 ## 🔗 Relationship with Felix Agent
 

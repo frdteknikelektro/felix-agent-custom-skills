@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mailgun Jala"
+  short_description: "Operate Jala Mailgun email APIs"
+  default_prompt: "Use $mailgun-jala to send email or manage Jala Mailgun domains, suppressions, routes, templates, and delivery data."

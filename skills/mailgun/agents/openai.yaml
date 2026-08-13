@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mailgun"
+  short_description: "Operate Mailgun email APIs"
+  default_prompt: "Use $mailgun to send email or manage Mailgun domains, suppressions, routes, and delivery data."
