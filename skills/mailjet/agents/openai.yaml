@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mailjet"
+  short_description: "Operate Mailjet email APIs"
+  default_prompt: "Use $mailjet to send email or manage Mailjet contacts, senders, templates, and delivery data."

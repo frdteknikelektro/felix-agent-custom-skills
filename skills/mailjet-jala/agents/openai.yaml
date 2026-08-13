@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mailjet Jala"
+  short_description: "Operate Jala Mailjet email APIs"
+  default_prompt: "Use $mailjet-jala to send Jala Mailjet email or manage Jala contacts, senders, templates, and delivery data."
