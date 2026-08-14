@@ -18,7 +18,7 @@ npm test
 
 > 💡 Skills are loaded by Felix on boot. You can also create or remove skills via the Felix WebUI (`POST /api/skills` / `DELETE /api/skills/:id`).
 
-> 🔗 Overlay skills such as `aws-jala`, `github-jala`, `gitlab-jala`, `mailjet-jala`, `posthog-jala`, and `vercel-jala` depend on their matching base skill. Deploy both directories into the same `workspace/catalog/skills/` folder.
+> 🔗 Overlay skills such as `aws-jala`, `github-jala`, `gitlab-jala`, `mailjet-jala`, `onesignal-jala`, `posthog-jala`, and `vercel-jala` depend on their matching base skill. Deploy both directories into the same `workspace/catalog/skills/` folder.
 
 ## 🧩 Skills
 
@@ -32,6 +32,7 @@ npm test
 | 📊 `posthog` | PostHog analytics via REST API — events, feature flags, dashboards, HogQL, cohorts, experiments |
 | ✉️ `mailgun` | Mailgun email delivery via REST API — sending, domains, suppressions, routes, webhooks, templates, logs, and metrics |
 | ✉️ `mailjet` | Mailjet transactional email via REST API — sending, contacts, lists, senders, templates, event callbacks, message history, and statistics |
+| 🔔 `onesignal` | OneSignal messaging via REST API — push, email, SMS, users, aliases, tags, subscriptions, messages, and app inventory |
 | ⚡ `vercel` | Vercel platform management via `vercel` CLI — deploy, domains, env vars, logs, rollback, SSL |
 
 ### 🏢 Organization-Specific Skills
@@ -43,6 +44,7 @@ npm test
 | 🦊 `gitlab-jala` | `gitlab` | Jala GitLab account (atnic group) — same operations with `GITLAB_JALA_TOKEN` |
 | ✉️ `mailgun-jala` | `mailgun` | Jala Mailgun account — same operations with `MAILGUN_JALA_*` credentials |
 | ✉️ `mailjet-jala` | `mailjet` | Jala Mailjet account — same operations with `MAILJET_JALA_*` credentials |
+| 🔔 `onesignal-jala` | `onesignal` | Jala OneSignal account — same operations with `ONESIGNAL_JALA_*` credentials |
 | 📊 `posthog-jala` | `posthog` | Jala PostHog orgs (10590, 28053) — same operations with `POSTHOG_JALA_PERSONAL_KEY` |
 | ⚡ `vercel-jala` | `vercel` | Jala Vercel account — same operations with `VERCEL_JALA_TOKEN` |
 | 🛠️ `software-development-jala` | `software-development` | Jala software-development overlay — routes repo work through project workflow profiles |

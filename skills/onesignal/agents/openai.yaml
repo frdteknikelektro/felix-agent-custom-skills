@@ -1,0 +1,4 @@
+interface:
+  display_name: "OneSignal"
+  short_description: "Operate OneSignal messaging APIs"
+  default_prompt: "Use $onesignal to send messages or manage OneSignal users, subscriptions, and app data."

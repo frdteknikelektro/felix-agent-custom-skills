@@ -1,0 +1,4 @@
+interface:
+  display_name: "OneSignal Jala"
+  short_description: "Operate Jala OneSignal APIs"
+  default_prompt: "Use $onesignal-jala to send messages or manage Jala OneSignal users, subscriptions, and app data."
