@@ -36,6 +36,11 @@ describe("crisp skill", () => {
     expect(skill).toContain("420");
     expect(skill).toContain("report acceptance and returned identifiers separately from delivery");
     expect(skill).toContain("curl --");
+    const quickExamples = await fs.readFile(
+      new URL("../skills/crisp/references/quick-examples.md", import.meta.url),
+      "utf8",
+    );
+    expect(quickExamples).toContain("--request PATCH");
   });
 
   it("links the operational references and keeps them substantive", async () => {

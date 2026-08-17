@@ -1,6 +1,6 @@
 # Crisp authentication and transport
 
-Use this reference before the first Crisp request or when a request fails because of credentials, token tier, scope, quota, or rate limits.
+Use this reference before the first Crisp request or when a request fails because of credentials, scope, quota, or rate limits.
 
 ## Authentication
 

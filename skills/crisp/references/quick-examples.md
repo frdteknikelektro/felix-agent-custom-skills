@@ -52,6 +52,7 @@ curl --fail-with-body --silent --show-error \
   --user "$CRISP_TOKEN_ID:$CRISP_TOKEN_KEY" \
   -H "Content-Type: application/json" \
   "$CRISP_API_BASE_URL/v1/website/$CRISP_WEBSITE_ID/conversation/$SESSION_ID/state" \
+  --request PATCH \
   --data '{"state":"resolved"}'
 ```
 
