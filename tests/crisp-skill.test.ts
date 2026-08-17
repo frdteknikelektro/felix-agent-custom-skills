@@ -11,8 +11,11 @@ describe("crisp skill", () => {
     expect(skill).toContain("CRISP_TOKEN_KEY");
     expect(skill).toContain("CRISP_TOKEN_TIER");
     expect(skill).toContain("CRISP_WEBSITE_ID");
+    expect(skill).not.toContain("CRISP_COOKIE");
+    expect(skill).not.toContain("CRISP_EXTRA_HEADERS_JSON");
     expect(skill).toContain("https://api.crisp.chat");
     expect(skill).toContain("X-Crisp-Tier");
+    expect(skill).toContain("scripts/crisp_api.py");
     expect(skill).toContain("secret: true");
   });
 
@@ -35,6 +38,7 @@ describe("crisp skill", () => {
     expect(skill).toContain("429");
     expect(skill).toContain("420");
     expect(skill).toContain("report acceptance and returned identifiers separately from delivery");
+    expect(skill).not.toContain("curl --");
   });
 
   it("links the operational references and keeps them substantive", async () => {
@@ -55,7 +59,23 @@ describe("crisp skill", () => {
       );
       expect(content.trim().length).toBeGreaterThan(100);
       expect(content).toContain("https://docs.crisp.chat/");
+      expect(content).not.toContain("curl --");
     }
+  });
+
+  it("bundles a transport script with cookie and header controls", async () => {
+    const script = await fs.readFile(
+      new URL("../skills/crisp/scripts/crisp_api.py", import.meta.url),
+      "utf8",
+    );
+
+    expect(script).toContain("build_user_session_cookie");
+    expect(script).toContain("user_session");
+    expect(script).not.toContain("CRISP_EXTRA_HEADERS_JSON");
+    expect(script).toContain("X-Crisp-Tier");
+    expect(script).toContain("path must stay within");
+    expect(script).toContain("PROTECTED_HEADERS");
+    expect(script).toContain("retry-mutations");
   });
 
   it("documents exact conversation, profile, visitor, inbox, and analytics routes", async () => {

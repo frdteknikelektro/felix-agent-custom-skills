@@ -14,6 +14,8 @@ describe("crisp-jala skill", () => {
     expect(skill).toContain("CRISP_JALA_API_BASE_URL");
     expect(skill).toContain("export CRISP_TOKEN_ID=\"$CRISP_JALA_TOKEN_ID\"");
     expect(skill).toContain("export CRISP_WEBSITE_ID=\"$CRISP_JALA_WEBSITE_ID\"");
+    expect(skill).not.toContain("CRISP_JALA_EXTRA_HEADERS_JSON");
+    expect(skill).not.toContain("CRISP_JALA_COOKIE");
     expect(skill).not.toMatch(/export CRISP_TOKEN_ID="\$CRISP_TOKEN_ID"/);
   });
 

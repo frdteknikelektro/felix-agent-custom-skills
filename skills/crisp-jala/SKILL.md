@@ -70,7 +70,7 @@ Use the base skill’s local `read`, `send`, and `write` permissions. Felix eval
    export CRISP_API_BASE_URL="${CRISP_JALA_API_BASE_URL:-https://api.crisp.chat}"
    ```
 
-   Keep both Jala token values secret; never source generic Crisp variables as the credential source.
+   Keep both Jala token values secret. Never source generic Crisp variables as the credential source.
    Completion: mapped variables are present without exposing their values.
 3. **Resolve Jala context.** Confirm the exact Jala `website_id`, token tier, operation, target identifier, and payload. This repository defines no canonical Jala workspace ID.
    Completion: one concrete Jala workspace and target are resolved, or one focused clarification is required.
@@ -95,6 +95,7 @@ Every command must map `CRISP_JALA_*` to the base `CRISP_*` names first. Never m
 
 - Confirm the base `crisp` skill is available before operating; if missing, report the dependency and stop.
 - Keep Jala token values private and preserve the selected website/plugin tier.
+- Use the base skill’s `scripts/crisp_api.py` transport script for every Jala request.
 - Confirm the exact Jala `website_id` immediately before every send or state-changing write; obtain destructive confirmation before any deletion.
 - Recheck the official Crisp link in the selected base reference when endpoint behavior, route scope, or token quota may have changed.
 - Redact tokens, conversation content, profile data, emails, phone numbers, visitor data, export details, and attachments.

@@ -52,6 +52,7 @@ Use for Crisp conversations, messages, people profiles, visitor inspection, oper
 - **Manage people or inspect visitors** — resolve the exact `people_id` or workspace, then load [people-and-visitors](references/people-and-visitors.md).
 - **Inspect workspace operations** — load [workspace-and-analytics](references/workspace-and-analytics.md) for operators, availability, inboxes, campaigns, and analytics.
 - **Authenticate or troubleshoot limits** — load [authentication](references/authentication.md).
+- **Call Crisp through the bundled transport** — use [quick-examples](references/quick-examples.md) for the request shape and managed authentication.
 - **Use a safe request recipe** — load [quick-examples](references/quick-examples.md) after the target and operation are resolved.
 
 ## Permissions
@@ -72,11 +73,11 @@ Use `send` for outbound conversation messages even though Crisp uses `POST`. Eve
    Completion: one concrete workspace boundary, operation, and target scope are resolved.
 3. **Load the branch.** Read [authentication](references/authentication.md), [conversations](references/conversations.md), [people-and-visitors](references/people-and-visitors.md), [workspace-and-analytics](references/workspace-and-analytics.md), or [quick-examples](references/quick-examples.md). Recheck the linked official Crisp page when a route, schema, token scope, or quota may have changed.
    Completion: the selected branch and its official source are loaded.
-4. **Preflight credentials.** Confirm `CRISP_TOKEN_ID` and `CRISP_TOKEN_KEY` without displaying them. Authenticate with Basic Auth and send `X-Crisp-Tier: website` or `X-Crisp-Tier: plugin` according to `CRISP_TOKEN_TIER`. Do not place credentials in URLs, files, or logs.
+4. **Preflight credentials.** Confirm `CRISP_TOKEN_ID`, `CRISP_TOKEN_KEY`, and `CRISP_TOKEN_TIER` without displaying them. Use the bundled [transport script](scripts/crisp_api.py), which assembles Basic Auth and `X-Crisp-Tier` without placing secrets in URLs or logs.
    Completion: the correct token tier and credential pair are ready, or the redacted blocker is reported.
 5. **Validate and confirm.** URL-encode path and query values, validate required IDs and message fields, and identify whether the route sends, writes, deletes, or only reads. Immediately before every send or write, obtain explicit confirmation naming the exact workspace, target, operation, and payload summary; obtain destructive confirmation before deletion or irreversible state removal.
    Completion: the request is valid and confirmed, or execution is paused.
-6. **Execute.** Run the documented method against `CRISP_API_BASE_URL/v1/...` with the correct auth headers. Handle `429` and `420` with bounded backoff; never blindly retry a send or mutation after an ambiguous timeout.
+6. **Execute.** Run the bundled [transport script](scripts/crisp_api.py) against the documented `/v1/...` path. It URL-encodes query values, enforces the configured workspace boundary, adds managed authentication headers, and retries reads with bounded backoff on explicit `429` or `420` responses. Never blindly retry a send or mutation after an ambiguous timeout; use `--retry-mutations` only for an explicit retry decision after a known `420`/`429` response.
    Completion: Crisp returns a documented success envelope/status, or a redacted failure is captured.
 7. **Verify and report.** Re-read the changed resource when a read route exists. For sends, report acceptance and returned identifiers separately from delivery or operator/user receipt. For profile exports, report that Crisp emails the export to the requester rather than claiming a local download.
    Completion: the observed result, relevant identifiers, remaining uncertainty, and redacted failure are reported.
@@ -87,19 +88,19 @@ Felix injects the declared variables before the turn. Keep `CRISP_TOKEN_ID` and 
 
 Crisp’s REST API host is `https://api.crisp.chat`. Use `CRISP_API_BASE_URL` only for an explicitly configured compatible host.
 
-Common request shape:
+Use the bundled script for every API request:
 
-```bash
-curl --fail-with-body --silent --show-error \
-  --user "$CRISP_TOKEN_ID:$CRISP_TOKEN_KEY" \
-  -H "X-Crisp-Tier: $CRISP_TOKEN_TIER" \
-  -H "Accept: application/json" \
-  "$CRISP_API_BASE_URL/v1/website/$CRISP_WEBSITE_ID"
+```sh
+python3 skills/crisp/scripts/crisp_api.py \
+  GET "/v1/website/$CRISP_WEBSITE_ID"
 ```
+
+Use `--header` only for non-sensitive headers. The script rejects attempts to override managed authentication or transport framing headers.
 
 ## Checks
 
 - Keep both token values private and keep the token tier aligned with the configured credential; never substitute a website token for a plugin token or vice versa.
+- Use `scripts/crisp_api.py` for every request. Keep token values out of command-line arguments or committed files; use `--header` only for non-sensitive values.
 - Treat `CRISP_WEBSITE_ID` as the data boundary. Do not infer it from a human-readable domain or workspace name.
 - Before every send or state-changing write, confirm the exact workspace, target, operation, and payload. Before deletion, confirm the exact resource and deletion effect immediately before the call.
 - Use Crisp’s documented route-specific scope requirements for plugin tokens; a valid Basic Auth pair does not imply every route is authorized.
