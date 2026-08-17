@@ -4,13 +4,13 @@ Read this branch for conversation discovery, message history, message sending, s
 
 ## Discover conversations
 
-List a workspace’s conversations:
+List a workspace’s conversations with page-number pagination:
 
 ```text
-GET /v1/website/{website_id}/conversations
+GET /v1/website/{website_id}/conversations/{page_number}
 ```
 
-The Crisp API returns a partial-content list response. Resolve `website_id` from `CRISP_WEBSITE_ID`; add filters deliberately. Useful filters include `search_query` with `search_type=text|segment|filter`, `search_operator=and|or`, `filter_inbox_id`, unread/resolved/not-resolved/assigned/unassigned filters, date bounds, and ordering fields. URL-encode the query.
+The documented `per_page` range is `20`–`50` and defaults to `20`. Resolve `website_id` from `CRISP_WEBSITE_ID`; start with a narrow page and add filters deliberately. Useful filters include `search_query` with `search_type=text|segment|filter`, `search_operator=and|or`, `filter_inbox_id`, unread/resolved/not-resolved/assigned/unassigned filters, date bounds, and ordering fields. URL-encode the query.
 
 Inspect a single conversation:
 

@@ -80,6 +80,7 @@ describe("crisp skill", () => {
 
     expect(conversations).toContain("/v1/website/{website_id}/conversation/{session_id}/messages");
     expect(conversations).toContain("/v1/website/{website_id}/conversation/{session_id}/message");
+    expect(conversations).toContain("/v1/website/{website_id}/conversations/{page_number}");
     expect(conversations).toContain('"state": "resolved"');
     expect(conversations).toContain("timestamp_before");
     expect(people).toContain("/v1/website/{website_id}/people/profile/{people_id}");

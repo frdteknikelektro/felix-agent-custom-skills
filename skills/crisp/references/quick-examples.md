@@ -11,13 +11,13 @@ curl --fail-with-body --silent --show-error \
   "$CRISP_API_BASE_URL/v1/website/$CRISP_WEBSITE_ID"
 ```
 
-## List conversations
+## List the first conversation page
 
 ```bash
 curl --fail-with-body --silent --show-error \
   --user "$CRISP_TOKEN_ID:$CRISP_TOKEN_KEY" \
   -H "Accept: application/json" \
-  "$CRISP_API_BASE_URL/v1/website/$CRISP_WEBSITE_ID/conversations"
+  "$CRISP_API_BASE_URL/v1/website/$CRISP_WEBSITE_ID/conversations/1?per_page=20"
 ```
 
 ## Read messages for one session
