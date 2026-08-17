@@ -21,8 +21,8 @@ env:
     required: true
     secret: false
   - key: CRISP_API_BASE_URL
-    description: Crisp app API host.
-    default: https://app.crisp.chat/api
+    description: Crisp API host.
+    default: https://api.crisp.chat
 ---
 
 # Crisp
@@ -80,7 +80,7 @@ Use `send` for outbound conversation messages even though Crisp uses `POST`. Eve
 
 Felix injects the declared variables before the turn. Keep `CRISP_TOKEN_ID` and `CRISP_TOKEN_KEY` secret. `CRISP_WEBSITE_ID` is the required exact workspace boundary.
 
-Crisp’s app API host is `https://app.crisp.chat/api`. Use `CRISP_API_BASE_URL` only for an explicitly configured compatible host.
+Crisp’s API host is `https://api.crisp.chat`. Use `CRISP_API_BASE_URL` only for an explicitly configured compatible host.
 
 Common request shape:
 

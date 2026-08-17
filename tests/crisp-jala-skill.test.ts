@@ -13,7 +13,7 @@ describe("crisp-jala skill", () => {
     expect(skill).toContain("CRISP_JALA_WEBSITE_ID");
     expect(skill).toContain("export CRISP_TOKEN_ID=\"$CRISP_JALA_TOKEN_ID\"");
     expect(skill).toContain("export CRISP_WEBSITE_ID=\"$CRISP_JALA_WEBSITE_ID\"");
-    expect(skill).toContain("https://app.crisp.chat/api");
+    expect(skill).toContain("https://api.crisp.chat");
     expect(skill).not.toMatch(/export CRISP_TOKEN_ID="\$CRISP_TOKEN_ID"/);
   });
 

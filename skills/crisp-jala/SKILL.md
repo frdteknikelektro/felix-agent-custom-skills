@@ -58,7 +58,7 @@ Use the base skill’s local `read`, `send`, and `write` permissions. Felix eval
    export CRISP_TOKEN_ID="$CRISP_JALA_TOKEN_ID"
    export CRISP_TOKEN_KEY="$CRISP_JALA_TOKEN_KEY"
    export CRISP_WEBSITE_ID="$CRISP_JALA_WEBSITE_ID"
-   export CRISP_API_BASE_URL="https://app.crisp.chat/api"
+   export CRISP_API_BASE_URL="https://api.crisp.chat"
    ```
 
    Keep both Jala token values secret; never source generic Crisp variables as the credential source.

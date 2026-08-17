@@ -4,7 +4,7 @@ Use this reference before the first Crisp request or when a request fails becaus
 
 ## Authentication
 
-Crisp app API requests use a token keypair with HTTP Basic Auth. Keep both values secret and do not place them in URLs, files, or logs.
+Crisp API requests use a token keypair with HTTP Basic Auth. Keep both values secret and do not place them in URLs, files, or logs.
 
 ```bash
 curl --fail-with-body --silent --show-error \

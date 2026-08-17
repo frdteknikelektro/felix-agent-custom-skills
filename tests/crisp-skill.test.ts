@@ -10,7 +10,7 @@ describe("crisp skill", () => {
     expect(skill).toContain("CRISP_TOKEN_ID");
     expect(skill).toContain("CRISP_TOKEN_KEY");
     expect(skill).toContain("CRISP_WEBSITE_ID");
-    expect(skill).toContain("https://app.crisp.chat/api");
+    expect(skill).toContain("https://api.crisp.chat");
     expect(skill).not.toContain("CRISP_TOKEN_TIER");
     expect(skill).not.toContain("X-Crisp-Tier");
     expect(skill).toContain("secret: true");

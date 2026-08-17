@@ -10,7 +10,7 @@ List a workspace’s conversations:
 GET /v1/website/{website_id}/conversations
 ```
 
-The app API returns a partial-content list response. Resolve `website_id` from `CRISP_WEBSITE_ID`; add filters deliberately. Useful filters include `search_query` with `search_type=text|segment|filter`, `search_operator=and|or`, `filter_inbox_id`, unread/resolved/not-resolved/assigned/unassigned filters, date bounds, and ordering fields. URL-encode the query.
+The Crisp API returns a partial-content list response. Resolve `website_id` from `CRISP_WEBSITE_ID`; add filters deliberately. Useful filters include `search_query` with `search_type=text|segment|filter`, `search_operator=and|or`, `filter_inbox_id`, unread/resolved/not-resolved/assigned/unassigned filters, date bounds, and ordering fields. URL-encode the query.
 
 Inspect a single conversation:
 
