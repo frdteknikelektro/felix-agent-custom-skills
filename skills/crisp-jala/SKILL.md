@@ -16,18 +16,10 @@ env:
     description: Jala Crisp website-token secret or plugin-token key.
     required: true
     secret: true
-  - key: CRISP_JALA_TOKEN_TIER
-    description: Jala Crisp authentication tier; use website for one workspace or plugin for multi-workspace access.
-    default: website
-    required: true
-    secret: false
   - key: CRISP_JALA_WEBSITE_ID
     description: Exact Jala Crisp workspace identifier. This overlay defines no canonical workspace ID.
     required: true
     secret: false
-  - key: CRISP_JALA_API_BASE_URL
-    description: Jala Crisp REST API host.
-    default: https://api.crisp.chat
 ---
 
 # Crisp Jala
@@ -65,16 +57,15 @@ Use the base skill’s local `read`, `send`, and `write` permissions. Felix eval
    ```bash
    export CRISP_TOKEN_ID="$CRISP_JALA_TOKEN_ID"
    export CRISP_TOKEN_KEY="$CRISP_JALA_TOKEN_KEY"
-   export CRISP_TOKEN_TIER="${CRISP_JALA_TOKEN_TIER:-website}"
    export CRISP_WEBSITE_ID="$CRISP_JALA_WEBSITE_ID"
-   export CRISP_API_BASE_URL="${CRISP_JALA_API_BASE_URL:-https://api.crisp.chat}"
+   export CRISP_API_BASE_URL="https://api.crisp.chat"
    ```
 
-   Keep both Jala token values secret. Never source generic Crisp variables as the credential source.
+   Keep both Jala token values secret; never source generic Crisp variables as the credential source.
    Completion: mapped variables are present without exposing their values.
-3. **Resolve Jala context.** Confirm the exact Jala `website_id`, token tier, operation, target identifier, and payload. This repository defines no canonical Jala workspace ID.
+3. **Resolve Jala context.** Confirm the exact Jala `website_id`, operation, target identifier, and payload. This repository defines no canonical Jala workspace ID.
    Completion: one concrete Jala workspace and target are resolved, or one focused clarification is required.
-4. **Delegate.** Read and follow [`crisp/SKILL.md`](../crisp/SKILL.md) and its selected branch reference. Preserve the base skill’s token-tier, scope, confirmation, deletion, pagination, redaction, and verification rules.
+4. **Delegate.** Read and follow [`crisp/SKILL.md`](../crisp/SKILL.md) and its selected branch reference. Preserve the base skill’s scope, confirmation, deletion, pagination, redaction, and verification rules.
    Completion: the Jala credential context is ready and the base branch is selected.
 5. **Execute and report.** Run the base workflow with the mapped Jala variables. Report the Jala workspace, returned identifiers, observed state, and any redacted API failure.
    Completion: the requested Jala state is observed and reported, or the smallest next step is reported.
@@ -85,17 +76,13 @@ Jala variables are the only credential source:
 
 - `CRISP_JALA_TOKEN_ID` — required Jala Crisp token identifier; never print it.
 - `CRISP_JALA_TOKEN_KEY` — required Jala Crisp token secret/key; never print it.
-- `CRISP_JALA_TOKEN_TIER` — optional `website` or `plugin` tier; defaults to `website`.
 - `CRISP_JALA_WEBSITE_ID` — exact Jala workspace identifier; required for every website-scoped request.
-- `CRISP_JALA_API_BASE_URL` — optional Crisp API host; defaults to `https://api.crisp.chat`.
-
 Every command must map `CRISP_JALA_*` to the base `CRISP_*` names first. Never map generic Crisp variables into themselves.
 
 ## Checks
 
 - Confirm the base `crisp` skill is available before operating; if missing, report the dependency and stop.
-- Keep Jala token values private and preserve the selected website/plugin tier.
-- Use the base skill’s `scripts/crisp_api.py` transport script for every Jala request.
+- Keep Jala token values private.
 - Confirm the exact Jala `website_id` immediately before every send or state-changing write; obtain destructive confirmation before any deletion.
 - Recheck the official Crisp link in the selected base reference when endpoint behavior, route scope, or token quota may have changed.
 - Redact tokens, conversation content, profile data, emails, phone numbers, visitor data, export details, and attachments.
