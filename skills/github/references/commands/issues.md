@@ -33,6 +33,13 @@ gh search issues <query> --repo [owner/repo]
 gh search issues <query> --json number,title,state,repository
 ```
 
+**Add a comment to an issue** (`github.review`):
+
+```bash
+gh issue comment <number> --body "<comment>"
+gh issue comment <number> --repo [owner/repo] --body "<comment>"
+```
+
 **Create an issue** (`github.write`):
 
 ```bash

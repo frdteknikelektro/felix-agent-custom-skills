@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 describe("github skill", () => {
   it("keeps GitHub access split by text-guided read and write permissions", async () => {
     const raw = await fs.readFile(new URL("../skills/github/SKILL.md", import.meta.url), "utf8");
+    const issues = await fs.readFile(new URL("../skills/github/references/commands/issues.md", import.meta.url), "utf8");
 
     expect(raw).toContain("github.read");
     expect(raw).toContain("github.review");
@@ -15,6 +16,9 @@ describe("github skill", () => {
     expect(raw).toContain("Use text-based permission judgment");
     expect(raw).toContain("Do not add or rely on hardcoded TypeScript command detection");
     expect(raw).toContain("If an operation is ambiguous, treat it as `github.write`");
+    expect(issues).toContain("Add a comment to an issue");
+    expect(issues).toContain("github.review");
+    expect(issues).toContain("gh issue comment");
   });
 
   it("keeps credentials in the runtime secret env without local env files", async () => {
@@ -97,5 +101,8 @@ describe("github skill", () => {
 
     expect(raw).toContain("## Cross-skill convention");
     expect(raw).toContain("Route GitHub work through this skill");
+    expect(raw).toContain("For a Jala target, this base skill is not eligible");
+    expect(raw).toContain("defer to `github-jala` before permission resolution");
+    expect(raw).toContain("Never let a generic GitHub match");
   });
 });

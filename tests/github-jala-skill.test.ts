@@ -68,6 +68,21 @@ describe("github-jala skill", () => {
     expect(raw).toContain("jala secret");
     expect(raw).toContain("atnic");
     expect(raw).toContain("jalaproduct");
+    expect(raw).toContain("Atnic repo");
+    expect(raw).toContain("jala project");
+  });
+
+  it("keeps Jala routing ahead of generic GitHub matches", async () => {
+    const raw = await fs.readFile(new URL("../skills/github-jala/SKILL.md", import.meta.url), "utf8");
+
+    expect(raw).toContain("## Jala repository routing");
+    expect(raw).toContain("GitHub owner `Atnic` case-insensitively");
+    expect(raw).toContain("future exact `jala/<repo>` namespace");
+    expect(raw).toContain("Do not select the base `github` skill alongside this overlay");
+    expect(raw).toContain("fail closed");
+    expect(raw).toContain("Never fall back to the generic GitHub skill or `GITHUB_TOKEN`");
+    expect(raw).toContain("comments on existing issues or pull requests");
+    expect(raw).toContain("`github.review`");
   });
 
   it("defaults to Atnic org for all Jala repo operations", async () => {

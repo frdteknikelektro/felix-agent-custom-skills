@@ -6,7 +6,7 @@ metadata:
   kind: operational
   version: "1.0.0"
   permissions: repo.write
-  match: software development jala, jala software development, jala code, jala implement, jala feature, jala bug fix, jala debug, jala refactor, jala test, jala build, jala review code
+  match: software development jala, jala software development, jala code, jala implement, jala feature, jala bug fix, jala debug, jala refactor, jala test, jala build, jala review code, jala repo, jala project, Atnic project, atnic project, Atnic repo, atnic repo
 ---
 
 # Software Development Jala
@@ -22,6 +22,8 @@ This is an overlay skill. Deploy it with the base `software-development` skill. 
 ## When to use
 
 Activate when the user asks for software-development work on a Jala project or names a known Jala project.
+
+Resolve Jala context from an explicit `Atnic/*`, `atnic/*`, or future exact `jala/*` target, an active local remote, or a known project profile. Matching is case-insensitive for namespace identity. A repository slug containing `jala` alone is only a hint; use the profile or remote to confirm it, otherwise ask. Once Jala context is confirmed, use this overlay for local project work and never fall back to the generic software-development workflow for the same project.
 
 ## Out of scope
 
@@ -41,6 +43,8 @@ To add a new project, create `references/projects/<project-name>.md` following t
 - `repo.write` — cloning projects, creating local work artifacts, editing code, changing dependencies, resolving conflicts, staging, committing, pushing, or opening PRs.
 
 Read-only asking is open: explain, plan, review, inspect, list candidate projects, and draft chat-only recommendations without permission. Emit `PERMISSION_REQUIRED` for `repo.write` before any mutation.
+
+No new local repository-read permission is introduced here. Purely local read-only inspection remains open; actual GitHub or GitLab reads must use the matching Jala platform skill and its existing `github.read` or `gitlab.read` permission. If the selected Jala platform skill or credential is unavailable, fail closed rather than falling back to the generic platform skill.
 
 Stage, commit, pull, rebase, force, or destructive operations only when explicitly requested and safe for the worktree.
 

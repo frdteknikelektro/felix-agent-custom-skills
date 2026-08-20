@@ -6,7 +6,7 @@ metadata:
   kind: operational
   version: "1.0.0"
   permissions: gitlab.read, gitlab.review, gitlab.write
-  match: gitlab jala, jala gitlab, jala glab, jala merge request, jala mr, jala pipeline, atnic, atnic gitlab
+  match: gitlab jala, jala gitlab, jala glab, jala merge request, jala mr, jala pipeline, atnic, atnic gitlab, atnic repo, atnic project, jala project
 env:
   - key: GITLAB_JALA_TOKEN
     description: GitLab token for atnic group (exported as GITLAB_TOKEN for the glab CLI)
@@ -22,6 +22,18 @@ Operate Jala's GitLab account (group: `atnic`) through the `glab` CLI. This skil
 **Execution:** Resolve permissions first (emit PERMISSION_REQUIRED if missing). Export `GITLAB_TOKEN="$GITLAB_JALA_TOKEN"` and verify with `glab auth status` before any command. Then follow the base `gitlab` skill's execution steps.
 
 **Default group**: All Jala repositories live under the `atnic` GitLab group. When no specific namespace is provided, default to `atnic`. For repo-scoped operations, use `--repo atnic/<project-name>`. To list all Jala repos, use `glab repo list --group atnic`.
+
+## Jala repository routing
+
+Resolve the repository or project identity before selecting a platform skill. This skill is the only GitLab skill for a Jala target:
+
+- Treat the GitLab group `atnic` case-insensitively as Jala. A future exact `jala/<project>` namespace is also Jala.
+- An active local remote, an explicit `atnic/<project>` target, or a known Jala project profile establishes Jala context even when the user only says "GitLab".
+- An explicit generic provider word never overrides a confirmed Jala group or remote. Do not select the base `gitlab` skill alongside this overlay for the same operation.
+- A project name containing `jala` is only a hint. If the group, remote, or known project profile does not confirm Jala context, resolve the provider or ask before acting.
+- If Jala context is confirmed but this skill, its permission, or `GITLAB_JALA_TOKEN` is unavailable, fail closed. Never fall back to the generic GitLab skill or `GITLAB_TOKEN`.
+
+Purely conceptual answers do not need a platform permission. Reading actual GitLab state requires `gitlab.read`; comments on existing issues or merge requests, review submissions, approvals, requests for changes, and merges remain `gitlab.review`; creating or editing resources requires `gitlab.write`.
 
 Do not duplicate operation documentation. This file documents only what is different.
 
@@ -46,7 +58,7 @@ Activate when the user asks to interact with Jala's specific GitLab account (atn
 Same permission policy as the base `gitlab` skill. Request the bare permission shown below; Felix stores grants under this skill id.
 
 - `gitlab.read` — inspection, listing, viewing, searching, downloading.
-- `gitlab.review` — adding comments, approving and merging merge requests.
+- `gitlab.review` — commenting on existing issues or merge requests, submitting reviews, approving merge requests, requesting changes, and merging merge requests.
 - `gitlab.write` — create, edit, close, reopen, fork, archive, delete, retry, cancel, set.
 
 If an operation is ambiguous, treat it as `gitlab.write` unless the user is only asking to inspect or explain current state.

@@ -25,6 +25,8 @@ Use text-based permission judgment. Do not add or rely on hardcoded TypeScript c
 
 Activate when the user asks to interact with GitHub repositories, issues, pull requests, releases, Actions workflows, secrets, variables, gists, code search, or any git operation through the GitHub CLI.
 
+For a Jala target, this base skill is not eligible. If the owner, active remote, known project profile, or explicit context identifies `Atnic/*` or a future exact `jala/*` namespace, defer to `github-jala` before permission resolution. Do not use generic GitHub credentials as a fallback when the Jala skill, permission, or credential is unavailable.
+
 ## Out of scope
 
 - Local git operations not involving a GitHub remote — those belong to the general git tooling
@@ -48,7 +50,7 @@ Use the requested intent and the likely GitHub effect to choose the required per
 Request the bare permission shown below; Felix stores grants under this skill id.
 
 - `github.read` — inspection, listing, viewing, searching, downloading, and commands whose purpose is to observe existing state. Examples: `repo list`, `repo view`, `issue list`, `issue view`, `issue search`, `pr list`, `pr view`, `pr diff`, `release list`, `release view`, `release download`, `run list`, `run view`, `run watch`, `workflow list`, `secret list`, `variable list`, `gist list`, `gist view`, `search`, `auth status`, `api GET`.
-- `github.review` — adding comments, approving pull requests, merging pull requests, and other collaborative review actions that do not create, edit, or delete GitHub resources. Examples: `pr review --approve`, `pr review --comment`, `pr review --request-changes`, `pr merge`, `pr merge --squash`, `pr merge --rebase`.
+- `github.review` — commenting on existing issues or pull requests, submitting reviews, approving pull requests, requesting changes, merging pull requests, and other collaborative review actions that do not create, edit, or delete GitHub resources. Examples: `issue comment`, `pr review --approve`, `pr review --comment`, `pr review --request-changes`, `pr merge`, `pr merge --squash`, `pr merge --rebase`.
 - `github.write` — create, edit, close, reopen, fork, archive, rename, delete, rerun, cancel, set, and any other operation that can change remote GitHub state.
 
 If an operation is ambiguous, treat it as `github.write` unless the user is only asking to inspect or explain current state.
@@ -148,3 +150,5 @@ For any mutating branch, completion requires the requested remote state to be ob
 ## Cross-skill convention
 
 Other skills that need GitHub operations (creating issues, triggering workflows, reading repo data) should not embed their own `gh` commands. Route GitHub work through this skill.
+
+The `github-jala` overlay is authoritative for Jala repositories. Never let a generic GitHub match or generic `github.*` grant authorize an `Atnic/*` or future exact `jala/*` target.

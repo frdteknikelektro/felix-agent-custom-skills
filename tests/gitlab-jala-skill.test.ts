@@ -65,6 +65,21 @@ describe("gitlab-jala skill", () => {
     expect(raw).toContain("jala mr");
     expect(raw).toContain("jala pipeline");
     expect(raw).toContain("atnic");
+    expect(raw).toContain("atnic repo");
+    expect(raw).toContain("jala project");
+  });
+
+  it("keeps Jala routing ahead of generic GitLab matches", async () => {
+    const raw = await fs.readFile(new URL("../skills/gitlab-jala/SKILL.md", import.meta.url), "utf8");
+
+    expect(raw).toContain("## Jala repository routing");
+    expect(raw).toContain("GitLab group `atnic` case-insensitively");
+    expect(raw).toContain("future exact `jala/<project>` namespace");
+    expect(raw).toContain("Do not select the base `gitlab` skill alongside this overlay");
+    expect(raw).toContain("fail closed");
+    expect(raw).toContain("Never fall back to the generic GitLab skill or `GITLAB_TOKEN`");
+    expect(raw).toContain("comments on existing issues or merge requests");
+    expect(raw).toContain("`gitlab.review`");
   });
 
   it("defaults to atnic group for all Jala repo operations", async () => {

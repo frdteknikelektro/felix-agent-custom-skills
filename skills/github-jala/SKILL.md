@@ -6,7 +6,7 @@ metadata:
   kind: operational
   version: "1.0.0"
   permissions: github.read, github.review, github.write
-  match: github jala, jala github, jala repo, jala issue, jala pr, jala release, jala workflow, jala actions, jala secret, jala gist, atnic, jalaproduct
+  match: github jala, jala github, jala repo, jala issue, jala pr, jala release, jala workflow, jala actions, jala secret, jala gist, atnic, jalaproduct, Atnic repo, atnic repo, jala project
 env:
   - key: GITHUB_JALA_TOKEN
     description: GitHub token for Jala org account (exported as GITHUB_TOKEN for the gh CLI)
@@ -22,6 +22,18 @@ Operate Jala's GitHub account (user `jalaproduct`, org `Atnic`) through the `gh`
 **Execution:** Resolve permissions first (emit PERMISSION_REQUIRED if missing). Export `GITHUB_TOKEN="$GITHUB_JALA_TOKEN"` and verify with `gh auth status` before any command. Then follow the base `github` skill's execution steps.
 
 **Default org**: All Jala repositories live under the `Atnic` GitHub organization. When no specific owner is provided, default to `Atnic`. For repo-scoped operations, use `--repo Atnic/<repo-name>`. To list all Jala repos, use `gh repo list Atnic`.
+
+## Jala repository routing
+
+Resolve the repository or project identity before selecting a platform skill. This skill is the only GitHub skill for a Jala target:
+
+- Treat the GitHub owner `Atnic` case-insensitively as Jala. A future exact `jala/<repo>` namespace is also Jala.
+- An active local remote, an explicit `Atnic/<repo>` target, or a known Jala project profile establishes Jala context even when the user only says "GitHub".
+- An explicit generic provider word never overrides a confirmed Jala owner or remote. Do not select the base `github` skill alongside this overlay for the same operation.
+- A repository name containing `jala` is only a hint. If the owner, remote, or known project profile does not confirm Jala context, resolve the provider or ask before acting.
+- If Jala context is confirmed but this skill, its permission, or `GITHUB_JALA_TOKEN` is unavailable, fail closed. Never fall back to the generic GitHub skill or `GITHUB_TOKEN`.
+
+Purely conceptual answers do not need a platform permission. Reading actual GitHub state requires `github.read`; comments on existing issues or pull requests, review submissions, approvals, requests for changes, and merges remain `github.review`; creating or editing resources requires `github.write`.
 
 Do not duplicate operation documentation. This file documents only what is different.
 
@@ -46,7 +58,7 @@ Activate when the user asks to interact with Jala's specific GitHub account (Atn
 Same permission policy as the base `github` skill. Request the bare permission shown below; Felix stores grants under this skill id.
 
 - `github.read` — inspection, listing, viewing, searching, downloading.
-- `github.review` — adding comments, approving pull requests, merging pull requests.
+- `github.review` — commenting on existing issues or pull requests, submitting reviews, approving pull requests, requesting changes, and merging pull requests.
 - `github.write` — create, edit, close, reopen, fork, archive, rename, delete, rerun, cancel, set.
 
 If an operation is ambiguous, treat it as `github.write` unless the user is only asking to inspect or explain current state.

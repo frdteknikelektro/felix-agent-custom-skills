@@ -25,6 +25,8 @@ Use text-based permission judgment. Do not add or rely on hardcoded TypeScript c
 
 Activate when the user asks to interact with GitLab repositories, issues, merge requests, releases, CI/CD pipelines, variables, snippets, or any GitLab API operation.
 
+For a Jala target, this base skill is not eligible. If the group, active remote, known project profile, or explicit context identifies `atnic/*` or a future exact `jala/*` namespace, defer to `gitlab-jala` before permission resolution. Do not use generic GitLab credentials as a fallback when the Jala skill, permission, or credential is unavailable.
+
 ## Out of scope
 
 - Git operations not involving a GitLab remote — those belong to the general git tooling
@@ -48,7 +50,7 @@ Use the requested intent and the likely GitLab effect to choose the required per
 Request the bare permission shown below; Felix stores grants under this skill id.
 
 - `gitlab.read` — inspection, listing, viewing, searching, downloading, and commands whose purpose is to observe existing state. Examples: `repo list`, `repo view`, `issue list`, `issue view`, `mr list`, `mr view`, `mr diff`, `mr approvers`, `release list`, `release view`, `release download`, `ci list`, `ci view`, `ci trace`, `ci status`, `variable list`, `snippet list`, `snippet view`, `auth status`, `api GET`.
-- `gitlab.review` — adding comments, approving and merging merge requests, and other collaborative review actions that do not create, edit, or delete GitLab resources. Examples: `issue note`, `mr note`, `mr approve`, `mr approve --sha`, `mr merge`, `mr merge --squash`, `mr merge --delete-source-branch`.
+- `gitlab.review` — commenting on existing issues or merge requests, submitting reviews, approving merge requests, requesting changes, merging merge requests, and other collaborative review actions that do not create, edit, or delete GitLab resources. Examples: `issue note`, `mr note`, `mr approve`, `mr approve --sha`, `mr merge`, `mr merge --squash`, `mr merge --delete-source-branch`.
 - `gitlab.write` — create, edit, close, reopen, fork, archive, delete, retry, cancel, set, and any other operation that can change remote GitLab state.
 
 If an operation is ambiguous, treat it as `gitlab.write` unless the user is only asking to inspect or explain current state.
@@ -146,3 +148,5 @@ For any mutating branch, completion requires the requested remote state to be ob
 ## Cross-skill convention
 
 Other skills that need GitLab operations (creating issues, triggering pipelines, reading project data) should not embed their own `glab` commands. Route GitLab work through this skill.
+
+The `gitlab-jala` overlay is authoritative for Jala projects. Never let a generic GitLab match or generic `gitlab.*` grant authorize an `atnic/*` or future exact `jala/*` target.

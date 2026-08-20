@@ -9,6 +9,8 @@ describe("software-development-jala skill", () => {
     expect(raw).toContain("This is an overlay skill");
     expect(raw).toContain("Deploy it with the base `software-development` skill");
     expect(raw).toContain("If the base skill is unavailable, stop and report the missing dependency");
+    expect(raw).toContain("explicit `Atnic/*`, `atnic/*`, or future exact `jala/*` target");
+    expect(raw).toContain("never fall back to the generic software-development workflow");
   });
 
   it("registers project profiles via dynamic directory discovery", async () => {
@@ -27,6 +29,15 @@ describe("software-development-jala skill", () => {
       const name = file.replace(/\.md$/, "");
       expect(raw).not.toContain(`- ${name}`);
     }
+  });
+
+  it("keeps local read policy and platform routing explicit", async () => {
+    const raw = await fs.readFile(new URL("../skills/software-development-jala/SKILL.md", import.meta.url), "utf8");
+
+    expect(raw).toContain("No new local repository-read permission is introduced here");
+    expect(raw).toContain("actual GitHub or GitLab reads must use the matching Jala platform skill");
+    expect(raw).toContain("fail closed rather than falling back to the generic platform skill");
+    expect(raw).toContain("permissions: repo.write");
   });
 
   it("requires local git identity confirmation before commit or push in every project profile", async () => {

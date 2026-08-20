@@ -115,5 +115,8 @@ describe("gitlab skill", () => {
 
     expect(raw).toContain("## Cross-skill convention");
     expect(raw).toContain("Route GitLab work through this skill");
+    expect(raw).toContain("For a Jala target, this base skill is not eligible");
+    expect(raw).toContain("defer to `gitlab-jala` before permission resolution");
+    expect(raw).toContain("Never let a generic GitLab match");
   });
 });
