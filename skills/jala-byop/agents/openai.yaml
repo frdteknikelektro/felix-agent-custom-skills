@@ -1,0 +1,7 @@
+interface:
+  display_name: "Jala BYOP"
+  short_description: "Author and verify Jala Bring Your Own Prediction calculations"
+  default_prompt: "Use $jala-byop to preview, apply, reset, or verify a Jala Bring Your Own Prediction calculation."
+policy:
+  allow_implicit_invocation: true
+

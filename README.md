@@ -56,6 +56,7 @@ npm test
 | Skill | Description |
 |---|---|
 | 📋 `odoo-jala` | Odoo 16.0 ERP for Jala via XML-RPC — search, create, update records, download reports, inspect models |
+| 🧮 `jala-byop` | Jala Bring Your Own Prediction — author, preview, apply, reset, and verify farm- or cycle-scoped calculations |
 | 🚢 `shorebird-jala` | Shorebird Flutter code-push patch management — inspect releases, move tracks, rollback investigation |
 
 ### 🎭 Persona Skills
