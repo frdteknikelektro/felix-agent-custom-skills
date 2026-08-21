@@ -15,6 +15,7 @@ Required:
 
 Derived:
 - Branch: staging uses `feature/compile-to-test`; production uses `release/*` or `master`.
+- Composer runner: staging uses `/usr/bin/php7.3 /usr/local/bin/composer`; production uses `/usr/bin/php7.3 /home/ubuntu/bin/composer`.
 - Composer flags: staging installs with dev dependencies; production uses `--no-dev`.
 - Artisan flags: staging runs `--no-downtime`; production runs `--no-downtime --production`.
 
@@ -60,7 +61,7 @@ git pull || {
 git stash list | grep -q deploy-stash && git stash pop
 
 # build and apply
-/usr/local/bin/composer install
+/usr/bin/php7.3 /usr/local/bin/composer install
 /usr/bin/php7.3 artisan app:update --no-downtime
 
 # restart workers
@@ -129,7 +130,7 @@ After deploy, confirm the application is responding on the deployed server:
 
 - **SSH connection refused** — check network connectivity and server status. Do not retry without user confirmation.
 - **git pull fails** — branch may not exist locally or remote has changed. Check branch name and remote state.
-- **composer install fails** — dependency conflict or missing lock file. Report the error output.
+- **composer install fails** — stop before `artisan` or worker restart. For staging, verify the command is `/usr/bin/php7.3 /usr/local/bin/composer install`; report the dependency or runtime error output.
 - **artisan app:update fails** — migration or cache issue. Report the error; do not retry destructive steps automatically.
 - **stash pop conflict** — `git stash pop` has conflicts. Felix will read each conflicted file, understand both sides, and merge intelligently — keep the deployed code for structural changes (config, migrations), keep the stashed changes for business logic. If irreconcilable, save to `/tmp/unstashed.patch` and report.
 
@@ -146,7 +147,7 @@ cd Code/Web/jala-web
 
 ```sh
 git checkout <commit-hash-from-above>
-/usr/local/bin/composer install
+/usr/bin/php7.3 /usr/local/bin/composer install
 /usr/bin/php7.3 artisan app:update --no-downtime
 ```
 
