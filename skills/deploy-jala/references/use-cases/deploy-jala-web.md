@@ -60,7 +60,7 @@ git pull || {
 git stash list | grep -q deploy-stash && git stash pop
 
 # build and apply
-/usr/bin/php7.3 /home/ubuntu/bin/composer install
+/usr/local/bin/composer install
 /usr/bin/php7.3 artisan app:update --no-downtime
 
 # restart workers
@@ -140,11 +140,22 @@ If deploy fails or verification fails, rollback to the commit hash captured befo
 ```sh
 ssh ubuntu@<server>
 cd Code/Web/jala-web
-
-# rollback
-git checkout <commit-hash-from-above>
-/usr/bin/php7.3 /home/ubuntu/bin/composer install [--no-dev]
-/usr/bin/php7.3 artisan app:update --no-downtime [--production]
 ```
 
-Use the same flags as the original deploy command (with `--no-dev` and `--production` for production).
+### Staging rollback
+
+```sh
+git checkout <commit-hash-from-above>
+/usr/local/bin/composer install
+/usr/bin/php7.3 artisan app:update --no-downtime
+```
+
+### Production rollback
+
+```sh
+git checkout <commit-hash-from-above>
+/usr/bin/php7.3 /home/ubuntu/bin/composer install --no-dev
+/usr/bin/php7.3 artisan app:update --no-downtime --production
+```
+
+Use the staging or production block matching the original deploy command.
