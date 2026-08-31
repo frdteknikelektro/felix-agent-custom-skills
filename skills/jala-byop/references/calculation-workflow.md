@@ -131,6 +131,36 @@ The complete calculation produces prediction, target, and actual series.
   `actual_mortality_accumulation` are system-owned. Finance fields are
   host-enriched and are not calculation inputs.
 
+### FR-preserving future partial harvest
+
+When a custom calculation is intended to preserve current FR behavior, carry the
+FR future partial-harvest rule into the candidate unless the user explicitly
+replaces it. A complete custom definition is a replacement; JALA does not inject
+Reference harvest behavior into it.
+
+- A recorded harvest on a row owns that row. A candidate does not add a predicted
+  harvest when an actual harvest fact exists.
+- With no actual harvest, a future row may receive a partial harvest when harvest,
+  sampling, and feed facts are stale, pre-harvest biomass is above
+  `area * limit_weight_per_area`, and the legacy future gate is open: the row date
+  minus one day is after the effective current/as-of day. The first eligible row
+  is therefore normally the day after tomorrow, not the immediate next day.
+- The prediction harvest is the capacity excess plus the FR percentage applied to
+  the remaining tails. Its downstream state includes harvest weight, harvest and
+  harvest-weight accumulations, reduced live tails/biomass, and the prediction
+  feed-population add-back of `0.425 * harvest`.
+- Target mode has a separate FR percentage rule over all remaining tails and uses
+  the target feed-population add-back of `0.5 * harvest`.
+- Actual mode remains observation-driven: recorded harvest facts are authoritative
+  and missing observed harvest stays null where the actual contract requires it.
+
+Use JALA context and preview responses to evaluate this rule; never calculate
+expected row values in the client. Inspect the future harvest row and its next
+row for `harvest`, `harvest_weight`, `harvest_accumulation`,
+`harvest_accumulation_weight`, `total_tails`, `total_weight`, feed population,
+feed, FCR, revenue, cost, and finance consequences. If the candidate intentionally
+replaces FR partial-harvest behavior, record that as an explicit behavior choice.
+
 An anchor correction must produce a coherent full trajectory. Inspect survival,
 live tails, inferred and actual mortality, mortality accumulation, harvest
 subtraction and accumulation, feed, growth, price/revenue, FCR, cost, and
@@ -300,6 +330,10 @@ an optional synthetic/default smoke result is not evidence.
 Compare the baseline around the requested anchor, neighboring rows, final row,
 and live-tail clamp. Include relevant survival, mortality, population, harvest,
 feed, growth, size, ADG, FCR, price, revenue, cost, finance, and null behavior.
+When FR behavior is being preserved, also inspect the first eligible future
+partial-harvest row and the immediate next row; confirm that a recorded harvest
+suppresses the projection and that the downstream population/feed transition is
+coherent.
 
 Completion criterion: the current source and all three baseline series have been
 read at the frozen effective time, with the requested anchor and downstream
@@ -406,6 +440,10 @@ Inspect the first, middle, and last rows plus the requested anchor. Include
 downstream survival, inferred and recorded mortality, live tails, harvest and
 mortality accumulation, feed, weight/size, ADG, FCR, price/revenue, cost, and
 finance fields when affected.
+For an FR-preserving candidate, verify the future partial-harvest row and its
+next row through the API response, including the no-actual-harvest gate,
+capacity/percentage harvest outcome, live-tail reduction, and feed-population
+add-back. The client reports returned values; it does not recompute them.
 
 Actual-specific checks preserve recorded observations and required nulls. A
 non-BYOP result remains on its original path. For FR actual parity, exact

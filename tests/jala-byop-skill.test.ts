@@ -9,6 +9,8 @@ describe("jala-byop skill", () => {
     expect(raw).toContain("Jala BYOP");
     expect(raw).toContain("JALA_BYOP_API_BASE_URL");
     expect(raw).toContain("JALA_BYOP_ACCESS_TOKEN");
+    expect(raw).toContain("future partial-harvest behavior");
+    expect(raw).toContain("jala partial harvest");
     expect(raw).not.toContain("JALA_API_BASE_URL");
     expect(raw).not.toContain("JALA_ACCESS_TOKEN");
     expect(raw).toContain("calculation.read");
@@ -37,6 +39,11 @@ describe("jala-byop skill", () => {
     expect(workflow).toContain("activates `byop` for every");
     expect(workflow).toContain("Cycle apply activates BYOP");
     expect(workflow).toContain("Context and event fields are contract-bound");
+    expect(workflow).toContain("### FR-preserving future partial harvest");
+    expect(workflow).toContain("day after tomorrow");
+    expect(workflow).toContain("0.425 * harvest");
+    expect(workflow).toContain("0.5 * harvest");
+    expect(workflow).toContain("future partial-harvest row");
   });
 
   it("bundles the dependency-free client under the Jala credential names", async () => {

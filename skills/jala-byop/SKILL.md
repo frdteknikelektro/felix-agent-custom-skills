@@ -1,12 +1,12 @@
 ---
 name: jala-byop
-description: Use when a farmer or Jala operator needs to author, preview, apply, reset, or verify a JALA Bring Your Own Prediction calculation through the stateless farm- or cycle-scoped API.
+description: Use when a farmer or Jala operator needs to author, preview, apply, reset, or verify a JALA Bring Your Own Prediction calculation through the stateless farm- or cycle-scoped API, including FR fallback and future partial-harvest behavior.
 metadata:
   author: felix-agent
   kind: operational
   version: "1.0.0"
   permissions: calculation.read, calculation.write
-  match: jala byop, bring your own prediction, jala prediction, jala calculation, jala target, jala actual, jala feeding rate, jala mortality, jala FR, jala farm calculation, jala cycle calculation
+  match: jala byop, bring your own prediction, jala prediction, jala calculation, jala target, jala actual, jala feeding rate, jala mortality, jala FR, jala FR fallback, jala partial harvest, jala farm calculation, jala cycle calculation
 env:
   - key: JALA_BYOP_API_BASE_URL
     description: Absolute JALA API base URL whose path ends in /api

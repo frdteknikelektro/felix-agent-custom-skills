@@ -1000,7 +1000,7 @@ def _read_json_stdin():
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="Author Jala BYOP calculations through the stateless API")
+    parser = argparse.ArgumentParser(description="Author BYOP calculations through JALA's API")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("contract")
 
