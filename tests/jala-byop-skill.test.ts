@@ -27,12 +27,16 @@ describe("jala-byop skill", () => {
     expect(raw).toContain("references/calculation-workflow.md");
     expect(raw).toContain("scripts/client.py");
     expect(workflow).toContain("Freshness gate");
+    expect(workflow).toContain("GET /api/calculation_contract");
     expect(workflow).toContain("POST /api/cycles/{cycle_id}/calculation/preview");
     expect(workflow).toContain("PUT    /api/cycles/{id}/calculation");
     expect(workflow).toContain("DELETE /api/farms/{id}/calculation");
     expect(workflow).toContain("AuthoringLoop");
     expect(workflow).toContain("verify_applied");
     expect(workflow).toContain("passed_with_warnings");
+    expect(workflow).toContain("activates `byop` for every");
+    expect(workflow).toContain("Cycle apply activates BYOP");
+    expect(workflow).toContain("Context and event fields are contract-bound");
   });
 
   it("bundles the dependency-free client under the Jala credential names", async () => {
@@ -41,6 +45,7 @@ describe("jala-byop skill", () => {
 
     expect(client).toContain("JALA_BYOP_API_BASE_URL");
     expect(client).toContain("JALA_BYOP_ACCESS_TOKEN");
+    expect(client).toContain('return self._request("GET", "calculation_contract")');
     expect(client).not.toContain("JALA_API_BASE_URL");
     expect(client).not.toContain("JALA_ACCESS_TOKEN");
     expect(client).toContain("class AuthoringLoop");
@@ -57,4 +62,3 @@ describe("jala-byop skill", () => {
     expect(readme).toContain("Bring Your Own Prediction");
   });
 });
-

@@ -49,7 +49,7 @@ Preview, baseline reads, and verification are read-only. Apply and reset always 
 2. Read credentials only from `JALA_BYOP_API_BASE_URL` and `JALA_BYOP_ACCESS_TOKEN`; never print, persist, or pass them in arguments.
 3. Use the bundled [dependency-free client](scripts/client.py) for transport, target resolution, live-contract reads, contexts, previews, series, mutation approval state, timeout reconciliation, and structural verification.
 4. Keep the API as the only calculation and data source. Never calculate prediction, target, actual, growth, feeding, mortality, fallback, finance, or expected result values locally.
-5. Treat every baseline, candidate, approval, mutation, and verification as one freshness-gated iteration. Stop on ambiguity, failed or incomplete previews, non-BYOP mutation attempts, stale identity, indeterminate timeout state, malformed output, incomplete coverage, or unexplained drift.
+5. Treat every baseline, candidate, approval, mutation, and verification as one freshness-gated iteration. Stop on ambiguity, failed or incomplete previews, invalid lifecycle operations, stale identity, indeterminate timeout state, malformed output, incomplete coverage, or unexplained drift.
 6. Before apply or reset, summarize scope, evidence, rule, before/after proof, downstream effects, and lifecycle consequence, then require explicit approval in the current turn.
 7. Verify the effective source and all approved prediction, target, and actual series before reporting success.
 
@@ -69,7 +69,6 @@ Require an absolute HTTP(S) base URL whose path ends in `/api`. Send the token o
 - Target is authorized and unambiguous.
 - The live contract and current effective source are recorded before the first candidate.
 - One timezone-aware `as_of`, context sample, current source, candidate, approval, mutation, and verification remain bound to the same iteration.
-- Farm mutations use confirmed real inheriting evidence cycles; non-BYOP cycles remain on their original path.
+- Farm mutations use confirmed real evidence cycles; cycle apply may activate BYOP for the explicitly selected cycle, including a non-BYOP or finished cycle, under the detailed lifecycle rules.
 - JALA owns generated-row cleanup and regeneration.
 - Every approved cycle and all three series have a concrete verification status before completion.
-

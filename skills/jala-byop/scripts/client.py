@@ -191,7 +191,7 @@ class RemoteCalculationClient:
         return "{}/{}/{}".format(resource, target_id, suffix)
 
     def contract(self):
-        return self._request("GET", "calculation/contract")
+        return self._request("GET", "calculation_contract")
 
     def resource(self, path, query=None):
         return self._request("GET", path, query)
@@ -1095,4 +1095,3 @@ if __name__ == "__main__":
     ) as error:
         print(str(error), file=sys.stderr)
         sys.exit(1)
-

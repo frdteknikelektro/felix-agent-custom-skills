@@ -2,8 +2,6 @@
 
 Read this reference for every Jala BYOP request. It is the complete farmer-facing authoring, preview, approval, mutation, reconciliation, and verification contract.
 
-Use the following workflow for every request.
-
 Use this standalone skill to change or verify a JALA calculation without local
 repository, database, PHP, or calculation-runtime access. JALA owns data,
 calculation, validation, persistence, cleanup, normal generation, and result
@@ -91,17 +89,22 @@ remote authoring.
 ### Scope and precedence
 
 - `cycle` scope changes one selected cycle.
-- `farm` scope changes the farm-owned calculation used by cycles that do not own
-  a cycle calculation.
-- Farm calculations affect BYOP cycles only; they never switch a non-BYOP cycle's
-  calculation method.
+- `farm` scope changes the farm-owned calculation and activates `byop` for every
+  unfinished cycle in that farm, regardless of its previous prediction method.
+- `cycle` apply stores the cycle-owned calculation and activates `byop` for the
+  explicitly selected cycle, whether finished or unfinished. Existing
+  cycle-owned calculations remain attached when a farm calculation is applied.
+- Finished cycles are not changed by farm apply. Farm and batch default methods
+  for future cycles remain outside this authoring operation.
 - Effective precedence is `cycle calculation → farm calculation → Reference
   calculation definition`.
 - A cycle calculation remains effective for that cycle after a farm change.
 - The maintained Reference calculation definition is immutable through this
   authoring surface.
-- A non-BYOP cycle may be previewed hypothetically. Apply and reset must fail
-  closed and must never switch the cycle's calculation method.
+- A non-BYOP cycle may be previewed hypothetically. Cycle apply activates BYOP
+  for the explicitly selected cycle whether finished or unfinished. Reset may
+  remove a stored definition from a finished cycle without changing its method;
+  a finished non-BYOP cycle without a stored definition remains rejected.
 
 ### Modes and responsibilities
 
@@ -239,8 +242,9 @@ timezone facts. For a farm, select and confirm one to three representative real
 cycles. Farm evidence cycles must inherit the farm/reference calculation; a
 cycle-owned calculation cannot represent farm behavior.
 
-Use only a BYOP cycle for a persisted mutation. A non-BYOP cycle may be used for
-read-only hypothetical preview, but the original method remains unchanged.
+Use the explicitly selected cycle for a persisted cycle mutation. A non-BYOP
+cycle may be used for read-only hypothetical preview, and apply activates BYOP
+for that cycle.
 
 Completion criterion: exactly one authorized farm or cycle, its method, scope,
 effective source, relevant facts, and any representative cycles are recorded
@@ -248,7 +252,7 @@ without ambiguity.
 
 ### 3. Freeze context and read the live contract
 
-Call `GET /api/calculation/contract` before the first candidate. Follow the live
+Call `GET /api/calculation_contract` before the first candidate. Follow the live
 AST schema, runtime, output fields, null behavior, and limits.
 
 Choose one timezone-aware `as_of` for the iteration. Prefer the user-provided
@@ -265,6 +269,12 @@ GET /api/cycles/{cycle_id}/calculation/context?as_of=<as_of>
 
 Treat the returned context as the only authoring input. Never invent facts from
 local assumptions or copied schemas.
+
+Context and event fields are contract-bound. Use the live contract for the
+allowlisted snapshot paths and fields; do not assume event IDs, cycle IDs, stock
+metadata, or other internal model attributes are available. Undocumented paths
+are rejected by JALA validation/runtime, and a missing optional fact should be
+handled as absent/null rather than reconstructed locally.
 
 Completion criterion: one frozen effective time, the live contract, and a safe
 context for every selected evidence cycle are available and tied to the same
@@ -333,10 +343,18 @@ Ask for explicit approval in the current user turn. A successful preview,
 earlier conversation, or confident wording is not approval. Accept a clear
 natural-language affirmative; do not require the exact word “approve.”
 
-Applying or resetting a farm calculation clears affected generated rows for
-unfinished BYOP cycles in that farm. Applying or resetting a cycle calculation
-clears affected generated rows for that cycle. Normal result generation rebuilds
-cleared rows, and cycle calculations outrank farm calculations.
+Applying a farm calculation activates BYOP for every unfinished farm cycle,
+regardless of its previous method; finished farm cycles remain unchanged. It
+clears generated rows for affected unfinished cycles. Applying a cycle
+calculation activates BYOP for the explicitly selected cycle, whether finished
+or unfinished, and clears generated rows when its method or stored definition
+changes. Resetting a farm calculation clears generated rows for affected
+unfinished BYOP cycles and leaves their current methods unchanged. Resetting a
+cycle calculation removes its stored definition without restoring a previous
+method; if the selected cycle remains on BYOP, it clears that cycle's generated
+rows, including when the cycle is finished, while a manually selected method
+remains selected. Normal result generation rebuilds cleared rows, and cycle
+calculations outrank farm calculations.
 
 Completion criterion: the user explicitly approves one action and its scope in
 the current turn; otherwise return the preview and stop without mutation.
@@ -553,13 +571,3 @@ through the approval-gated loop.
 The authoring effort may continue after a failed candidate, warning, or diagnostic.
 It ends only when the user stops, explicitly applies or resets with verification,
 or a blocker requires user or server intervention.
-
-
-## Checks
-
-- Confirm the selected target is authorized and unambiguous before authoring.
-- Keep the frozen effective time, evidence sample, current source, candidate, approval, mutation, and verification bound to one freshness context.
-- Keep credentials in JALA_BYOP_API_BASE_URL and JALA_BYOP_ACCESS_TOKEN; never print or persist them.
-- Keep calculation, cleanup, normal generation, and result-row ownership on the JALA API.
-- Verify all approved cycles and prediction, target, and actual series before reporting success.
-
