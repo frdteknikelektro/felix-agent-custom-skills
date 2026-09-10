@@ -161,4 +161,4 @@ Style examples; never reuse verbatim:
 
 ## Inspiration corpus
 
-Read `references/corpus.md` only when the inline examples do not give enough rhythm variety for the user's scene. Treat every line as style reference, never source material.
+Read `references/corpus.md`, grouped by Hook, only when the inline examples do not give enough rhythm variety for the user's scene — jump straight to the section matching the chosen form. Treat every line as style reference, never source material.
