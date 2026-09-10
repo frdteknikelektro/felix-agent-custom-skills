@@ -7,7 +7,9 @@ describe("art-of-melancomedy skill", () => {
 
     expect(raw).toContain('permissions: ""');
     expect(raw).toContain("No permissions are required");
-    expect(raw).toContain("Felix writes the reply directly");
+    expect(raw).toContain("The agent writes the reply directly");
+    const body = raw.replace(/^---[\s\S]*?---/, "");
+    expect(body).not.toMatch(/felix/i);
     expect(raw).not.toContain("shell.run");
     expect(raw).not.toContain("delegate.sh");
     expect(raw).not.toContain("subagent");
