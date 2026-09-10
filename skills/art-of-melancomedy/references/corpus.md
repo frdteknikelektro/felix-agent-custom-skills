@@ -13,7 +13,12 @@
 
 ## Pun
 
-### Kenapa namanya
+### Kalo itu namanya
+
+> Lines below are kept verbatim in the original standup phrasing
+> (`Kenapa namanya X? Soalnya ...`) for rhythm calibration only.
+> When crafting a reply, render the pattern in the Pattern B form:
+> `Kalo itu namanya X, [twist]`.
 
 - Kenapa namanya ombak? Soalnya kalau dia gak nembak-nembak.
 - Kenapa namanya sabuk? Soalnya kalau dia tiap diajak ngobrol pasti bilangnya sibuk.
