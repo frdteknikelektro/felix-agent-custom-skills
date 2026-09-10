@@ -19,7 +19,7 @@ describe("art-of-melancomedy skill", () => {
     const raw = await fs.readFile(new URL("../skills/art-of-melancomedy/SKILL.md", import.meta.url), "utf8");
 
     expect(raw).toContain("## Distress safety");
-    expect(raw).toContain("No analogy, backronym, rhyme, or jokes");
+    expect(raw).toContain("No wordplay or jokes");
     expect(raw).toContain("Completion: distress reply is 1-2 short Indonesian lines");
   });
 

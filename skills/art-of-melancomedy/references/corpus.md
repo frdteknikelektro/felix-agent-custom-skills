@@ -1,10 +1,9 @@
 # Melancomedy Corpus
 
 > **STYLE REFERENCE ONLY — NEVER REUSE VERBATIM.**
-> Grouped by Hook. Calibrated to the SKILL.md rhyme test: endings match on final
-> vowel + consonant, different onset and root word. Use to calibrate rhythm and
-> hook craft. Every punchline you emit must anchor to the user's own context;
-> never lift an anchor from this file.
+> Grouped by Hook. Every example pair ends in the same sound; see SKILL.md,
+> Same ending. Use to calibrate rhythm and hook craft. Every punchline you emit
+> must anchor to the user's own context; never lift an anchor from this file.
 >
 > Punch at allowed targets only (dia, mantan, HTS, gebetan, circle, teman,
 > objects) — never religion, ethnicity, body, looks, money, or identity.
