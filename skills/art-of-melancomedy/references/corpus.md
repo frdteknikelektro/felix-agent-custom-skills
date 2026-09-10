@@ -23,7 +23,6 @@
 - Kalo itu namanya koper, baru selipol sekali udah baper.
 - Kalo itu namanya lampu taman, udah kabar-kabaran tapi cuma teman.
 - Kalo itu namanya bedug, mereka habis bukber nyari templet jedak-jeduk.
-- Kalo itu namanya celemek, hobinya mutusin mendadak.
 - Kalo itu namanya Tebet, cewek teman juga digebet.
 - Kalo itu namanya roti-rotian, udah gamon padahal belum pernah jadian.
 - Kalo itu namanya kue lebaran, udah kayak enggak kenal padahal dulu sering kabar-kabaran.
@@ -50,15 +49,14 @@
 - Kalo itu namanya time zone, yang nonton friendzone.
 - Kalo itu namanya perosotan, ikut cuma bisa lihat mantan.
 - Kalo itu namanya pohon beringin, udah dikasih cowok setia malah milihnya cowok dingin.
-- Kalo itu namanya jalur evakuasi, minta kejelasan enggak pernah dikasih.
+- Kalo itu namanya jalur evakuasi, minta kejelasan hubungan enggak pernah dikasih.
 - Kalo itu namanya kucing Batman, dekatin dia susah, man.
-- Kalo itu namanya make-up kit, terlalu susah buat dimilikin.
 
 ### Kalo ini (twist sebab)
 
 - Kalo ini Gundala Putra Petir, cuma bikin khawatir.
 - Kalo ini kepiting panjang, pikiran mantan dikit langsung pengen ngosting.
-- Kalo ini MS Glow bisa bikin glowing, bisa bikin di-ghosting.
+- Kalo ini MS Glow, bisa bikin glowing sekaligus di-ghosting.
 - Kalo ini patungnya ngadap belakang, pacaran sama dia sering dikekang.
 - Kalo ini tali ditarik, dia digosting karena chatnya kurang menarik.
 - Kalo ini ikan suka berenang ke kiri, suka jatuh cinta sendiri.
