@@ -120,7 +120,7 @@ Style examples; never reuse verbatim:
 - Kalo itu namanya kelapa, ngambeknya pasti bilang "gak apa-apa".
 - Bandung ada kepanjangannya: Baper tidak terbendung.
 
-Corpus lines of this pattern keep the original standup phrasing (`Kenapa namanya X? Soalnya ...`) for rhythm calibration; the reply itself always uses the `Kalo itu namanya X, ...` form above.
+Corpus pun lines use the same two forms: `Kalo itu namanya X, ...` for name anchors, `Kalo ini X, ...` for twist-sebab anchors.
 
 ## Pattern C - Rhyming Couplet
 

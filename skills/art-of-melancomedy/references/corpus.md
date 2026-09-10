@@ -15,61 +15,59 @@
 
 ### Kalo itu namanya
 
-> Lines below are kept verbatim in the original standup phrasing
-> (`Kenapa namanya X? Soalnya ...`) for rhythm calibration only.
-> When crafting a reply, render the pattern in the Pattern B form:
-> `Kalo itu namanya X, [twist]`.
+- Kalo itu namanya ombak, dia gak nembak-nembak.
+- Kalo itu namanya sabuk, tiap diajak ngobrol pasti bilangnya sibuk.
+- Kalo itu namanya tomat, hubungan lu sudah lama tamat.
+- Kalo itu namanya burung makau, cuma bikin pikiran kacau.
+- Kalo itu namanya becak, hubungan lu udah lucak.
+- Kalo itu namanya koper, baru selipol sekali udah baper.
+- Kalo itu namanya lampu taman, udah kabar-kabaran tapi cuma teman.
+- Kalo itu namanya bedug, mereka habis bukber nyari templet jedak-jeduk.
+- Kalo itu namanya celemek, hobinya mutusin mendadak.
+- Kalo itu namanya Tebet, cewek teman juga digebet.
+- Kalo itu namanya roti-rotian, udah gamon padahal belum pernah jadian.
+- Kalo itu namanya kue lebaran, udah kayak enggak kenal padahal dulu sering kabar-kabaran.
+- Kalo itu namanya Bianglala, biang kecewa.
+- Kalo itu namanya komedi puter, hubungan dia udah jadi puncak komedi ujungnya juga gak together.
+- Kalo itu namanya gerimis, udah dibilang gak bisa lanjut masih aja ngemis.
+- Kalo itu namanya jungkit, hubungan lu masa lalunya suka diungkit.
+- Kalo itu namanya bambu, hubungan dia masih abu-abu.
+- Kalo itu namanya rusa, pura-pura move on padahal masih ada rasa.
+- Kalo itu namanya rusa tutul, cewek walaupun salah tetap merasa betul.
+- Kalo itu namanya kelapa muda, suka nyari yang lebih muda.
+- Kalo itu namanya batik keris, udah cantik tapi kelakuannya bikin miris.
+- Kalo itu namanya air mancur, suka narik ulur.
+- Kalo itu namanya wayang, belum pacaran udah manggil sayang.
+- Kalo itu namanya Malioboro, mau lihat dia berubah juga boro-boro.
+- Kalo itu namanya kaliper, baru diajak mabar sekali udah baper.
+- Kalo itu namanya babat, pacar teman juga diembat.
+- Kalo itu namanya burung kakak tua, suka nyari yang lebih tua.
+- Kalo itu namanya sampah organik, cara mutusinnya yang unik.
+- Kalo itu namanya King Kong, dia berbohong.
+- Kalo itu namanya Iron Man, dia left you for another man.
+- Kalo itu namanya Galaxy Bima Sakti, udah biasa disakiti.
+- Kalo itu namanya T-Street, backstreet.
+- Kalo itu namanya time zone, yang nonton friendzone.
+- Kalo itu namanya perosotan, ikut cuma bisa lihat mantan.
+- Kalo itu namanya pohon beringin, udah dikasih cowok setia malah milihnya cowok dingin.
+- Kalo itu namanya jalur evakuasi, minta kejelasan enggak pernah dikasih.
+- Kalo itu namanya kucing Batman, dekatin dia susah, man.
+- Kalo itu namanya make-up kit, terlalu susah buat dimilikin.
 
-- Kenapa namanya ombak? Soalnya kalau dia gak nembak-nembak.
-- Kenapa namanya sabuk? Soalnya kalau dia tiap diajak ngobrol pasti bilangnya sibuk.
-- Kenapa namanya tomat? Soalnya kalau hubungan lu sudah lama tamat.
-- Kenapa namanya burung makau? Soalnya kalau dia cuma bikin pikiran kacau.
-- Kenapa namanya becak? Soalnya kalau hubungan lu udah lucak.
-- Kenapa namanya koper? Soalnya kalau dia baru selipol sekali udah baper.
-- Kenapa namanya lampu taman? Soalnya kalau dia udah kabar-kabaran tapi cuma teman.
-- Kenapa namanya bedug? Soalnya kalau mereka habis bukber nyari templet jedak-jeduk.
-- Kenapa namanya celemek? Soalnya kalau dia hobinya mutusin mendadak.
-- Kenapa namanya Tebet? Soalnya kalau dia cewek teman juga digebet.
-- Kenapa namanya roti-rotian? Soalnya kalau dia udah gamon padahal belum pernah jadian.
-- Kenapa namanya kue lebaran? Soalnya kalau dia udah kayak enggak kenal padahal dulu sering kabar-kabaran.
-- Kenapa namanya Bianglala? Soalnya kalau dia biang kecewa.
-- Kenapa namanya komedi puter? Soalnya kalau hubungan dia udah jadi puncak komedi ujungnya juga gak together.
-- Kenapa namanya gerimis? Soalnya kalau dia udah dibilang gak bisa lanjut masih aja ngemis.
-- Kenapa namanya jungkit? Soalnya kalau hubungan lu masa lalunya suka diungkit.
-- Kenapa namanya bambu? Soalnya kalau hubungan dia masih abu-abu.
-- Kenapa namanya rusa? Soalnya kalau dia pura-pura move on padahal masih ada rasa.
-- Kenapa namanya rusa tutul? Soalnya kalau cewek walaupun salah tetap merasa betul.
-- Kenapa namanya kelapa muda? Soalnya kalau dia suka nyari yang lebih muda.
-- Kenapa namanya batik keris? Soalnya kalau dia udah cantik tapi kelakuannya bikin miris.
-- Kenapa namanya air mancur? Soalnya kalau dia suka narik ulur.
-- Kenapa namanya wayang? Soalnya kalau dia belum pacaran udah manggil sayang.
-- Kenapa namanya Malioboro? Soalnya kalau mau lihat dia berubah juga boro-boro.
-- Kenapa namanya kaliper? Soalnya kalau dia baru diajak mabar sekali udah baper.
-- Kenapa namanya babat? Soalnya kalau dia pacar teman juga diembat.
-- Kenapa namanya burung kakak tua? Soalnya kalau dia suka nyari yang lebih tua.
-- Kenapa namanya sampah organik? Soalnya kalau dia cara mutusinnya yang unik.
-- Kenapa Gundala Putra Petir? Soalnya kalau dia cuma bikin khawatir.
-- Kenapa namanya King Kong? Soalnya kalau dia berbohong.
-- Kenapa namanya Iron Man? Soalnya kalau dia left you for another man.
-- Kenapa panjang kepiting? Soalnya kalau pikiran mantan dikit langsung pengen ngosting.
-- Kenapa namanya Galaxy Bima Sakti? Soalnya kalau dia udah biasa disakiti.
-- Kenapa MS Glow bisa bikin glowing? Soalnya kalau dia bisa bikin di-ghosting.
-- Kenapa namanya T-Street? Soalnya kalau dia backstreet.
-- Kenapa namanya time zone? Soalnya kalau yang nonton friendzone.
-- Kenapa patungnya ngadap belakang? Soalnya kalau pacaran sama dia sering dikekang.
-- Kenapa namanya perosotan? Soalnya kalau dia ikut cuma bisa lihat mantan.
-- Kenapa tali ditarik? Soalnya kalau dia digosting karena chatnya kurang menarik.
-- Kenapa namanya pohon beringin? Soalnya kalau dia udah dikasih cowok setia malah milihnya cowok dingin.
-- Kenapa namanya jalur evakuasi? Soalnya kalau lu minta kejelasan hubungan enggak pernah dikasih.
-- Kenapa ikan ini suka berenang ke kiri? Soalnya kalau dia suka jatuh cinta sendiri.
-- Kenapa manusia punya satu hati? Soalnya kalau dua hati-hati.
-- Kenapa namanya kucing Batman? Soalnya kalau dekatin dia susah, man.
-- Kenapa suka ikan kering? Soalnya kalau dia sukanya gaslighting.
-- Kenapa namanya make-up kit? Soalnya kalau dia terlalu susah buat dimilikin.
-- Kenapa sate ditusuk? Soalnya kalau dia suka nusuk.
-- Kenapa parkir sepeda di sebelah kanan? Soalnya kalau cinta dia suka bertepuk sebelah tangan.
-- Kenapa demen broset? Soalnya kalau berantem sama dia di chat pasti di-screenshot.
-- Kenapa tangganya naik? Soalnya kalau dia di awal doang baik.
+### Kalo ini (twist sebab)
+
+- Kalo ini Gundala Putra Petir, cuma bikin khawatir.
+- Kalo ini kepiting panjang, pikiran mantan dikit langsung pengen ngosting.
+- Kalo ini MS Glow bisa bikin glowing, bisa bikin di-ghosting.
+- Kalo ini patungnya ngadap belakang, pacaran sama dia sering dikekang.
+- Kalo ini tali ditarik, dia digosting karena chatnya kurang menarik.
+- Kalo ini ikan suka berenang ke kiri, suka jatuh cinta sendiri.
+- Kalo ini manusia punya satu hati, dua hati-hati.
+- Kalo ini suka ikan kering, sukanya gaslighting.
+- Kalo ini sate ditusuk, dia suka nusuk.
+- Kalo ini parkir sepeda di sebelah kanan, cinta dia suka bertepuk sebelah tangan.
+- Kalo ini demen broset, berantem sama dia di chat pasti di-screenshot.
+- Kalo ini tangganya naik, dia di awal doang baik.
 
 ### Kepanjangan / alias
 
