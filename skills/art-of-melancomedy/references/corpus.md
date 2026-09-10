@@ -15,57 +15,57 @@
 
 ### Kalo itu namanya
 
-- Kalo itu namanya ombak, dia gak nembak-nembak.
-- Kalo itu namanya sabuk, tiap diajak ngobrol pasti bilangnya sibuk.
-- Kalo itu namanya tomat, hubungan lu sudah lama tamat.
-- Kalo itu namanya burung makau, cuma bikin pikiran kacau.
-- Kalo itu namanya becak, hubungan lu udah lucak.
-- Kalo itu namanya koper, baru selipol sekali udah baper.
-- Kalo itu namanya lampu taman, udah kabar-kabaran tapi cuma teman.
-- Kalo itu namanya bedug, mereka habis bukber nyari templet jedak-jeduk.
-- Kalo itu namanya Tebet, cewek teman juga digebet.
-- Kalo itu namanya roti-rotian, udah gamon padahal belum pernah jadian.
-- Kalo itu namanya kue lebaran, udah kayak enggak kenal padahal dulu sering kabar-kabaran.
-- Kalo itu namanya Bianglala, biang kecewa.
-- Kalo itu namanya komedi puter, hubungan dia udah jadi puncak komedi ujungnya juga gak together.
-- Kalo itu namanya gerimis, udah dibilang gak bisa lanjut masih aja ngemis.
-- Kalo itu namanya jungkit, hubungan lu masa lalunya suka diungkit.
-- Kalo itu namanya bambu, hubungan dia masih abu-abu.
-- Kalo itu namanya rusa, pura-pura move on padahal masih ada rasa.
-- Kalo itu namanya rusa tutul, cewek walaupun salah tetap merasa betul.
-- Kalo itu namanya kelapa muda, suka nyari yang lebih muda.
-- Kalo itu namanya batik keris, udah cantik tapi kelakuannya bikin miris.
-- Kalo itu namanya air mancur, suka narik ulur.
-- Kalo itu namanya wayang, belum pacaran udah manggil sayang.
-- Kalo itu namanya Malioboro, mau lihat dia berubah juga boro-boro.
-- Kalo itu namanya kaliper, baru diajak mabar sekali udah baper.
-- Kalo itu namanya babat, pacar teman juga diembat.
-- Kalo itu namanya burung kakak tua, suka nyari yang lebih tua.
-- Kalo itu namanya sampah organik, cara mutusinnya yang unik.
-- Kalo itu namanya King Kong, dia berbohong.
-- Kalo itu namanya Iron Man, dia left you for another man.
-- Kalo itu namanya Galaxy Bima Sakti, udah biasa disakiti.
-- Kalo itu namanya T-Street, backstreet.
-- Kalo itu namanya time zone, yang nonton friendzone.
-- Kalo itu namanya perosotan, ikut cuma bisa lihat mantan.
-- Kalo itu namanya pohon beringin, udah dikasih cowok setia malah milihnya cowok dingin.
-- Kalo itu namanya jalur evakuasi, minta kejelasan hubungan enggak pernah dikasih.
-- Kalo itu namanya kucing Batman, dekatin dia susah, man.
+- Kalo itu namanya ombak, kalo dia gak nembak-nembak.
+- Kalo itu namanya sabuk, kalo dia tiap diajak ngobrol pasti bilangnya sibuk.
+- Kalo itu namanya tomat, kalo hubungan lu sudah lama tamat.
+- Kalo itu namanya burung makau, kalo dia cuma bikin pikiran kacau.
+- Kalo itu namanya becak, kalo hubungan lu udah lucak.
+- Kalo itu namanya koper, kalo dia baru selipol sekali udah baper.
+- Kalo itu namanya lampu taman, kalo dia udah kabar-kabaran tapi cuma teman.
+- Kalo itu namanya bedug, kalo mereka habis bukber nyari templet jedak-jeduk.
+- Kalo itu namanya Tebet, kalo dia cewek teman juga digebet.
+- Kalo itu namanya roti-rotian, kalo dia udah gamon padahal belum pernah jadian.
+- Kalo itu namanya kue lebaran, kalo dia udah kayak enggak kenal padahal dulu sering kabar-kabaran.
+- Kalo itu namanya Bianglala, kalo dia biang kecewa.
+- Kalo itu namanya komedi puter, kalo hubungan dia udah jadi puncak komedi ujungnya juga gak together.
+- Kalo itu namanya gerimis, kalo dia udah dibilang gak bisa lanjut masih aja ngemis.
+- Kalo itu namanya jungkit, kalo hubungan lu masa lalunya suka diungkit.
+- Kalo itu namanya bambu, kalo hubungan dia masih abu-abu.
+- Kalo itu namanya rusa, kalo dia pura-pura move on padahal masih ada rasa.
+- Kalo itu namanya rusa tutul, kalo cewek walaupun salah tetap merasa betul.
+- Kalo itu namanya kelapa muda, kalo dia suka nyari yang lebih muda.
+- Kalo itu namanya batik keris, kalo dia udah cantik tapi kelakuannya bikin miris.
+- Kalo itu namanya air mancur, kalo dia suka narik ulur.
+- Kalo itu namanya wayang, kalo dia belum pacaran udah manggil sayang.
+- Kalo itu namanya Malioboro, kalo mau lihat dia berubah juga boro-boro.
+- Kalo itu namanya kaliper, kalo dia baru diajak mabar sekali udah baper.
+- Kalo itu namanya babat, kalo dia pacar teman juga diembat.
+- Kalo itu namanya burung kakak tua, kalo dia suka nyari yang lebih tua.
+- Kalo itu namanya sampah organik, kalo dia cara mutusinnya yang unik.
+- Kalo itu namanya King Kong, kalo dia berbohong.
+- Kalo itu namanya Iron Man, kalo dia left you for another man.
+- Kalo itu namanya Galaxy Bima Sakti, kalo dia udah biasa disakiti.
+- Kalo itu namanya T-Street, kalo dia backstreet.
+- Kalo itu namanya time zone, kalo yang nonton friendzone.
+- Kalo itu namanya perosotan, kalo dia ikut cuma bisa lihat mantan.
+- Kalo itu namanya pohon beringin, kalo dia udah dikasih cowok setia malah milihnya cowok dingin.
+- Kalo itu namanya jalur evakuasi, kalo minta kejelasan hubungan enggak pernah dikasih.
+- Kalo itu namanya kucing Batman, kalo dekatin dia susah, man.
 
 ### Kalo ini (twist sebab)
 
-- Kalo ini Gundala Putra Petir, cuma bikin khawatir.
-- Kalo ini kepiting panjang, pikiran mantan dikit langsung pengen ngosting.
-- Kalo ini MS Glow, bisa bikin glowing sekaligus di-ghosting.
-- Kalo ini patungnya ngadap belakang, pacaran sama dia sering dikekang.
-- Kalo ini tali ditarik, dia digosting karena chatnya kurang menarik.
-- Kalo ini ikan suka berenang ke kiri, suka jatuh cinta sendiri.
-- Kalo ini manusia punya satu hati, dua hati-hati.
-- Kalo ini suka ikan kering, sukanya gaslighting.
-- Kalo ini sate ditusuk, dia suka nusuk.
-- Kalo ini parkir sepeda di sebelah kanan, cinta dia suka bertepuk sebelah tangan.
-- Kalo ini demen broset, berantem sama dia di chat pasti di-screenshot.
-- Kalo ini tangganya naik, dia di awal doang baik.
+- Kalo ini Gundala Putra Petir, kalo dia cuma bikin khawatir.
+- Kalo ini kepiting panjang, kalo pikiran mantan dikit langsung pengen ngosting.
+- Kalo ini MS Glow bisa bikin glowing, kalo dia bisa bikin di-ghosting.
+- Kalo ini patungnya ngadap belakang, kalo pacaran sama dia sering dikekang.
+- Kalo ini tali ditarik, kalo dia digosting karena chatnya kurang menarik.
+- Kalo ini ikan suka berenang ke kiri, kalo dia suka jatuh cinta sendiri.
+- Kalo ini manusia punya satu hati, kalo dua hati-hati.
+- Kalo ini suka ikan kering, kalo dia sukanya gaslighting.
+- Kalo ini sate ditusuk, kalo dia suka nusuk.
+- Kalo ini parkir sepeda di sebelah kanan, kalo cinta dia suka bertepuk sebelah tangan.
+- Kalo ini demen broset, kalo berantem sama dia di chat pasti di-screenshot.
+- Kalo ini tangganya naik, kalo dia di awal doang baik.
 
 ### Kepanjangan / alias
 
