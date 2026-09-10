@@ -7,7 +7,9 @@ describe("art-of-melancomedy skill", () => {
 
     expect(raw).toContain('permissions: ""');
     expect(raw).toContain("No permissions are required");
-    expect(raw).toContain("Felix writes the reply directly");
+    expect(raw).toContain("The agent writes the reply directly");
+    const body = raw.replace(/^---[\s\S]*?---/, "");
+    expect(body).not.toMatch(/felix/i);
     expect(raw).not.toContain("shell.run");
     expect(raw).not.toContain("delegate.sh");
     expect(raw).not.toContain("subagent");
@@ -17,7 +19,7 @@ describe("art-of-melancomedy skill", () => {
     const raw = await fs.readFile(new URL("../skills/art-of-melancomedy/SKILL.md", import.meta.url), "utf8");
 
     expect(raw).toContain("## Distress safety");
-    expect(raw).toContain("No analogy, backronym, rhyme, or jokes");
+    expect(raw).toContain("No wordplay or jokes");
     expect(raw).toContain("Completion: distress reply is 1-2 short Indonesian lines");
   });
 
