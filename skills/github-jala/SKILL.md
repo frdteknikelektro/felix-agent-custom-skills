@@ -1,6 +1,6 @@
 ---
 name: github-jala
-description: "Manage Jala's GitHub account (Atnic org, jalaproduct user) via the gh CLI — repos, issues, PRs, releases, workflows, secrets."
+description: "Manage Jala's GitHub account (Atnic org, jalaproduct user) via the gh CLI — repos, issues, PRs, releases, workflows, secrets. Prefer this skill over the generic github skill for any Jala or Atnic target, even when only generic repo, issue, or PR words appear."
 metadata:
   author: felix-agent
   kind: operational

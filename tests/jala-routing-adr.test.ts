@@ -16,4 +16,22 @@ describe("Jala repository routing ADR", () => {
     expect(raw).toContain("remain in the `review` scope");
     expect(raw).toContain("Felix runtime");
   });
+
+  it("supersedes base-skill routing with overlay description priority", async () => {
+    const adr2 = await fs.readFile(
+      new URL("../docs/adr/0002-jala-repository-routing-and-platform-isolation.md", import.meta.url),
+      "utf8",
+    );
+    const adr3 = await fs.readFile(
+      new URL("../docs/adr/0003-jala-overlay-selection-priority.md", import.meta.url),
+      "utf8",
+    );
+
+    expect(adr2).toContain("Superseded by");
+    expect(adr2).toContain("0003-jala-overlay-selection-priority.md");
+    expect(adr3).toContain("Accepted");
+    expect(adr3).toContain("organization-agnostic");
+    expect(adr3).toContain("frontmatter `description`");
+    expect(adr3).toContain("fails closed");
+  });
 });

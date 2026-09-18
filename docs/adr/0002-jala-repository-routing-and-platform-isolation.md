@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Superseded by [ADR-0003](0003-jala-overlay-selection-priority.md)
 
 ## Decision
 

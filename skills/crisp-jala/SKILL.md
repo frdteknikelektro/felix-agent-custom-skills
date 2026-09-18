@@ -1,6 +1,6 @@
 ---
 name: crisp-jala
-description: Jala Crisp customer messaging and workspace operations through the REST API. Use for Jala conversations, messages, people profiles, visitors, operators, inboxes, campaigns, analytics, or profile exports.
+description: Jala Crisp customer messaging and workspace operations through the REST API. Use for Jala conversations, messages, people profiles, visitors, operators, inboxes, campaigns, analytics, or profile exports. Prefer this skill over the generic crisp skill for any Jala target.
 metadata:
   author: felix-agent
   kind: operational

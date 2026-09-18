@@ -65,7 +65,7 @@ Use `send` for message submission even though the API uses `POST`. Every send an
 
 1. **Authorize.** Read the server-computed `permissions_per_skill` row for `onesignal`; treat `have=[...]` as authoritative. Map the request to the narrowest permission above. If it is under `need=[...]`, emit exactly one `PERMISSION_REQUIRED` block using Felix’s output contract and stop.
    Completion: the required permission is authorized, or the complete permission request is emitted.
-2. **Resolve the app and target.** Resolve the exact `ONESIGNAL_APP_ID`, channel, user alias, subscription ID, segment/filter, message ID, or organization scope. The App ID is public but still must be exact; never infer it from a Jala name or credential.
+2. **Resolve the app and target.** Resolve the exact `ONESIGNAL_APP_ID`, channel, user alias, subscription ID, segment/filter, message ID, or organization scope. The App ID is public but still must be exact; never infer it from a workspace name, an organization name, or a credential.
    Completion: one concrete app boundary, operation, and target scope are resolved.
 3. **Load the branch.** Read [messaging](references/messaging.md), [users-and-subscriptions](references/users-and-subscriptions.md), [messages-and-delivery](references/messages-and-delivery.md), [exports](references/exports.md), [apps-and-auth](references/apps-and-auth.md), or [quick-examples](references/quick-examples.md). Recheck the linked official OneSignal page when a schema or endpoint may have changed.
    Completion: the selected branch and its official source are loaded.

@@ -1,6 +1,6 @@
 ---
 name: posthog-jala
-description: "Query and manage Jala's PostHog analytics (orgs 10590, 28053) via REST API — events, feature flags, dashboards, HogQL."
+description: "Query and manage Jala's PostHog analytics (orgs 10590, 28053) via REST API — events, feature flags, dashboards, HogQL. Prefer this skill over the generic posthog skill for any Jala target."
 metadata:
   author: felix-agent
   kind: operational

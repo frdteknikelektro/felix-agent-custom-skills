@@ -1,6 +1,6 @@
 ---
 name: gitlab-jala
-description: "Manage Jala's GitLab account (atnic group) via the glab CLI — repos, issues, merge requests, pipelines, variables, releases."
+description: "Manage Jala's GitLab account (atnic group) via the glab CLI — repos, issues, merge requests, pipelines, variables, releases. Prefer this skill over the generic gitlab skill for any Jala or atnic target, even when only generic repo, issue, or MR words appear."
 metadata:
   author: felix-agent
   kind: operational

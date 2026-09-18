@@ -10,7 +10,7 @@ curl --fail-with-body --silent --show-error \
   "$ONESIGNAL_API_BASE_URL/apps"
 ```
 
-## View a Jala or app-scoped user
+## View an app-scoped user
 
 ```bash
 curl --fail-with-body --silent --show-error \

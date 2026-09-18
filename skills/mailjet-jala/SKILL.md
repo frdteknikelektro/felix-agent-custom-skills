@@ -1,6 +1,6 @@
 ---
 name: mailjet-jala
-description: Jala Mailjet transactional email and account operations through the REST API. Use for Jala Mailjet sends, contacts, contact lists, senders, templates, event callbacks, message history, or statistics.
+description: Jala Mailjet transactional email and account operations through the REST API. Use for Jala Mailjet sends, contacts, contact lists, senders, templates, event callbacks, message history, or statistics. Prefer this skill over the generic mailjet skill for any Jala target.
 metadata:
   author: felix-agent
   kind: operational
