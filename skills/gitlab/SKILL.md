@@ -25,8 +25,6 @@ Use text-based permission judgment. Do not add or rely on hardcoded TypeScript c
 
 Activate when the user asks to interact with GitLab repositories, issues, merge requests, releases, CI/CD pipelines, variables, snippets, or any GitLab API operation.
 
-For a Jala target, this base skill is not eligible. If the group, active remote, known project profile, or explicit context identifies `atnic/*` or a future exact `jala/*` namespace, defer to `gitlab-jala` before permission resolution. Do not use generic GitLab credentials as a fallback when the Jala skill, permission, or credential is unavailable.
-
 ## Out of scope
 
 - Git operations not involving a GitLab remote — those belong to the general git tooling
@@ -148,5 +146,3 @@ For any mutating branch, completion requires the requested remote state to be ob
 ## Cross-skill convention
 
 Other skills that need GitLab operations (creating issues, triggering pipelines, reading project data) should not embed their own `glab` commands. Route GitLab work through this skill.
-
-The `gitlab-jala` overlay is authoritative for Jala projects. Never let a generic GitLab match or generic `gitlab.*` grant authorize an `atnic/*` or future exact `jala/*` target.

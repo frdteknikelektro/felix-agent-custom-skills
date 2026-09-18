@@ -1,6 +1,6 @@
 ---
 name: onesignal-jala
-description: Jala OneSignal messaging and user operations through the REST API. Use for Jala push, email, or SMS messages; Jala users, aliases, tags, subscriptions, message reports, or app inventory.
+description: Jala OneSignal messaging and user operations through the REST API. Use for Jala push, email, or SMS messages; Jala users, aliases, tags, subscriptions, message reports, or app inventory. Prefer this skill over the generic onesignal skill for any Jala target.
 metadata:
   author: felix-agent
   kind: operational

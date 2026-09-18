@@ -110,13 +110,11 @@ describe("gitlab skill", () => {
     expect(quickExamples).toContain("Copy the full sequence");
   });
 
-  it("includes cross-skill routing convention", async () => {
+  it("stays organization-agnostic while routing GitLab work through itself", async () => {
     const raw = await fs.readFile(new URL("../skills/gitlab/SKILL.md", import.meta.url), "utf8");
 
     expect(raw).toContain("## Cross-skill convention");
     expect(raw).toContain("Route GitLab work through this skill");
-    expect(raw).toContain("For a Jala target, this base skill is not eligible");
-    expect(raw).toContain("defer to `gitlab-jala` before permission resolution");
-    expect(raw).toContain("Never let a generic GitLab match");
+    expect(raw).not.toMatch(/jala|atnic/i);
   });
 });

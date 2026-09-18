@@ -1,6 +1,6 @@
 ---
 name: mailgun-jala
-description: Jala Mailgun email delivery and sending-domain operations through the REST API. Use for Jala email or MIME sends, domains, suppressions, routes, webhooks, templates, delivery logs, or metrics.
+description: Jala Mailgun email delivery and sending-domain operations through the REST API. Use for Jala email or MIME sends, domains, suppressions, routes, webhooks, templates, delivery logs, or metrics. Prefer this skill over the generic mailgun skill for any Jala target.
 metadata:
   author: felix-agent
   kind: operational

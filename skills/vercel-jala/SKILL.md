@@ -1,6 +1,6 @@
 ---
 name: vercel-jala
-description: "Manage Jala's Vercel account via the vercel CLI — deploy, domains, env vars, projects, logs, rollback."
+description: "Manage Jala's Vercel account via the vercel CLI — deploy, domains, env vars, projects, logs, rollback. Prefer this skill over the generic vercel skill for any Jala target."
 metadata:
   author: felix-agent
   kind: operational

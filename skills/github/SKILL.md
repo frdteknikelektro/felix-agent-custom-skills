@@ -25,8 +25,6 @@ Use text-based permission judgment. Do not add or rely on hardcoded TypeScript c
 
 Activate when the user asks to interact with GitHub repositories, issues, pull requests, releases, Actions workflows, secrets, variables, gists, code search, or any git operation through the GitHub CLI.
 
-For a Jala target, this base skill is not eligible. If the owner, active remote, known project profile, or explicit context identifies `Atnic/*` or a future exact `jala/*` namespace, defer to `github-jala` before permission resolution. Do not use generic GitHub credentials as a fallback when the Jala skill, permission, or credential is unavailable.
-
 ## Out of scope
 
 - Local git operations not involving a GitHub remote — those belong to the general git tooling
@@ -150,5 +148,3 @@ For any mutating branch, completion requires the requested remote state to be ob
 ## Cross-skill convention
 
 Other skills that need GitHub operations (creating issues, triggering workflows, reading repo data) should not embed their own `gh` commands. Route GitHub work through this skill.
-
-The `github-jala` overlay is authoritative for Jala repositories. Never let a generic GitHub match or generic `github.*` grant authorize an `Atnic/*` or future exact `jala/*` target.

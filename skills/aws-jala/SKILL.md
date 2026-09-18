@@ -1,6 +1,6 @@
 ---
 name: aws-jala
-description: Use for broad Jala AWS account administration through the AWS CLI, including read-only inspection, billing lookups, and explicitly requested remote-state changes. Uses text-based read/write permission guidance with the project-level AWS_JALA_* secret env contract.
+description: Use for broad Jala AWS account administration through the AWS CLI, including read-only inspection, billing lookups, and explicitly requested remote-state changes. Prefer this skill over the generic aws skill for any Jala target.
 metadata:
   author: felix-agent
   kind: operational

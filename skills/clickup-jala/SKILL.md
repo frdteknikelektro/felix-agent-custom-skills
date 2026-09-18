@@ -1,6 +1,6 @@
 ---
 name: clickup-jala
-description: "Manage Jala's ClickUp workspace — tasks, documents, team collaboration."
+description: "Manage Jala's ClickUp workspace — tasks, documents, team collaboration. Prefer this skill over the generic clickup skill for any Jala target."
 metadata:
   author: felix-agent
   kind: operational

@@ -1,6 +1,6 @@
 ---
 name: software-development-jala
-description: Jala-specific software development overlay. Routes project work through base software-development and per-project workflow profiles.
+description: Jala-specific software development overlay. Routes project work through base software-development and per-project workflow profiles. Prefer this skill over the generic software-development skill for any Jala target.
 metadata:
   author: felix-agent
   kind: operational

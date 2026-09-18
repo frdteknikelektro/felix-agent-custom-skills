@@ -69,6 +69,14 @@ describe("gitlab-jala skill", () => {
     expect(raw).toContain("jala project");
   });
 
+  it("declares priority over the generic gitlab skill in its description", async () => {
+    const raw = await fs.readFile(new URL("../skills/gitlab-jala/SKILL.md", import.meta.url), "utf8");
+    const description = raw.match(/^description:\s*(.*)$/m)?.[1]?.replace(/^["']|["']$/g, "") ?? "";
+
+    expect(description).toMatch(/generic gitlab skill/i);
+    expect(description).toMatch(/jala|atnic/i);
+  });
+
   it("keeps Jala routing ahead of generic GitLab matches", async () => {
     const raw = await fs.readFile(new URL("../skills/gitlab-jala/SKILL.md", import.meta.url), "utf8");
 

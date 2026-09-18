@@ -132,4 +132,4 @@ aws lambda update-function-configuration \
 
 ## Cross-skill convention
 
-Other skills that need AWS inspection or administration should not embed their own AWS commands. Route AWS work through this skill. Organization-specific overlays (e.g. `aws-jala`) extend this skill and only override the credential contract.
+Other skills that need AWS inspection or administration should not embed their own AWS commands. Route AWS work through this skill. Organization-specific overlay skills extend this skill and only override the credential contract.
