@@ -51,7 +51,7 @@ Same use-case recipes as the base `aws` skill, run against Jala's credentials:
 
 ## Permissions
 
-Same permission policy as the base `aws` skill. Request the bare permission shown below; Felix stores grants under this skill id.
+Same permission policy as the base `aws` skill. Request the bare permission shown below; the runtime stores grants under this skill id.
 
 - `aws.read` — inspection, inventory, diagnostics, billing lookups, Cost Explorer reads.
 - `aws.write` — create, update, delete, attach, detach, put, revoke, terminate, deploy, restore, modify.

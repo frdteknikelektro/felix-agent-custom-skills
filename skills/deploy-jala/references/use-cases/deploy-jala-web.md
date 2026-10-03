@@ -132,7 +132,7 @@ After deploy, confirm the application is responding on the deployed server:
 - **git pull fails** — branch may not exist locally or remote has changed. Check branch name and remote state.
 - **composer install fails** — stop before `artisan` or worker restart. For staging, verify the command is `/usr/bin/php7.3 /usr/local/bin/composer install`; report the dependency or runtime error output.
 - **artisan app:update fails** — migration or cache issue. Report the error; do not retry destructive steps automatically.
-- **stash pop conflict** — `git stash pop` has conflicts. Felix will read each conflicted file, understand both sides, and merge intelligently — keep the deployed code for structural changes (config, migrations), keep the stashed changes for business logic. If irreconcilable, save to `/tmp/unstashed.patch` and report.
+- **stash pop conflict** — `git stash pop` has conflicts. Read each conflicted file, understand both sides, and merge intelligently — keep the deployed code for structural changes (config, migrations), keep the stashed changes for business logic. If irreconcilable, save to `/tmp/unstashed.patch` and report.
 
 ## Recovery
 

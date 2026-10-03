@@ -53,7 +53,7 @@ Use for OneSignal push, email, or SMS messages; users, aliases, tags, or subscri
 
 ## Permissions
 
-Permissions are skill-local; Felix adds the `onesignal:` namespace when it evaluates grants.
+Permissions are skill-local; the runtime adds the `onesignal:` namespace when it evaluates grants.
 
 - `read` — inspect app inventory, users, subscriptions, messages, outcomes, or message history.
 - `send` — submit a OneSignal message through `POST /notifications`.
@@ -63,7 +63,7 @@ Use `send` for message submission even though the API uses `POST`. Every send an
 
 ## Workflow
 
-1. **Authorize.** Read the server-computed `permissions_per_skill` row for `onesignal`; treat `have=[...]` as authoritative. Map the request to the narrowest permission above. If it is under `need=[...]`, emit exactly one `PERMISSION_REQUIRED` block using Felix’s output contract and stop.
+1. **Authorize.** Read the server-computed `permissions_per_skill` row for `onesignal`; treat `have=[...]` as authoritative. Map the request to the narrowest permission above. If it is under `need=[...]`, emit exactly one `PERMISSION_REQUIRED` block using the runtime’s output contract and stop.
    Completion: the required permission is authorized, or the complete permission request is emitted.
 2. **Resolve the app and target.** Resolve the exact `ONESIGNAL_APP_ID`, channel, user alias, subscription ID, segment/filter, message ID, or organization scope. The App ID is public but still must be exact; never infer it from a workspace name, an organization name, or a credential.
    Completion: one concrete app boundary, operation, and target scope are resolved.
@@ -80,7 +80,7 @@ Use `send` for message submission even though the API uses `POST`. Every send an
 
 ## Environment
 
-Felix injects the declared variables before the turn. Use `ONESIGNAL_APP_API_KEY` only as an app-scoped credential and `ONESIGNAL_ORG_API_KEY` only for organization-scoped app inventory. Never print, persist, place in URLs, or log either key.
+The runtime injects the declared variables before the turn. Use `ONESIGNAL_APP_API_KEY` only as an app-scoped credential and `ONESIGNAL_ORG_API_KEY` only for organization-scoped app inventory. Never print, persist, place in URLs, or log either key.
 
 OneSignal’s API host is `https://api.onesignal.com`. Use `ONESIGNAL_API_BASE_URL` only for an explicitly configured compatible host.
 

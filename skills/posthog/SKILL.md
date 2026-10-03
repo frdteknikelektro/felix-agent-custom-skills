@@ -50,7 +50,7 @@ Activate when the user asks to query PostHog events, manage feature flags, view/
 
 Use the requested intent and the likely PostHog effect to choose the required permission:
 
-Request the bare permission shown below; Felix stores grants under this skill id.
+Request the bare permission shown below; the runtime stores grants under this skill id.
 
 - `posthog.read` — inspection, listing, viewing, searching, querying, downloading exports. Examples: list projects, list organizations, view insight, get feature flag, list events, query person, run HogQL query, list session recordings, get dashboard, view annotation, list cohorts, view survey, get experiment results, list event definitions, list property definitions.
 - `posthog.write` — creating, updating, or deleting anything in PostHog. Examples: create feature flag, toggle flag, update cohort, delete dashboard, capture event, create insight, patch person properties, set annotation, launch experiment, create survey.

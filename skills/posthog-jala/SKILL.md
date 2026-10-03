@@ -50,7 +50,7 @@ Activate when the user asks to query PostHog specifically for Jala's organizatio
 
 ## Permissions
 
-Same permission policy as the base `posthog` skill. Request the bare permission shown below; Felix stores grants under this skill id.
+Same permission policy as the base `posthog` skill. Request the bare permission shown below; the runtime stores grants under this skill id.
 
 - `posthog.read` — inspection, listing, viewing, searching, querying, downloading.
 - `posthog.write` — create, update, delete, toggle, launch, patch.

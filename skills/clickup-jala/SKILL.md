@@ -33,7 +33,7 @@ Activate when the user asks to interact with Jala's ClickUp workspace. Trigger w
 
 ## Permissions
 
-Same permission policy as the base `clickup` skill. Request the bare permission shown below; Felix stores grants under this skill id.
+Same permission policy as the base `clickup` skill. Request the bare permission shown below; the runtime stores grants under this skill id.
 
 - `tasks.read` — inspect, list, view, search tasks and their fields.
 - `tasks.write` — create, update, delete, comment on tasks, change status, set fields.

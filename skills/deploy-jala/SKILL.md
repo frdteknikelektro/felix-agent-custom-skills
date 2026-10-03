@@ -34,7 +34,7 @@ Activate when the user asks to deploy, ship, or release any Jala product. Trigge
 
 ## Permissions
 
-Request the bare permission shown below; Felix stores grants under this skill id.
+Request the bare permission shown below; the runtime stores grants under this skill id.
 
 - `deploy.write` — execute deploy commands, restart services, pull code on servers.
 

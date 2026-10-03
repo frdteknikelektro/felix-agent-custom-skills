@@ -125,7 +125,7 @@ After deploy, confirm the application is responding on the deployed server:
 - **pnpm install fails** — dependency conflict or lock file mismatch. Report the error output.
 - **pnpm build fails** — build error. Report the error; do not retry without fixing the underlying issue.
 - **pm2 restart fails** — process not found. Check if pm2 is running.
-- **stash pop conflict** — `git stash pop` has conflicts. Felix will read each conflicted file, understand both sides, and merge intelligently — keep the deployed code for structural changes (config, lock files), keep the stashed changes for business logic. If irreconcilable, save to `/tmp/unstashed.patch` and report.
+- **stash pop conflict** — `git stash pop` has conflicts. Read each conflicted file, understand both sides, and merge intelligently — keep the deployed code for structural changes (config, lock files), keep the stashed changes for business logic. If irreconcilable, save to `/tmp/unstashed.patch` and report.
 
 ## Recovery
 

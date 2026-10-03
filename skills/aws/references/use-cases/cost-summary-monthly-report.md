@@ -40,7 +40,7 @@ For the default two-month report, produce:
 If charting fails after reasonable local setup, still produce the JSON exports and markdown report. State that charts were skipped and include the dependency or runtime blocker.
 
 ## Working directory
-Write generated files under the active session directory when Felix exposes one. If no active session directory is available, create a timestamped directory under:
+Write generated files under the active session directory when the runtime exposes one. If no active session directory is available, create a timestamped directory under:
 
 ```text
 workspace/reports/aws/cost-summary/<YYYYMMDDHHMMSS>-<older-month>-<latest-month>/

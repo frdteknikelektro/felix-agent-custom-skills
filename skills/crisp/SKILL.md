@@ -51,7 +51,7 @@ Use for Crisp conversations, messages, people profiles, visitor inspection, oper
 
 ## Permissions
 
-Permissions are skill-local; Felix adds the `crisp:` namespace when it evaluates grants.
+Permissions are skill-local; the runtime adds the `crisp:` namespace when it evaluates grants.
 
 - `read` — inspect websites, conversations, messages, people, visitors, operators, inboxes, campaigns, analytics, or settings.
 - `send` — send a message in an existing conversation or dispatch/test/resume a campaign when the selected Crisp route is a send operation.
@@ -61,7 +61,7 @@ Use `send` for outbound conversation messages even though Crisp uses `POST`. Eve
 
 ## Workflow
 
-1. **Authorize.** Read the server-computed `permissions_per_skill` row for `crisp`; treat `have=[...]` as authoritative. Map the request to the narrowest permission above. If it is under `need=[...]`, emit exactly one `PERMISSION_REQUIRED` block using Felix’s output contract and stop.
+1. **Authorize.** Read the server-computed `permissions_per_skill` row for `crisp`; treat `have=[...]` as authoritative. Map the request to the narrowest permission above. If it is under `need=[...]`, emit exactly one `PERMISSION_REQUIRED` block using the runtime’s output contract and stop.
    Completion: the required permission is authorized, or the complete permission request is emitted.
 2. **Resolve the workspace and target.** Confirm `CRISP_WEBSITE_ID` and the exact conversation, session, message, person, inbox, operator, campaign, or analytics scope.
    Completion: one concrete workspace boundary, operation, and target scope are resolved.
@@ -78,7 +78,7 @@ Use `send` for outbound conversation messages even though Crisp uses `POST`. Eve
 
 ## Environment
 
-Felix injects the declared variables before the turn. Keep `CRISP_TOKEN_ID` and `CRISP_TOKEN_KEY` secret. `CRISP_WEBSITE_ID` is the required exact workspace boundary.
+The runtime injects the declared variables before the turn. Keep `CRISP_TOKEN_ID` and `CRISP_TOKEN_KEY` secret. `CRISP_WEBSITE_ID` is the required exact workspace boundary.
 
 Crisp’s API host is `https://api.crisp.chat`. Use `CRISP_API_BASE_URL` only for an explicitly configured compatible host.
 

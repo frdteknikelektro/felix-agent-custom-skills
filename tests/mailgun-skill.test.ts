@@ -13,7 +13,7 @@ describe("mailgun skill", () => {
     expect(skillMarkdown).toContain("secret: true");
     expect(skillMarkdown).toContain("MAILGUN_API_BASE_URL");
     expect(skillMarkdown).toContain("MAILGUN_DOMAIN");
-    expect(skillMarkdown).toContain("Felix injects the declared variables");
+    expect(skillMarkdown).toContain("The runtime injects the declared variables");
   });
 
   it("documents region-aware endpoints and modern analytics APIs", async () => {

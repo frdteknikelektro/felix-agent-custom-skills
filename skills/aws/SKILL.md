@@ -51,7 +51,7 @@ Use cases are repeatable operating recipes. They may produce artifacts, but they
 
 Use the user's requested intent and the likely AWS effect to choose the required permission:
 
-Request the bare permission shown below; Felix stores grants under this skill id.
+Request the bare permission shown below; the runtime stores grants under this skill id.
 
 - `aws.read` — inspection, inventory, diagnostics, billing lookups, Cost Explorer reads, and commands whose purpose is to observe existing state. Examples: `list`, `get`, `describe`, `show`, `head`, `sts get-caller-identity`, `ce get-cost-and-usage`.
 - `aws.write` — create, update, delete, attach, detach, put, revoke, terminate, deploy, restore, modify, or any other operation that can change remote AWS state.

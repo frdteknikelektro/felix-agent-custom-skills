@@ -53,4 +53,4 @@ curl --fail-with-body --silent --show-error \
   --data-urlencode "limit=100"
 ```
 
-This uses the GNU `date` available in the Felix container. Prefer `/v1/analytics/logs` for new work.
+This uses the GNU `date` available in the runtime container. Prefer `/v1/analytics/logs` for new work.

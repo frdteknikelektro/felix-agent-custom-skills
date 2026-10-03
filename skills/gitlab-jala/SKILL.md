@@ -55,7 +55,7 @@ Activate when the user asks to interact with Jala's specific GitLab account (atn
 
 ## Permissions
 
-Same permission policy as the base `gitlab` skill. Request the bare permission shown below; Felix stores grants under this skill id.
+Same permission policy as the base `gitlab` skill. Request the bare permission shown below; the runtime stores grants under this skill id.
 
 - `gitlab.read` — inspection, listing, viewing, searching, downloading.
 - `gitlab.review` — commenting on existing issues or merge requests, submitting reviews, approving merge requests, requesting changes, and merging merge requests.

@@ -36,7 +36,7 @@ Use when a farmer or Jala operator asks to change, preview, apply, reset, or ver
 
 ## Permissions
 
-Request the bare permission shown below; Felix stores grants under this skill ID.
+Request the bare permission shown below; the runtime stores grants under this skill ID.
 
 - `calculation.read` — resolve targets, read contracts and contexts, preview candidates, inspect series, and verify results.
 - `calculation.write` — apply or reset a calculation after the current-turn approval gate succeeds.

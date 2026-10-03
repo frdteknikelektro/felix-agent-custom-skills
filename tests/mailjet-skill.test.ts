@@ -14,7 +14,7 @@ describe("mailjet skill", () => {
     expect(skillMarkdown).toContain("secret: true");
     expect(skillMarkdown).toContain("MAILJET_API_BASE_URL");
     expect(skillMarkdown).toContain("Basic Auth");
-    expect(skillMarkdown).toContain("Felix injects the declared variables");
+    expect(skillMarkdown).toContain("The runtime injects the declared variables");
   });
 
   it("uses the documented skill structure and gates writes", async () => {

@@ -47,7 +47,7 @@ Use for Mailjet transactional sends, contacts, contact lists, sender validation,
 
 ## Permissions
 
-Permissions are skill-local; Felix adds the `mailjet:` namespace when it evaluates grants.
+Permissions are skill-local; the runtime adds the `mailjet:` namespace when it evaluates grants.
 
 - `read` — inspect senders, DNS records, contacts, lists, templates, messages, event callbacks, or statistics.
 - `send` — submit transactional messages through Send API v3.1.
@@ -57,7 +57,7 @@ Use `send` for message submission even though the API uses `POST`. Use `write` f
 
 ## Workflow
 
-1. **Authorize.** Read the server-computed `permissions_per_skill` row for `mailjet`; treat `have=[...]` as authoritative. Map the request to the narrowest permission above. If it is under `need=[...]`, emit exactly one `PERMISSION_REQUIRED` block using Felix’s output contract and stop.
+1. **Authorize.** Read the server-computed `permissions_per_skill` row for `mailjet`; treat `have=[...]` as authoritative. Map the request to the narrowest permission above. If it is under `need=[...]`, emit exactly one `PERMISSION_REQUIRED` block using the runtime’s output contract and stop.
    Completion: the required permission is authorized, or the complete permission request is emitted.
 2. **Resolve the target.** Determine the exact operation, validated sender, recipients, message content or template, contact/list IDs, message ID, callback URL, and statistics filters from the request and environment.
    Completion: one concrete target and operation are resolved.
@@ -72,7 +72,7 @@ Use `send` for message submission even though the API uses `POST`. Use `write` f
 
 ## Environment
 
-Felix injects the declared variables before the turn. Use `MAILJET_API_KEY` as the Basic Auth username and `MAILJET_SECRET_KEY` as the password; keep both out of replies, files, URLs, and logs.
+The runtime injects the declared variables before the turn. Use `MAILJET_API_KEY` as the Basic Auth username and `MAILJET_SECRET_KEY` as the password; keep both out of replies, files, URLs, and logs.
 
 Mailjet’s REST API base URL is `https://api.mailjet.com`. Use `MAILJET_API_BASE_URL` only for an explicitly configured compatible host.
 

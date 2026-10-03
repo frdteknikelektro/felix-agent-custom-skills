@@ -45,7 +45,7 @@ Use for Mailgun email or MIME sends, domain and DNS-status work, suppressions, r
 
 ## Permissions
 
-Permissions are skill-local; Felix adds the `mailgun:` namespace when it evaluates grants.
+Permissions are skill-local; the runtime adds the `mailgun:` namespace when it evaluates grants.
 
 - `read` — inspect or query domains, DNS status, suppressions, routes, webhooks, templates, stored messages, logs, events, or metrics.
 - `send` — submit an email or MIME message for delivery.
@@ -55,7 +55,7 @@ Use `send` for a message submission even though the API uses `POST`. Use `write`
 
 ## Workflow
 
-1. **Authorize.** Read the server-computed `permissions_per_skill` row for `mailgun`; treat `have=[...]` as authoritative. Map the request to the narrowest permission above. If it is under `need=[...]`, emit exactly one `PERMISSION_REQUIRED` block using Felix’s output contract and stop.
+1. **Authorize.** Read the server-computed `permissions_per_skill` row for `mailgun`; treat `have=[...]` as authoritative. Map the request to the narrowest permission above. If it is under `need=[...]`, emit exactly one `PERMISSION_REQUIRED` block using the runtime’s output contract and stop.
    Completion: the required permission is authorized, or the complete permission request is emitted.
 2. **Resolve the target.** Determine the exact operation, domain, region, recipients, sender, and content from the request and environment. Require a confirmed domain for sending and domain-scoped work; ask one focused question when a missing value changes the safe target.
    Completion: one concrete target and region are resolved.
@@ -70,7 +70,7 @@ Use `send` for a message submission even though the API uses `POST`. Use `write`
 
 ## Environment
 
-Felix injects the declared variables before the turn. Read them directly; keep `MAILGUN_API_KEY` in the process environment and out of replies, files, URLs, and logs.
+The runtime injects the declared variables before the turn. Read them directly; keep `MAILGUN_API_KEY` in the process environment and out of replies, files, URLs, and logs.
 
 - US: `https://api.mailgun.net`
 - EU: `https://api.eu.mailgun.net`
@@ -94,7 +94,7 @@ Use multipart `-F` fields for `/messages`, form encoding where a reference speci
 - Require an exact sender, recipient scope, and content for every send. Test mode still needs an exact recipient and `send` permission.
 - Before an update, rename, copy to an existing destination, import, or delete, confirm the exact domain, route, webhook, template, suppression record, or queued-message target immediately before execution when existing state can be overwritten or removed.
 - Prefer current Logs and Metrics APIs. Use legacy Events or Stats only when requested or required by an existing workflow, and label them deprecated.
-- When saving a response or stored message as a file, apply Felix’s Workspace placement contract and attach only the requested artifact.
+- When saving a response or stored message as a file, apply the runtime’s Workspace placement contract and attach only the requested artifact.
 - Report API method, redacted path, status, and error detail on failure; never claim a state that was not observed.
 
 Route Mailgun work through this skill instead of embedding Mailgun credentials or API calls in another skill.

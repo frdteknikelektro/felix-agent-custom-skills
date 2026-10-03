@@ -52,11 +52,11 @@ This overlay does not define a canonical Jala App ID or organization.
 
 ## Permissions
 
-Use the base skill’s local `read`, `send`, and `write` permissions. Felix evaluates grants under `onesignal-jala:` for this overlay. The base skill’s confirmation rule applies to every Jala send and state-changing write; cancellation and deletion require destructive confirmation.
+Use the base skill’s local `read`, `send`, and `write` permissions. The runtime evaluates grants under `onesignal-jala:` for this overlay. The base skill’s confirmation rule applies to every Jala send and state-changing write; cancellation and deletion require destructive confirmation.
 
 ## Workflow
 
-1. **Authorize.** Resolve the operation against this skill’s local permission using Felix’s server-computed `permissions_per_skill` row. If it is under `need=[...]`, emit one `PERMISSION_REQUIRED` block with skill `onesignal-jala` and stop.
+1. **Authorize.** Resolve the operation against this skill’s local permission using the runtime’s server-computed `permissions_per_skill` row. If it is under `need=[...]`, emit one `PERMISSION_REQUIRED` block with skill `onesignal-jala` and stop.
    Completion: the operation permission is authorized, or the complete permission request is emitted.
 2. **Map credentials.** Before any OneSignal API call, map only the Jala variables:
 

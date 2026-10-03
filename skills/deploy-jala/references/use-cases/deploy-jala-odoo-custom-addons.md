@@ -116,7 +116,7 @@ After deploy, confirm the Odoo service is running on the deployed server:
 - **sudo su odoo fails** — odoo user may not exist or sudo permissions issue. Report the error.
 - **git pull fails** — branch may not exist or remote has changed. Check branch name.
 - **service restart fails** — service name may be wrong or Odoo config has errors. Report the error output.
-- **stash pop conflict** — `git stash pop` has conflicts. Felix will read each conflicted file, understand both sides, and merge intelligently — keep the deployed code for structural changes (config), keep the stashed changes for business logic. If irreconcilable, save to `/tmp/unstashed.patch` and report.
+- **stash pop conflict** — `git stash pop` has conflicts. Read each conflicted file, understand both sides, and merge intelligently — keep the deployed code for structural changes (config), keep the stashed changes for business logic. If irreconcilable, save to `/tmp/unstashed.patch` and report.
 
 ## Recovery
 

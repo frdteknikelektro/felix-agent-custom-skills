@@ -45,7 +45,7 @@ Activate when the user asks to interact with GitLab repositories, issues, merge 
 
 Use the requested intent and the likely GitLab effect to choose the required permission:
 
-Request the bare permission shown below; Felix stores grants under this skill id.
+Request the bare permission shown below; the runtime stores grants under this skill id.
 
 - `gitlab.read` — inspection, listing, viewing, searching, downloading, and commands whose purpose is to observe existing state. Examples: `repo list`, `repo view`, `issue list`, `issue view`, `mr list`, `mr view`, `mr diff`, `mr approvers`, `release list`, `release view`, `release download`, `ci list`, `ci view`, `ci trace`, `ci status`, `variable list`, `snippet list`, `snippet view`, `auth status`, `api GET`.
 - `gitlab.review` — commenting on existing issues or merge requests, submitting reviews, approving merge requests, requesting changes, merging merge requests, and other collaborative review actions that do not create, edit, or delete GitLab resources. Examples: `issue note`, `mr note`, `mr approve`, `mr approve --sha`, `mr merge`, `mr merge --squash`, `mr merge --delete-source-branch`.

@@ -45,7 +45,7 @@ Activate when the user asks to deploy, manage domains/DNS, set environment varia
 
 Use the requested intent and the likely Vercel effect to choose the required permission:
 
-Request the bare permission shown below; Felix stores grants under this skill id.
+Request the bare permission shown below; the runtime stores grants under this skill id.
 
 - `vercel.read` — inspection, listing, viewing, pulling, and commands whose purpose is to observe existing state. Examples: `ls`, `list`, `inspect`, `logs`, `whoami`, `env ls`, `env pull`, `domains ls`, `domains inspect`, `certs ls`, `projects ls`, `alias ls`, `teams ls`, `dns ls`, `integration ls`, `integration-resource ls`, `billing ls`, `target ls`.
 - `vercel.write` — deploy, create, add, remove, set, delete, promote, rollback, link, unlink, switch, verify, issue, buy, transfer, and any other operation that can change remote Vercel state.

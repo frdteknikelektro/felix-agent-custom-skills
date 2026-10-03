@@ -45,7 +45,7 @@ Activate when the user asks to interact with GitHub repositories, issues, pull r
 
 Use the requested intent and the likely GitHub effect to choose the required permission:
 
-Request the bare permission shown below; Felix stores grants under this skill id.
+Request the bare permission shown below; the runtime stores grants under this skill id.
 
 - `github.read` — inspection, listing, viewing, searching, downloading, and commands whose purpose is to observe existing state. Examples: `repo list`, `repo view`, `issue list`, `issue view`, `issue search`, `pr list`, `pr view`, `pr diff`, `release list`, `release view`, `release download`, `run list`, `run view`, `run watch`, `workflow list`, `secret list`, `variable list`, `gist list`, `gist view`, `search`, `auth status`, `api GET`.
 - `github.review` — commenting on existing issues or pull requests, submitting reviews, approving pull requests, requesting changes, merging pull requests, and other collaborative review actions that do not create, edit, or delete GitHub resources. Examples: `issue comment`, `pr review --approve`, `pr review --comment`, `pr review --request-changes`, `pr merge`, `pr merge --squash`, `pr merge --rebase`.

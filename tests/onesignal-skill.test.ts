@@ -15,7 +15,7 @@ describe("onesignal skill", () => {
     expect(skillMarkdown).toContain("ONESIGNAL_ORG_API_KEY");
     expect(skillMarkdown).toContain("secret: true");
     expect(skillMarkdown).toContain("Authorization: Key");
-    expect(skillMarkdown).toContain("Felix injects the declared variables");
+    expect(skillMarkdown).toContain("The runtime injects the declared variables");
   });
 
   it("uses the documented Felix skill structure and safety gates", async () => {

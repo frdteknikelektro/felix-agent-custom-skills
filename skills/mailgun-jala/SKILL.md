@@ -43,11 +43,11 @@ Use when the request names Jala Mailgun, Jala email, a Jala sending domain, or J
 
 ## Permissions
 
-Use the base skill’s local `read`, `send`, and `write` permissions. Felix evaluates grants under `mailgun-jala:` for this overlay. The base skill’s explicit confirmation rule applies to every Jala update, rename, copy to an existing destination, import, or deletion that can overwrite or remove existing state.
+Use the base skill’s local `read`, `send`, and `write` permissions. The runtime evaluates grants under `mailgun-jala:` for this overlay. The base skill’s explicit confirmation rule applies to every Jala update, rename, copy to an existing destination, import, or deletion that can overwrite or remove existing state.
 
 ## Workflow
 
-1. **Authorize.** Resolve the operation against this skill’s local permission using Felix’s server-computed `permissions_per_skill` row. If it is under `need=[...]`, emit one `PERMISSION_REQUIRED` block with skill `mailgun-jala` and stop.
+1. **Authorize.** Resolve the operation against this skill’s local permission using the runtime’s server-computed `permissions_per_skill` row. If it is under `need=[...]`, emit one `PERMISSION_REQUIRED` block with skill `mailgun-jala` and stop.
    Completion: the operation permission is authorized, or the complete permission request is emitted.
 2. **Map credentials.** Before any Mailgun API call, map only the Jala variables:
 

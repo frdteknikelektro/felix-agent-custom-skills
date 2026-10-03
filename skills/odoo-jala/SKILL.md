@@ -65,7 +65,7 @@ Activate when the user asks to interact with Jala's Odoo ERP — query records, 
 
 Use the requested intent and the likely Odoo effect to choose the required permission:
 
-Request the bare permission shown below; Felix stores grants under this skill id.
+Request the bare permission shown below; the runtime stores grants under this skill id.
 
 - `odoo.read` — searching, reading, counting, inspecting fields, downloading reports, and operations whose purpose is to observe existing data. Methods: `search_read`, `read`, `search_count`, `fields_get`, `render_report`.
 - `odoo.write` — create, update, delete, and any operation that can change Odoo state. Methods: `create`, `write`, `unlink`.

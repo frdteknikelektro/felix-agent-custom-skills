@@ -41,7 +41,7 @@ Activate when the user asks to operate specifically on Jala's Vercel account. Tr
 
 ## Permissions
 
-Same permission policy as the base `vercel` skill. Request the bare permission shown below; Felix stores grants under this skill id.
+Same permission policy as the base `vercel` skill. Request the bare permission shown below; the runtime stores grants under this skill id.
 
 - `vercel.read` — inspection, listing, viewing, pulling.
 - `vercel.write` — deploy, create, add, remove, set, delete, promote, rollback, link, unlink.

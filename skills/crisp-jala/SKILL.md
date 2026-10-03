@@ -46,11 +46,11 @@ Use when the request names Jala Crisp, Jala conversations, Jala Crisp messages, 
 
 ## Permissions
 
-Use the base skill’s local `read`, `send`, and `write` permissions. Felix evaluates grants under `crisp-jala:` for this overlay. The base skill’s confirmation rule applies to every Jala send and state-changing write; destructive confirmation applies to every Jala deletion.
+Use the base skill’s local `read`, `send`, and `write` permissions. The runtime evaluates grants under `crisp-jala:` for this overlay. The base skill’s confirmation rule applies to every Jala send and state-changing write; destructive confirmation applies to every Jala deletion.
 
 ## Workflow
 
-1. **Authorize.** Resolve the operation against this skill’s local permission using Felix’s server-computed `permissions_per_skill` row. If it is under `need=[...]`, emit one `PERMISSION_REQUIRED` block with skill `crisp-jala` and stop.
+1. **Authorize.** Resolve the operation against this skill’s local permission using the runtime’s server-computed `permissions_per_skill` row. If it is under `need=[...]`, emit one `PERMISSION_REQUIRED` block with skill `crisp-jala` and stop.
    Completion: the operation permission is authorized, or the complete permission request is emitted.
 2. **Map credentials.** Before any Crisp API call, map only the Jala variables:
 

@@ -55,7 +55,7 @@ Activate when the user asks to interact with Jala's specific GitHub account (Atn
 
 ## Permissions
 
-Same permission policy as the base `github` skill. Request the bare permission shown below; Felix stores grants under this skill id.
+Same permission policy as the base `github` skill. Request the bare permission shown below; the runtime stores grants under this skill id.
 
 - `github.read` — inspection, listing, viewing, searching, downloading.
 - `github.review` — commenting on existing issues or pull requests, submitting reviews, approving pull requests, requesting changes, and merging pull requests.
