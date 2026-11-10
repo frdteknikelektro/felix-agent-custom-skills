@@ -1,13 +1,13 @@
 ---
 name: jali-staging
-description: ALWAYS ACTIVE for Jali staging work. Prefer this overlay over jali for staging authentication, credential renewal, and JALA reads or changes; use only JALI_STAGING_JALA_BASE_URL and session-scoped credentials.
+description: ALWAYS ACTIVE for Jali staging work. Prefer this overlay over jali for staging authentication, credential renewal, and JALA reads or changes; require JALI_JALA_BASE_URL to point at staging and use session-scoped credentials.
 metadata:
   author: felix-agent
   kind: operational
   version: "2.0.0"
 env:
-  - key: JALI_STAGING_JALA_BASE_URL
-    description: Required staging JALA HTTPS origin without /api, e.g. https://staging-app.jala.tech
+  - key: JALI_JALA_BASE_URL
+    description: Required JALA HTTPS origin for this staging deployment: https://staging-app.jala.tech
     required: true
     secret: false
 ---
@@ -49,27 +49,28 @@ secret-handling permission rules. This overlay grants no additional authority.
 ## Workflow
 
 1. Confirm the base skill is installed. If missing, report the dependency.
-2. Before **every** base helper command, map staging variables in the same shell
-   invocation as that command. Run from the base skill folder:
+2. Before **every** base helper command, confirm `JALI_JALA_BASE_URL` is set to
+   `https://staging-app.jala.tech`. Run from the base skill folder:
 
    ```bash
-   export JALI_JALA_BASE_URL="${JALI_STAGING_JALA_BASE_URL:?Configure JALI_STAGING_JALA_BASE_URL}"
+   test "${JALI_JALA_BASE_URL:-}" = "https://staging-app.jala.tech" || { echo "Configure JALI_JALA_BASE_URL for staging" >&2; exit 1; }
    python3 scripts/jali.py --event-file <current_event> status
    ```
 
    Replace `status` with the base command for the selected operation. Repeat
-   the mapping for authenticate, request, renewal and disconnect; shell state
-   is not assumed to persist. A missing/empty staging URL stops the command.
+   the origin check for authenticate, request, renewal and disconnect. A
+   missing or non-staging URL stops the command.
 3. Follow the base skill and selected use case with the mapped environment.
    Return only safe helper results; preserve its identity checks, redaction,
    verification and uncertain-write behavior.
 
 ## Environment
 
-The Owner configures `JALI_STAGING_JALA_BASE_URL`, for example
-`https://staging-app.jala.tech`. Supply an HTTPS origin without `/api`, path,
-query, fragment or embedded credentials. All staging profile validation and
-JALA requests must use that configured origin.
+The Owner configures `JALI_JALA_BASE_URL` on the staging deployment as
+`https://staging-app.jala.tech`. Production uses the same variable name on its
+own deployment with `https://app.jala.tech`. Supply an HTTPS origin without
+`/api`, path, query, fragment or embedded credentials. All staging profile
+validation and JALA requests must use the staging origin.
 
 The base helper retains each session's accepted native upload and stores a
 secret-free pointer in that session. No shared private credential directory or

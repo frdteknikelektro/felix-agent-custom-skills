@@ -50,7 +50,7 @@ npm test
 | 📊 `posthog-jala` | `posthog` | Jala PostHog orgs (10590, 28053) — same operations with `POSTHOG_JALA_PERSONAL_KEY` |
 | ⚡ `vercel-jala` | `vercel` | Jala Vercel account — same operations with `VERCEL_JALA_TOKEN` |
 | 🛠️ `software-development-jala` | `software-development` | Jala software-development overlay — routes repo work through project workflow profiles |
-| `jali-staging` | `jali` | Jali staging overlay — maps `JALI_STAGING_JALA_BASE_URL` into the base helper with session-scoped credentials |
+| `jali-staging` | `jali` | Jali staging overlay — requires `JALI_JALA_BASE_URL` to point at staging and uses session-scoped credentials |
 
 ### ⚙️ Standalone Jala Skills
 
