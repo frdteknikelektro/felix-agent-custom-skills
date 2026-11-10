@@ -4,12 +4,13 @@ description: ALWAYS ACTIVE in the Jali deployment. Use every turn to check the c
 metadata:
   author: felix-agent
   kind: operational
-  version: "1.0.0"
+  version: "2.0.0"
 env:
-  - key: JALI_PRIVATE_DIR
-    description: Private persistent credential directory outside WORKSPACE_DIR; defaults to /run/jali-private
+  - key: JALI_JALA_BASE_URL
+    description: HTTPS JALA origin without /api; defaults to https://app.jala.tech
     required: false
     secret: false
+    default: https://app.jala.tech
 ---
 
 # Jali
@@ -32,7 +33,7 @@ a new thread.
   **jali-auth.json** file. Read [authentication](references/authentication.md)
   before collection or consumption. Use `secrets-handling` when collecting
   missing credentials; retain its permissions/consent and opaque-value rules.
-- `private_store_unavailable` or `store_unavailable`: stop dependent JALA work
+- `store_unavailable`: stop dependent JALA work
   for Owner repair; a storage failure is not missing authentication.
 - `identity_mismatch`: stop. A different profile must not replace this sender's
   established identity.
@@ -52,7 +53,7 @@ requester receives the appropriate authentication/setup next step.
 Read the linked case before its operation:
 
 - [Authenticate a new thread](references/use-cases/authenticate-thread.md):
-  welcome, fixed file format, validation, private persistence and cleanup.
+  automatic upload, validation and session-scoped persistence.
 - [Read JALA data](references/use-cases/read-data.md): profile/farm lookup,
   selecting the requested resource and reporting actual API results.
 - [Change JALA data](references/use-cases/change-data.md): resolve the endpoint,
@@ -78,19 +79,37 @@ skills such as secrets-handling, or grant Owner authority.
 
 ## Storage and scope
 
-The Owner configures `JALI_PRIVATE_DIR` (default `/run/jali-private`) as a private
-persistent mount **outside WORKSPACE_DIR**. `auth.json` stores user credentials
-under `jala-<verified profile id>`, sender bindings, and explicit per-thread
-authentication. Only the helper reads/writes it; writes use a process lock and
-atomic replacement, with restrictive file modes. Do not share or inspect it.
+`JALI_JALA_BASE_URL` selects the deployment's JALA HTTPS origin (default
+`https://app.jala.tech`). The helper appends `/api/...`; configure an origin,
+not a URL ending in `/api`. A configured invalid/empty origin stops requests
+with `invalid_jala_base_url`, without falling back to production. Each deployment belongs to one JALA environment. An origin change requires
+a fresh session and authentication.
 
-Every new thread needs its own authentication upload, even for a known user.
-Threads for the same verified user use that user's latest valid saved credential;
-a successful renewal updates it for those threads without authenticating new
-ones. Disconnect removes the current thread's binding, not the user's Felix key.
+Each thread retains its accepted native attachment under its own
+`attachments/api-inputs/file_<uuid>.bin`. The helper stores only the active
+file ID, verified identity, origin, status and revision in `.jali/auth-state.json`
+inside that thread. Credentials are never copied into a global JSON store.
+The session directory lives in the existing persistent container home storage.
 
-Event selection and secret hiding are instruction-driven, as in Notakuy's helper
-workflow. This is not filesystem/process isolation against an unrestricted shell.
-Felix contact/API-key provisioning remains with the app or Owner through existing
-Owner APIs. This skill needs no Owner password, changes no contact permissions,
-and never rotates/revokes the persistent Felix key on thread authentication.
+Every new thread needs its own upload. A new `jali-auth.json` may also arrive
+in the middle of the same thread: validate it before switching, reject another
+identity, then delete the superseded file bytes. Renewal and disconnect affect
+only this thread; other threads retain their own credentials.
+
+Event selection and secret hiding are instruction-driven, not OS isolation.
+Contact/key provisioning belongs to the app/Owner. The app rotates a key on
+login, like Notakuy; this skill never rotates it during JALA authentication.
+
+## Widget protocol
+
+For an input beginning `[[jali-internal:init:`, initialize without accessing
+JALA and reply `Ready.` Do not ask for manual credentials: the widget will upload.
+For an input beginning `[[jali-internal:auth:`, process the referenced attachment
+through the helper. End the reply with exactly `<jali-auth>` followed by the
+helper's safe JSON result and `</jali-auth>`. Include its actual file_id and
+user_id on success. Never infer success from a completed turn or substitute
+another attachment. For auth failure with no file_id in the helper result,
+include the referenced attachment's file ID and safe failure status only.
+
+For widget operations, read [BYOP widget](references/use-cases/byop-widget.md).
+Preserve `[[jali-op:...]]` operation identity without echoing the prefix in replies.

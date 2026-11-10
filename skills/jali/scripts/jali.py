@@ -2,7 +2,7 @@
 """Instruction-bound Jali helper. Secret values stay inside this process.
 
 Current event selection is governed by the skill, not an OS security boundary.
-The private JSON directory must be outside the shared model Workspace.
+Credentials remain opaque session uploads; the local state stores only file references.
 """
 import argparse
 from contextlib import contextmanager
@@ -21,7 +21,6 @@ import urllib.parse
 import urllib.request
 import uuid
 
-ORIGIN = 'https://app.jala.tech'
 LIMIT = 4 * 1024 * 1024
 
 
@@ -32,6 +31,21 @@ class Refused(Exception):
 def require(condition, code):
     if not condition:
         raise Refused(code)
+
+
+def api_origin():
+    value = os.environ.get('JALI_JALA_BASE_URL', 'https://app.jala.tech')
+    try:
+        parsed = urllib.parse.urlsplit(value)
+        valid = (value == value.strip() and not any(c.isspace() for c in value) and
+                 not any(c in value for c in ('\\', '?', '#')) and
+                 parsed.scheme == 'https' and bool(parsed.hostname) and
+                 parsed.username is None and parsed.password is None and
+                 parsed.path in ('', '/') and parsed.port != 0)
+        require(valid, 'invalid_jala_base_url')
+    except ValueError:
+        raise Refused('invalid_jala_base_url') from None
+    return value.rstrip('/')
 
 
 def unique(pairs):
@@ -114,16 +128,13 @@ console.log(JSON.stringify({type:e.type,source:e.source,sender:e.sender,
 
 
 class Store:
-    def __init__(self, workspace):
-        self.root = Path(os.environ.get('JALI_PRIVATE_DIR', '/run/jali-private'))
-        require(self.root.is_absolute() and not self.root.is_symlink(), 'private_store_unavailable')
-        require(not self.root.resolve().is_relative_to(workspace), 'private_store_unavailable')
-        try:
-            self.root.mkdir(mode=0o700, parents=True, exist_ok=True)
-            self.root.chmod(0o700)
-        except OSError:
-            raise Refused('private_store_unavailable') from None
-        self.file = self.root / 'auth.json'
+    def __init__(self, ctx):
+        self.ctx = ctx
+        self.root = ctx['thread_dir'] / '.jali'
+        require(not self.root.is_symlink(), 'store_unavailable')
+        self.root.mkdir(mode=0o700, exist_ok=True)
+        self.root.chmod(0o700)
+        self.file = self.root / 'auth-state.json'
 
     @contextmanager
     def locked(self):
@@ -132,17 +143,15 @@ class Store:
         with os.fdopen(fd, 'r+') as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
             require(not self.file.is_symlink(), 'store_unavailable')
+            data = {}
             if self.file.exists():
                 try:
-                    data = read_json(self.file, 16 * 1024 * 1024)
+                    data = read_json(self.file, 65536)
+                    require(isinstance(data, dict) and data.get('version') == 2 and
+                            data.get('sender') == self.ctx['sender_key'] and
+                            data.get('thread') == self.ctx['thread_key'], 'store_unavailable')
                 except (Refused, OSError):
                     raise Refused('store_unavailable') from None
-                require(isinstance(data, dict) and data.get('version') == 1 and
-                        set(data) == {'version', 'users', 'senders', 'threads'} and
-                        all(isinstance(data[k], dict) for k in ('users', 'senders', 'threads')),
-                        'store_unavailable')
-            else:
-                data = {'version': 1, 'users': {}, 'senders': {}, 'threads': {}}
             yield data
 
     def save(self, data):
@@ -157,6 +166,41 @@ class Store:
         finally:
             if os.path.exists(temporary):
                 os.unlink(temporary)
+
+
+def upload(ctx, file_id):
+    require(isinstance(file_id, str) and re.fullmatch(r'file_[a-f0-9-]{36}', file_id), 'invalid_auth_file')
+    base = ctx['thread_dir'] / 'attachments' / 'api-inputs'
+    metadata = read_json(safe_file(base / (file_id + '.json'), base), 65536)
+    require(metadata.get('id') == file_id and metadata.get('filename') == 'jali-auth.json' and
+            isinstance(metadata.get('session_id'), str), 'invalid_auth_file')
+    file = safe_file(base / (file_id + '.bin'), base)
+    require(file.stat().st_size == metadata.get('size_bytes'), 'invalid_auth_file')
+    return file, metadata
+
+
+def clean_superseded(ctx, data):
+    for file_id in data.get('superseded', []):
+        if file_id == data.get('file_id'):
+            continue
+        try:
+            file, _ = upload(ctx, file_id)
+            file.unlink(missing_ok=True)
+        except FileNotFoundError:
+            pass
+
+
+def active(ctx, data):
+    require(data.get('origin') == api_origin() and data.get('status') == 'authenticated',
+            'authentication_required')
+    require(ctx['source'] == 'api' and ctx['sender_id'] == data.get('user_id'), 'identity_mismatch')
+    try:
+        file, metadata = upload(ctx, data.get('file_id'))
+        require(metadata['session_id'] == data.get('session_id'), 'invalid_auth_file')
+        auth = credential(read_json(file, 65536))
+    except (OSError, Refused):
+        raise Refused('authentication_required') from None
+    return auth
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -194,7 +238,7 @@ def call_api(auth, method, route, query=None, body=None):
         query['cache_key'] = secret
     else:
         headers['Authorization'] = 'Bearer ' + secret
-    url = ORIGIN + route + ('?' + urllib.parse.urlencode(query) if query else '')
+    url = api_origin() + route + ('?' + urllib.parse.urlencode(query) if query else '')
     if body is not None:
         require(method != 'GET', 'invalid_operation')
         headers['Content-Type'] = 'application/json'
@@ -216,60 +260,63 @@ def call_api(auth, method, route, query=None, body=None):
 
 
 def authenticate(ctx, store, supplied):
-    file = safe_file(supplied, ctx['thread_dir'] / 'attachments')
+    file = safe_file(supplied, ctx['thread_dir'] / 'attachments' / 'api-inputs')
     matches = [a for a in ctx['attachments'] if isinstance(a, dict) and
                a.get('filename') == 'jali-auth.json' and a.get('local_path') and
-               Path(a['local_path']).resolve() == file.resolve()]
+               Path(a['local_path']).resolve() == file.resolve() and a.get('file_id')]
     require(len(matches) == 1, 'auth_attachment_required')
-    # Once bound to this authorized upload, consume/clean only this file.
-    try:
-        auth = credential(read_json(file, 65536))
-        result = call_api(auth, 'GET', '/api/profile')
-        profile = result.get('data') if isinstance(result, dict) else None
-        require(isinstance(profile, dict), 'invalid_profile')
-        user_id = str(profile.get('id', ''))
-        require(re.fullmatch(r'[1-9][0-9]*', user_id), 'invalid_profile')
-        key = 'jala-' + user_id
-        if ctx['source'] == 'api' and ctx['sender_id'].startswith('jala-'):
-            require(ctx['sender_id'] == key, 'identity_mismatch')
-        with store.locked() as data:
-            known = data['senders'].get(ctx['sender_key'])
-            require(known is None or known == key, 'identity_mismatch')
-            data['senders'][ctx['sender_key']] = key
-            data['users'][key] = {'credential': auth, 'revision': uuid.uuid4().hex,
-                                  'profile': {'id': user_id, 'name': profile.get('name', '')}}
-            data['threads'][ctx['thread_key']] = {'user': key}
-            store.save(data)
-        return {'status': 'authenticated', 'user_id': key}
-    finally:
-        file.unlink(missing_ok=True)
-
-
-def authenticated(ctx, data):
-    binding = data['threads'].get(ctx['thread_key'])
-    require(isinstance(binding, dict), 'authentication_required')
-    user = binding.get('user')
-    require(data['senders'].get(ctx['sender_key']) == user, 'identity_mismatch')
-    record = data['users'].get(user)
-    require(isinstance(record, dict) and record.get('credential'), 'authentication_required')
-    credential(record['credential'])
-    return user, record
+    file_id = matches[0]['file_id']
+    verified, metadata = upload(ctx, file_id)
+    require(verified == file, 'auth_attachment_required')
+    with store.locked() as data:
+        clean_superseded(ctx, data)
+        if data.get('file_id') == file_id and data.get('status') == 'authenticated':
+            active(ctx, data)
+            return {'status': 'authenticated', 'user_id': data['user_id'], 'file_id': file_id}
+        try:
+            auth = credential(read_json(file, 65536))
+            result = call_api(auth, 'GET', '/api/profile')
+            profile = result.get('data') if isinstance(result, dict) else None
+            require(isinstance(profile, dict), 'invalid_profile')
+            user_id = str(profile.get('id', ''))
+            require(re.fullmatch(r'[1-9][0-9]*', user_id), 'invalid_profile')
+            key = 'jala-' + user_id
+            require(ctx['source'] == 'api' and ctx['sender_id'] == key, 'identity_mismatch')
+            require(not data or (data.get('user_id') == key and data.get('origin') == api_origin()),
+                    'identity_mismatch')
+            prior = data.get('file_id')
+            replacement = {'version': 2, 'sender': ctx['sender_key'], 'thread': ctx['thread_key'],
+                           'origin': api_origin(), 'user_id': key, 'session_id': metadata['session_id'],
+                           'file_id': file_id, 'revision': uuid.uuid4().hex,
+                           'status': 'authenticated', 'superseded': [prior] if prior else []}
+            store.save(replacement)
+        except Exception:
+            if data.get('file_id') != file_id:
+                file.unlink(missing_ok=True)
+            raise
+        clean_superseded(ctx, replacement)
+    return {'status': 'authenticated', 'user_id': key, 'file_id': file_id}
 
 
 def execute(args):
     ctx = context(args.event_file)
-    store = Store(ctx['workspace'])
+    store = Store(ctx)
     if args.command == 'authenticate':
         return authenticate(ctx, store, args.credential_file)
     with store.locked() as data:
+        clean_superseded(ctx, data)
         if args.command == 'disconnect':
-            data['threads'].pop(ctx['thread_key'], None)
-            store.save(data)
+            if data:
+                previous = data.get('file_id')
+                data.update(status='disconnected', file_id=None, revision=uuid.uuid4().hex,
+                            superseded=[previous] if previous else [])
+                store.save(data)
+                clean_superseded(ctx, data)
             return {'status': 'disconnected'}
-        user, record = authenticated(ctx, data)
+        auth = active(ctx, data)
+        user, revision = data['user_id'], data['revision']
         if args.command == 'status':
-            return {'status': 'authenticated', 'user_id': user}
-        auth, revision = record['credential'], record['revision']
+            return {'status': 'authenticated', 'user_id': user, 'file_id': data['file_id']}
     query = read_json(safe_file(args.query_file, ctx['thread_dir'] / 'work')) if args.query_file else {}
     require(isinstance(query, dict) and all(isinstance(v, (str, int, float, bool)) for v in query.values()), 'invalid_query')
     body = read_json(safe_file(args.body_file, ctx['thread_dir'] / 'work')) if args.body_file else None
@@ -277,11 +324,10 @@ def execute(args):
         result = call_api(auth, args.method, args.route, query, body)
     except Refused as error:
         if str(error) == 'authentication_required':
-            with store.locked() as data:
-                current = data['users'].get(user, {})
+            with store.locked() as current:
                 if current.get('revision') == revision:
-                    current.pop('credential', None)
-                    store.save(data)
+                    current['status'] = 'expired'
+                    store.save(current)
         raise
     return {'status': 'ok', 'data': redact(result, next(iter(auth.values())))}
 
