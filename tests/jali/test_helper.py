@@ -12,6 +12,7 @@ import unittest
 from unittest.mock import patch
 import urllib.error
 import urllib.parse
+import uuid
 
 SOURCE = Path(__file__).resolve().parents[2] / 'skills/jali/scripts/jali.py'
 spec = importlib.util.spec_from_file_location('jali_helper', SOURCE)
@@ -32,7 +33,7 @@ class HelperTests(unittest.TestCase):
         self.base = Path(self.temp.name).resolve()
         self.workspace = self.base / 'workspace'; self.workspace.mkdir()
         self.private = self.base / 'private'
-        self.environment = patch.dict(os.environ, {'WORKSPACE_DIR': str(self.workspace), 'JALI_PRIVATE_DIR': str(self.private)}, clear=False)
+        self.environment = patch.dict(os.environ, {'WORKSPACE_DIR': str(self.workspace), 'JALI_PRIVATE_DIR': str(self.private), 'JALI_JALA_BASE_URL': 'https://app.jala.tech'}, clear=False)
         self.environment.start()
         self.calls = []; self.profile_id = 123; self.reject = None
         def opened(request, timeout):
@@ -53,9 +54,12 @@ class HelperTests(unittest.TestCase):
         attachments = []
         uploaded = None
         if auth is not None:
-            uploaded = folder / 'attachments' / ('upload-' + filename)
+            file_id = 'file_' + str(uuid.uuid4())
+            base = folder / 'attachments' / 'api-inputs'; base.mkdir(exist_ok=True)
+            uploaded = base / (file_id + '.bin')
             uploaded.write_text(json.dumps(auth))
-            attachments.append({'filename': filename, 'local_path': str(uploaded)})
+            (base / (file_id + '.json')).write_text(json.dumps({'id': file_id, 'session_id': 'session_' + name, 'filename': filename, 'size_bytes': uploaded.stat().st_size}))
+            attachments.append({'file_id': file_id, 'filename': filename, 'local_path': str(uploaded)})
         data = {'type': 'source_event', 'source': 'api', 'visibility': 'dm', 'sender': {'source': 'api', 'id': sender}, 'thread_key': 'api:' + sender + ':' + name, 'attachments': attachments}
         event = folder / 'events' / 'current.md'
         event.write_text('---\n' + json.dumps(data) + '\n---\nUser message\n')
@@ -73,11 +77,14 @@ class HelperTests(unittest.TestCase):
     def test_authentication_saves_verified_user_privately_without_returning_secret(self):
         event, file = self.event(auth={'cache_key': 'fake-cache-secret'})
         result = self.authenticate(event, file)
-        self.assertEqual(result, {'status': 'authenticated', 'user_id': 'jala-123'})
-        self.assertFalse(file.exists())
+        self.assertEqual(result['status'], 'authenticated')
+        self.assertEqual(result['user_id'], 'jala-123')
+        self.assertTrue(file.exists())
         self.assertNotIn('fake-cache-secret', json.dumps(result))
-        self.assertEqual(stat.S_IMODE((self.private / 'auth.json').stat().st_mode), 0o600)
-        self.assertEqual(stat.S_IMODE(self.private.stat().st_mode), 0o700)
+        state = event.parent.parent / '.jali' / 'auth-state.json'
+        self.assertEqual(stat.S_IMODE(state.stat().st_mode), 0o600)
+        self.assertNotIn('fake-cache-secret', state.read_text())
+        self.assertEqual(stat.S_IMODE(state.parent.stat().st_mode), 0o700)
         self.assertFalse((self.workspace / 'auth.json').exists())
         query = urllib.parse.parse_qs(urllib.parse.urlparse(self.calls[0].full_url).query)
         self.assertEqual(query, {'cache_key': ['fake-cache-secret']})
@@ -99,8 +106,8 @@ class HelperTests(unittest.TestCase):
         with self.assertRaisesRegex(jali.Refused, 'identity_mismatch'):
             self.authenticate(event, file)
         self.assertFalse(file.exists())
-        data = json.loads((self.private / 'auth.json').read_text())
-        self.assertEqual(set(data['users']), {'jala-123'})
+        data = json.loads((self.workspace / 'sessions/one/.jali/auth-state.json').read_text())
+        self.assertEqual(data['user_id'], 'jala-123')
 
     def test_oauth_and_cache_key_are_exclusive_and_credentials_are_redacted_from_results(self):
         event, file = self.event(auth={'access_token': 'fake-oauth-secret'})
@@ -128,18 +135,22 @@ class HelperTests(unittest.TestCase):
     def test_duplicate_json_keys_are_rejected_opaquely(self):
         event, file = self.event(auth={'cache_key': 'x'})
         file.write_text('{"cache_key":"x","cache_key":"y"}')
+        metadata = json.loads(file.with_suffix('.json').read_text())
+        metadata['size_bytes'] = file.stat().st_size
+        file.with_suffix('.json').write_text(json.dumps(metadata))
         with self.assertRaisesRegex(jali.Refused, 'invalid_json'):
             self.authenticate(event, file)
         self.assertFalse(file.exists())
         self.assertEqual(self.calls, [])
 
-    def test_disconnect_is_thread_only_and_renewal_uses_latest_user_credential(self):
+    def test_disconnect_and_credentials_are_session_scoped(self):
         first, file = self.event(auth={'cache_key': 'first-credential'})
         self.authenticate(first, file)
         second, file = self.event('two', auth={'access_token': 'latest-credential'})
         self.authenticate(second, file)
         self.request(first)
-        self.assertEqual(self.calls[-1].get_header('Authorization'), 'Bearer latest-credential')
+        self.assertIsNone(self.calls[-1].get_header('Authorization'))
+        self.assertIn('first-credential', self.calls[-1].full_url)
         jali.execute(self.args(first, 'disconnect'))
         with self.assertRaisesRegex(jali.Refused, 'authentication_required'):
             self.request(first)
@@ -177,16 +188,14 @@ class HelperTests(unittest.TestCase):
                 self.request(event, query_file=str(query))
         self.assertEqual(len(self.calls), before)
 
-    def test_corrupt_store_and_workspace_store_do_not_silently_reset(self):
+    def test_corrupt_session_state_does_not_silently_reset(self):
         event, file = self.event(auth={'cache_key': 'fake-cache-secret'})
         self.authenticate(event, file)
-        (self.private / 'auth.json').write_text('corrupt')
+        state = event.parent.parent / '.jali' / 'auth-state.json'
+        state.write_text('corrupt')
         with self.assertRaisesRegex(jali.Refused, 'store_unavailable'):
             jali.execute(self.args(event, 'status'))
-        self.assertEqual((self.private / 'auth.json').read_text(), 'corrupt')
-        with patch.dict(os.environ, {'JALI_PRIVATE_DIR': str(self.workspace / 'private')}):
-            with self.assertRaisesRegex(jali.Refused, 'private_store_unavailable'):
-                jali.execute(self.args(event, 'status'))
+        self.assertEqual(state.read_text(), 'corrupt')
 
     def test_parallel_authentication_preserves_both_users_in_json_store(self):
         inputs = [self.event('parallel-' + str(i), sender='jala-' + str(i),
@@ -205,9 +214,9 @@ class HelperTests(unittest.TestCase):
         for worker in workers: worker.join(15)
         self.assertTrue(all(not worker.is_alive() and worker.exitcode == 0 for worker in workers))
         self.assertEqual([results.get(timeout=1), results.get(timeout=1)], ['authenticated', 'authenticated'])
-        data = json.loads((self.private / 'auth.json').read_text())
-        self.assertEqual(set(data['users']), {'jala-123', 'jala-124'})
-        self.assertEqual(len(data['threads']), 2)
+        for index in (123, 124):
+            data = json.loads((self.workspace / ('sessions/parallel-' + str(index)) / '.jali/auth-state.json').read_text())
+            self.assertEqual(data['user_id'], 'jala-' + str(index))
 
     def test_upload_from_another_thread_cannot_be_consumed(self):
         event, _ = self.event('one')
@@ -216,6 +225,79 @@ class HelperTests(unittest.TestCase):
             self.authenticate(event, file)
         self.assertTrue(file.exists())
         self.assertEqual(self.calls, [])
+
+    def test_configured_origin_is_used_for_profile_and_subsequent_requests(self):
+        event, file = self.event(auth={'cache_key': 'fake-cache-secret'})
+        with patch.dict(os.environ, {'JALI_JALA_BASE_URL': 'https://staging-app.jala.tech/'}):
+            self.authenticate(event, file)
+            self.request(event)
+        self.assertEqual(len(self.calls), 2)
+        for request in self.calls:
+            self.assertEqual(urllib.parse.urlsplit(request.full_url).netloc, 'staging-app.jala.tech')
+            self.assertNotIn('//api', request.full_url)
+
+    def test_default_origin_preserves_existing_production_configuration(self):
+        environment = dict(os.environ)
+        environment.pop('JALI_JALA_BASE_URL', None)
+        with patch.dict(os.environ, environment, clear=True):
+            self.assertEqual(jali.api_origin(), 'https://app.jala.tech')
+
+    def test_invalid_configured_origin_never_sends_credentials(self):
+        invalid = ['', 'http://staging-app.jala.tech', 'https://staging-app.jala.tech/api',
+                   'https://user:password@staging-app.jala.tech',
+                   'https://staging-app.jala.tech?x=1', 'https://staging-app.jala.tech#fragment',
+                   'https://staging-app.jala.tech:wrong', 'https://staging-app.jala.tech:0',
+                   ' https://staging-app.jala.tech', 'https://staging-app.jala.tech\n',
+                   'https://staging-app.jala.tech\\evil']
+        for value in invalid:
+            with self.subTest(value=value), patch.dict(os.environ, {'JALI_JALA_BASE_URL': value}):
+                with self.assertRaisesRegex(jali.Refused, 'invalid_jala_base_url'):
+                    jali.call_api({'cache_key': 'fake-cache-secret'}, 'GET', '/api/profile')
+        self.assertEqual(self.calls, [])
+
+    def test_origin_change_requires_fresh_authentication(self):
+        event, file = self.event(auth={'cache_key': 'fake-cache-secret'})
+        self.authenticate(event, file)
+        with patch.dict(os.environ, {'JALI_JALA_BASE_URL': 'https://staging-app.jala.tech'}):
+            with self.assertRaisesRegex(jali.Refused, 'authentication_required'):
+                jali.execute(self.args(event, 'status'))
+
+    def test_mid_chat_renewal_replaces_exact_upload_and_deletes_old_bytes(self):
+        event, first = self.event(auth={'cache_key': 'fake-cache-secret'})
+        result = self.authenticate(event, first)
+        self.assertEqual(self.authenticate(event, first), result)
+        event, second = self.event(auth={'access_token': 'new-secret'})
+        self.authenticate(event, second)
+        self.assertFalse(first.exists())
+        self.assertTrue(second.exists())
+        self.request(event)
+        self.assertEqual(self.calls[-1].get_header('Authorization'), 'Bearer new-secret')
+
+    def test_failed_renewal_keeps_previous_binding(self):
+        event, first = self.event(auth={'cache_key': 'fake-cache-secret'})
+        self.authenticate(event, first)
+        event, second = self.event(auth={'access_token': 'wrong-user'})
+        self.profile_id = 124
+        with self.assertRaisesRegex(jali.Refused, 'identity_mismatch'):
+            self.authenticate(event, second)
+        self.assertFalse(second.exists())
+        self.assertTrue(first.exists())
+        self.assertEqual(jali.execute(self.args(event, 'status'))['status'], 'authenticated')
+
+    def test_late_401_does_not_expire_new_revision(self):
+        event, first = self.event(auth={'cache_key': 'fake-cache-secret'})
+        self.authenticate(event, first)
+        original = jali.call_api
+        def replace_then_fail(auth, method, route, query=None, body=None):
+            event2, second = self.event(auth={'access_token': 'replacement'})
+            with patch.object(jali, 'call_api', original):
+                self.authenticate(event2, second)
+            raise jali.Refused('authentication_required')
+        with patch.object(jali, 'call_api', replace_then_fail):
+            with self.assertRaisesRegex(jali.Refused, 'authentication_required'):
+                self.request(event)
+        self.assertEqual(jali.execute(self.args(event, 'status'))['status'], 'authenticated')
+
 
 
 if __name__ == '__main__': unittest.main()
