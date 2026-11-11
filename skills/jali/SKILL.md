@@ -43,7 +43,7 @@ Read the linked case before its operation:
 - [Read JALA data](references/use-cases/read-data.md): resolve a requested farm/resource and report actual results.
 - [Change JALA data](references/use-cases/change-data.md): resolve the endpoint and target, perform the requested change and verify it.
 - [Renew or disconnect](references/use-cases/renew-authentication.md): accept a replacement credential or disconnect this thread.
-- [BYOP widget](references/use-cases/byop-widget.md): handle the widget's internal protocol and calculation workflow.
+- BYOP calculations and BYOP widget turns: use the `jala-byop` skill, which runs on this skill's thread credential.
 
 ## Permissions
 

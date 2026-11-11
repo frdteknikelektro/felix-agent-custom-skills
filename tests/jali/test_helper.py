@@ -39,11 +39,11 @@ class HelperTests(unittest.TestCase):
             environment['JALI_YAML_MODULE'] = str(Path(__file__).resolve().parents[2] / 'node_modules/yaml')
         self.environment = patch.dict(os.environ, environment, clear=False)
         self.environment.start()
-        self.calls = []; self.profile_id = 123; self.reject = None
+        self.calls = []; self.profile_id = 123; self.reject = None; self.reject_body = None
         def opened(request, timeout):
             self.calls.append(request)
             if self.reject:
-                raise urllib.error.HTTPError(request.full_url, self.reject, '', {}, None)
+                raise urllib.error.HTTPError(request.full_url, self.reject, '', {}, io.BytesIO(self.reject_body) if self.reject_body else None)
             data = {'data': {'id': self.profile_id, 'name': 'Test User'}} if urllib.parse.urlparse(request.full_url).path == '/api/profile' else {'farms': [], 'access_token': 'must-not-return', 'message': 'fake-cache-secret'}
             return Response(data)
         self.transport = patch.object(jali.urllib.request, 'build_opener', return_value=argparse.Namespace(open=opened))
@@ -133,6 +133,16 @@ class HelperTests(unittest.TestCase):
         event, file = self.event(sender='jala-byop-123', auth={'cache_key': 'other-user-secret'})
         with self.assertRaisesRegex(jali.Refused, 'identity_mismatch'):
             self.authenticate(event, file)
+
+    def test_rejected_request_returns_jala_error_details_without_the_credential(self):
+        event, file = self.event(auth={'cache_key': 'fake-cache-secret'})
+        self.authenticate(event, file)
+        self.reject = 422
+        self.reject_body = json.dumps({'error': {'code': 'INVALID_DEFINITION', 'message': 'Unknown node fake-cache-secret', 'details': {'path': 'overrides.fr'}}}).encode()
+        with self.assertRaises(jali.Refused) as caught:
+            self.request(event, '/api/cycles/1/calculation/preview', 'POST')
+        self.assertEqual(str(caught.exception), 'request_rejected')
+        self.assertEqual(caught.exception.details, {'http_status': 422, 'error': {'code': 'INVALID_DEFINITION', 'message': 'Unknown node [redacted]', 'details': {'path': 'overrides.fr'}}})
 
     def test_oauth_and_cache_key_are_exclusive_and_credentials_are_redacted_from_results(self):
         event, file = self.event(auth={'access_token': 'fake-oauth-secret'})

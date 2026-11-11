@@ -2,7 +2,7 @@
 
 Read this reference for every Jala BYOP request. It is the complete farmer-facing authoring, preview, approval, mutation, reconciliation, and verification contract.
 
-Use this standalone skill to change or verify a JALA calculation without local
+Use this workflow to change or verify a JALA calculation without local
 repository, database, PHP, or calculation-runtime access. JALA owns data,
 calculation, validation, persistence, cleanup, normal generation, and result
 rows. The calling agent owns the interview, decision ledger, candidate loop,
@@ -61,16 +61,26 @@ same target, scope, evidence sample, effective time, and current source. A
 change to any of these, or to the candidate definition, invalidates the
 approval and requires a fresh baseline or preview before mutation.
 
-## Session-aware transport
+## Thread transport
 
-Use the jali helper for every API operation. Maintain the authoring state and
-freshness gates in the session work directory; use this thread's uploaded
-credential. The remaining workflow describes required authoring behavior;
-client class names describe behavior, not permission to use a global token.
+JALA access comes from this thread's uploaded credential, held by the `jali`
+helper. Run `scripts/client.py` with `--event-file <current_event>`; it sends
+every API call through `jali/scripts/jali.py request` for that thread, so the
+credential never appears in arguments, files, prompts, logs, or output. For
+staging, prefix each client command with the same origin override the
+`jali-staging` overlay uses for the helper.
+
+The client owns target resolution, pagination, contract and context reads,
+baseline/candidate previews, approval state, timeout reconciliation, mutation
+limits, farm sample confirmation, and structural verification. It has no server
+session and no calculation engine. A helper status other than `ok` stops the
+iteration: `authentication_required` follows the jali renewal case,
+`permission_denied` is reported as such, and `request_rejected` carries JALA's
+own error code and message for the candidate loop.
 
 ## Calculation contract
 
-These rules are part of this standalone skill; follow them directly during
+These rules are part of this skill; follow them directly during
 remote authoring.
 
 ### Scope and precedence
@@ -181,7 +191,7 @@ JALA compiles and validates the candidate. The client never evaluates it.
 
 ### 0. Preflight and decision ledger
 
-Before the first substantive question, check this session’s helper status and configured JALA origin
+Before the first substantive question, check this thread's jali helper status and configured JALA origin only
 and prepare the API reads needed after the target is known. When a target is
 already supplied, perform a bounded read-only preflight: resolve the target, read
 the live contract, and read the current effective calculation. Select
@@ -235,7 +245,13 @@ then show the resolved tambak/kolam name and ID in a short confirmation. Stop on
 zero or multiple matches and ask for one identifying clue; do not enumerate all
 farms, ponds, or batches to guess.
 
-Resolve the supplied ID or narrow name through current-event helper requests.
+The client supports these equivalent forms:
+
+```text
+python3 scripts/client.py --event-file <current_event> resolve_target cycle 123
+python3 scripts/client.py --event-file <current_event> resolve_target farm https://host/api/farms/7
+cat narrow-farm-search.json | python3 scripts/client.py --event-file <current_event> resolve_target farm --search
+```
 
 When needed, discover cycles progressively through the existing routes:
 
@@ -468,12 +484,125 @@ sanitized handoff note for the technical agent when possible. The handoff may
 contain target IDs, frozen time, safe preview evidence, diagnostics, and
 acceptance criteria, but never credentials or authorization headers.
 
-## Transport and stop conditions
+## Canonical client sequence
 
-Use the current-event jali helper for live contract, target, context, preview,
-apply/reset and verification requests. Keep candidate/approval state in a
-secret-free manifest under this session's work directory. Use only this
-session's uploaded credential. Stop on missing/expired authentication, denied
-access, missing contract, ambiguous target, stale approval, incomplete evidence,
-unknown mutation outcome or failed verification. Read back before retrying an
-uncertain mutation. Report only observed results.
+Use the in-process Python loop when the host agent must retain interview,
+candidate, approval, and mutation state. The shell CLI is intentionally limited
+to read, resolve, context, preview, series, and verification operations; it has
+no apply or reset command.
+
+```python
+from client import AuthoringLoop, RemoteCalculationClient
+
+client = RemoteCalculationClient.for_event(current_event)
+loop = AuthoringLoop(client)
+loop.set_target(scope, target_id, as_of=as_of)
+
+# For farm scope, confirmed_cycles are real cycle objects selected through the
+# narrow farm discovery flow. Do this only after farm scope is settled.
+if scope == "farm":
+    loop.set_confirmed_sample(confirmed_cycles)
+
+baseline = loop.read_baseline()
+candidate_preview = loop.preview_candidate(definition)
+
+# Run this only after explicit approval in the current user turn.
+loop.approve("apply")
+mutation = loop.apply()
+verification = loop.verify()
+```
+
+For reset, read the baseline, obtain explicit approval, then call
+`loop.approve("reset")`, `loop.reset()`, and `loop.verify()`. If the candidate,
+scope, sample, effective time, or baseline changes, preview again and obtain
+fresh approval before mutation.
+
+## API operations
+
+The dependency-free client exposes these operations:
+
+```text
+contract
+resolve_target <farm|cycle> <id-or-url>
+resolve_target <farm|cycle> --search < narrow-filters.json
+farms / farm_cycles / farm_ponds / farm_batches / batch_cycles
+current <farm|cycle> <id>
+context <cycle_id> [--as-of ISO-8601]
+baseline preview through AuthoringLoop.read_baseline()
+preview <farm|cycle> <id> [--cycle-id ID ...] [--as-of ISO-8601] < candidate.json
+series <cycle_id> <prediction|target|actual>
+verify <farm|cycle> <id> [--cycle-id ID ...] < evidence.json
+```
+
+For farm CLI preview input, wrap the candidate definition with confirmed sample
+objects. The sample objects must come from the narrow farm discovery flow:
+
+```json
+{
+  "definition": {"base": "fr", "overrides": {}},
+  "samples": [
+    {
+      "id": 123,
+      "confirmed": true,
+      "is_real": true,
+      "sample_role": "recent_unfinished_inheriting"
+    }
+  ]
+}
+```
+
+Example commands:
+
+```text
+python3 scripts/client.py --event-file <current_event> preview farm 7 --cycle-id 123 < farm-preview.json
+python3 scripts/client.py --event-file <current_event> verify farm 7 --cycle-id 123 < farm-verification.json
+```
+
+Verification uses a separate evidence object. `expected` is the effective
+identity returned by the approved mutation, `preview` is the complete candidate
+or reset preview returned by JALA, and `definition` is the definition used for
+warning rechecks when available:
+
+```json
+{
+  "expected": {
+    "scope": "farm",
+    "source": "farm",
+    "runtime_version": "<returned-runtime-version>",
+    "definition_hash": "<returned-definition-hash>"
+  },
+  "preview": "<complete-preview-response-returned-by-jala>",
+  "definition": {"base": "fr", "overrides": {}},
+  "as_of": "<frozen-timezone-aware-instant>",
+  "samples": [
+    {
+      "id": 123,
+      "confirmed": true,
+      "is_real": true,
+      "sample_role": "recent_unfinished_inheriting"
+    }
+  ]
+}
+```
+
+Use `RemoteCalculationClient`, `AuthoringLoop`, `verify_applied`, and
+`verify_series` when the host agent needs to retain the interview and approval
+ledger. Low-level mutation methods are not shell operations; call them only
+through the approval-gated loop.
+
+## Safety and stop conditions
+
+- Use this thread's uploaded credential and the requester's normal farm/cycle authorization.
+- Keep API errors concise and safe; never print raw response bodies or headers.
+- Keep authoring iterations unlimited but mutation attempts bounded and approval-gated.
+- Keep JALA stateless: no server session, transcript, candidate history, rollback
+  table, calculation-history table, or local calculation engine.
+- Keep the maintained Reference calculation definition immutable through this API.
+- Keep non-BYOP methods on their original path.
+- Stop on ambiguous targets, missing farm evidence, unsupported candidate
+  responsibility, stale source identity, indeterminate timeout state, malformed
+  output, incomplete coverage, or unexplained warning drift.
+
+The authoring effort may continue after a failed candidate, warning, or diagnostic.
+It ends only when the user stops, explicitly applies or resets with verification,
+or a blocker requires user or server intervention.
