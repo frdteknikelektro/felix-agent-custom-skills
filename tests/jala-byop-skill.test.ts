@@ -63,6 +63,10 @@ describe("jala-byop skill", () => {
     expect(widget).toContain("<byop-panel>JSON</byop-panel>");
     expect(widget).toContain("<byop-action>");
     expect(widget).toContain("## Prompt choices");
+    expect(widget).toContain("## Render errors");
+    expect(widget).toContain("[[jali-internal:render-error:<id>:<message id>]]");
+    expect(widget).toContain("[[jali-render-note:v1]]");
+    expect(widget).toContain("Make no new API calls or writes in this turn");
     expect(widget).toContain("`options` holds 1–4 objects with exactly `label` and `prompt`");
     expect(widget).toContain("`label` is 1–64 characters");
     expect(widget).toContain("`prompt` is 1–2000 characters");
