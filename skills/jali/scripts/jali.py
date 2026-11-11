@@ -226,7 +226,7 @@ def profile_id(data):
         return value
     # Existing sessions used the contact ID as the JALA profile binding.
     legacy = data.get('user_id')
-    match = re.fullmatch(r'jala-([1-9][0-9]*)', legacy) if isinstance(legacy, str) else None
+    match = re.fullmatch(r'jala(?:-[a-z0-9]+)*-([1-9][0-9]*)', legacy) if isinstance(legacy, str) else None
     require(match is not None, 'identity_mismatch')
     return match.group(1)
 

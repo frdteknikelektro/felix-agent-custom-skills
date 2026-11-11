@@ -122,6 +122,18 @@ class HelperTests(unittest.TestCase):
             self.assertEqual(result, {'status': 'authenticated', 'user_id': sender, 'file_id': result['file_id']})
             self.assertEqual(self.request(event)['data']['farms'], [])
 
+    def test_existing_state_without_profile_id_keeps_its_labelled_contact_binding(self):
+        event, file = self.event(sender='jala-byop-123', auth={'cache_key': 'fake-cache-secret'})
+        self.authenticate(event, file)
+        state = self.workspace / 'sessions/one/.jali/auth-state.json'
+        data = json.loads(state.read_text()); del data['profile_id']; state.write_text(json.dumps(data))
+        event, file = self.event(sender='jala-byop-123', auth={'cache_key': 'renewed-secret'})
+        self.assertEqual(self.authenticate(event, file)['status'], 'authenticated')
+        self.profile_id = 124
+        event, file = self.event(sender='jala-byop-123', auth={'cache_key': 'other-user-secret'})
+        with self.assertRaisesRegex(jali.Refused, 'identity_mismatch'):
+            self.authenticate(event, file)
+
     def test_oauth_and_cache_key_are_exclusive_and_credentials_are_redacted_from_results(self):
         event, file = self.event(auth={'access_token': 'fake-oauth-secret'})
         self.authenticate(event, file)
