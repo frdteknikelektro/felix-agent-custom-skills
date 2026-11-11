@@ -78,8 +78,8 @@ from the farmer, so the reply never mentions it.
   proposal and source IDs, and a corrected panel built from the evidence you
   already gathered. Make no new API calls or writes in this turn. The widget
   shows your answer in place of the broken reply and asks only once.
-- A user message that starts with a `[[jali-render-note:v1]] …
-  [[/jali-render-note]]` block carries a note about your previous reply, such
+- A user message that starts with a `[[jala-byop-render-note]] …
+  [[/jala-byop-render-note]]` block carries a note about your previous reply, such
   as prompt choices that were not shown and why. Answer the farmer's message
   after the block as usual, and apply the note to this and later replies.
 
