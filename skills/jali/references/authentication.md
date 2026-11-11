@@ -1,6 +1,6 @@
 # Session authentication and renewal
 
-The widget uploads `jali-auth.json` automatically. In other private Felix
+The widget uploads `jali-auth.json` automatically. In other private
 transports, the requester may attach the same file. For a supplied credential
 attachment, collection is already authorized; run the helper without opening
 its bytes. For missing manual credentials, follow secrets-handling intake.
@@ -16,7 +16,7 @@ python3 scripts/jali.py --event-file <current_event> authenticate --credential-f
 Use the exact runtime current event and attachment path. The helper verifies
 the original filename, event file reference and session-scoped managed path.
 It calls `/api/profile` on `JALI_JALA_BASE_URL` and binds the returned JALA
-profile ID to this Felix contact and thread; the contact ID need not encode the
+profile ID to this contact and thread; the contact ID need not encode the
 profile ID. Private direct messages are required.
 
 On success it retains the native uploaded bytes and atomically records a
@@ -37,5 +37,5 @@ Another session's authentication is never borrowed. No automatic uncertain-write
 retry is allowed. Disconnect marks only this session disconnected and deletes
 its active credential bytes. Metadata can remain in native records.
 
-The uploaded JALA credential is distinct from the browser's Felix key. The app
+The uploaded JALA credential is distinct from the browser's agent key. The app
 handles contact creation and key rotation on login through existing Owner APIs.

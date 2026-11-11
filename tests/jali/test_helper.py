@@ -33,7 +33,11 @@ class HelperTests(unittest.TestCase):
         self.base = Path(self.temp.name).resolve()
         self.workspace = self.base / 'workspace'; self.workspace.mkdir()
         self.private = self.base / 'private'
-        self.environment = patch.dict(os.environ, {'WORKSPACE_DIR': str(self.workspace), 'JALI_PRIVATE_DIR': str(self.private), 'JALI_JALA_BASE_URL': 'https://app.jala.tech'}, clear=False)
+        # The helper parses Felix event frontmatter with Felix's own YAML module; use the repo copy outside the container.
+        environment = {'WORKSPACE_DIR': str(self.workspace), 'JALI_PRIVATE_DIR': str(self.private), 'JALI_JALA_BASE_URL': 'https://app.jala.tech'}
+        if 'JALI_YAML_MODULE' not in os.environ and not Path('/app/node_modules/yaml').exists():
+            environment['JALI_YAML_MODULE'] = str(Path(__file__).resolve().parents[2] / 'node_modules/yaml')
+        self.environment = patch.dict(os.environ, environment, clear=False)
         self.environment.start()
         self.calls = []; self.profile_id = 123; self.reject = None
         def opened(request, timeout):
@@ -110,6 +114,13 @@ class HelperTests(unittest.TestCase):
         second = json.loads((self.workspace / 'sessions/two/.jali/auth-state.json').read_text())
         self.assertEqual(first['profile_id'], '123')
         self.assertEqual(second['profile_id'], '124')
+
+    def test_labelled_contact_ids_such_as_byop_authenticate_for_the_same_profile(self):
+        for sender in ('jala-123', 'jala-byop-123', 'jala-any-label-123'):
+            event, file = self.event(sender.replace('-', '_'), sender=sender, auth={'cache_key': 'fake-cache-secret'})
+            result = self.authenticate(event, file)
+            self.assertEqual(result, {'status': 'authenticated', 'user_id': sender, 'file_id': result['file_id']})
+            self.assertEqual(self.request(event)['data']['farms'], [])
 
     def test_oauth_and_cache_key_are_exclusive_and_credentials_are_redacted_from_results(self):
         event, file = self.event(auth={'access_token': 'fake-oauth-secret'})
