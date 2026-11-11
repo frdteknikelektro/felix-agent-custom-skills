@@ -98,16 +98,18 @@ class HelperTests(unittest.TestCase):
         with self.assertRaisesRegex(jali.Refused, 'authentication_required'):
             jali.execute(self.args(second, 'status'))
 
-    def test_other_account_cannot_replace_sender_identity(self):
-        event, file = self.event(auth={'cache_key': 'fake-cache-secret'})
+    def test_contacts_bind_independent_profiles_per_thread(self):
+        event, file = self.event(sender='arbitrary-contact', auth={'cache_key': 'fake-cache-secret'})
         self.authenticate(event, file)
-        event, file = self.event('two', auth={'access_token': 'other-secret'})
+        event, file = self.event('two', sender='arbitrary-contact', auth={'access_token': 'other-secret'})
         self.profile_id = 124
-        with self.assertRaisesRegex(jali.Refused, 'identity_mismatch'):
-            self.authenticate(event, file)
-        self.assertFalse(file.exists())
-        data = json.loads((self.workspace / 'sessions/one/.jali/auth-state.json').read_text())
-        self.assertEqual(data['user_id'], 'jala-123')
+        result = self.authenticate(event, file)
+        self.assertEqual(result['user_id'], 'arbitrary-contact')
+        self.assertTrue(file.exists())
+        first = json.loads((self.workspace / 'sessions/one/.jali/auth-state.json').read_text())
+        second = json.loads((self.workspace / 'sessions/two/.jali/auth-state.json').read_text())
+        self.assertEqual(first['profile_id'], '123')
+        self.assertEqual(second['profile_id'], '124')
 
     def test_oauth_and_cache_key_are_exclusive_and_credentials_are_redacted_from_results(self):
         event, file = self.event(auth={'access_token': 'fake-oauth-secret'})

@@ -2,7 +2,8 @@
 """Instruction-bound Jali helper. Secret values stay inside this process.
 
 Current event selection is governed by the skill, not an OS security boundary.
-Credentials remain opaque session uploads; the local state stores only file references.
+Credentials remain opaque session uploads; the local state stores only the thread binding,
+verified profile ID and file reference.
 """
 import argparse
 from contextlib import contextmanager
@@ -179,24 +180,63 @@ def upload(ctx, file_id):
     return file, metadata
 
 
+def attachment_file(ctx, attachment):
+    require(isinstance(attachment, dict) and attachment.get('filename') == 'jali-auth.json' and
+            attachment.get('status', 'available') == 'available' and
+            isinstance(attachment.get('file_id'), str) and attachment.get('file_id'),
+            'auth_attachment_required')
+    base = ctx['thread_dir'] / 'attachments'
+    file = safe_file(attachment.get('local_path', ''), base)
+    if ctx['source'] == 'api':
+        uploaded, _ = upload(ctx, attachment['file_id'])
+        require(uploaded == file, 'auth_attachment_required')
+    return file, file.relative_to(ctx['thread_dir']).as_posix(), attachment['file_id']
+
+
+def stored_file(ctx, data):
+    relative = data.get('credential_path')
+    if isinstance(relative, str) and relative:
+        return safe_file(ctx['thread_dir'] / relative, ctx['thread_dir'] / 'attachments')
+    # Version 2 API sessions stored only the native Felix upload ID.
+    file, _ = upload(ctx, data.get('file_id'))
+    return file
+
+
+def stored_reference(data):
+    return data.get('credential_path') or data.get('file_id')
+
+
 def clean_superseded(ctx, data):
-    for file_id in data.get('superseded', []):
-        if file_id == data.get('file_id'):
+    for reference in data.get('superseded', []):
+        if reference == stored_reference(data):
             continue
         try:
-            file, _ = upload(ctx, file_id)
+            if ctx['source'] == 'api' and isinstance(reference, str) and re.fullmatch(r'file_[a-f0-9-]{36}', reference):
+                file, _ = upload(ctx, reference)
+            else:
+                file = safe_file(ctx['thread_dir'] / str(reference), ctx['thread_dir'] / 'attachments')
             file.unlink(missing_ok=True)
         except FileNotFoundError:
             pass
 
 
+def profile_id(data):
+    value = data.get('profile_id')
+    if isinstance(value, str) and re.fullmatch(r'[1-9][0-9]*', value):
+        return value
+    # Existing sessions used the contact ID as the JALA profile binding.
+    legacy = data.get('user_id')
+    match = re.fullmatch(r'jala-([1-9][0-9]*)', legacy) if isinstance(legacy, str) else None
+    require(match is not None, 'identity_mismatch')
+    return match.group(1)
+
+
 def active(ctx, data):
     require(data.get('origin') == api_origin() and data.get('status') == 'authenticated',
             'authentication_required')
-    require(ctx['source'] == 'api' and ctx['sender_id'] == data.get('user_id'), 'identity_mismatch')
+    require(ctx['sender_id'] == data.get('user_id'), 'identity_mismatch')
     try:
-        file, metadata = upload(ctx, data.get('file_id'))
-        require(metadata['session_id'] == data.get('session_id'), 'invalid_auth_file')
+        file = stored_file(ctx, data)
         auth = credential(read_json(file, 65536))
     except (OSError, Refused):
         raise Refused('authentication_required') from None
@@ -260,42 +300,39 @@ def call_api(auth, method, route, query=None, body=None):
 
 
 def authenticate(ctx, store, supplied):
-    file = safe_file(supplied, ctx['thread_dir'] / 'attachments' / 'api-inputs')
+    file = safe_file(supplied, ctx['thread_dir'] / 'attachments')
     matches = [a for a in ctx['attachments'] if isinstance(a, dict) and
                a.get('filename') == 'jali-auth.json' and a.get('local_path') and
-               Path(a['local_path']).resolve() == file.resolve() and a.get('file_id')]
+               Path(a['local_path']).resolve() == file.resolve() and a.get('file_id') and
+               a.get('status', 'available') == 'available']
     require(len(matches) == 1, 'auth_attachment_required')
-    file_id = matches[0]['file_id']
-    verified, metadata = upload(ctx, file_id)
-    require(verified == file, 'auth_attachment_required')
+    file, relative_path, file_id = attachment_file(ctx, matches[0])
     with store.locked() as data:
         clean_superseded(ctx, data)
         if data.get('file_id') == file_id and data.get('status') == 'authenticated':
             active(ctx, data)
-            return {'status': 'authenticated', 'user_id': data['user_id'], 'file_id': file_id}
+            return {'status': 'authenticated', 'user_id': ctx['sender_id'], 'file_id': file_id}
         try:
             auth = credential(read_json(file, 65536))
             result = call_api(auth, 'GET', '/api/profile')
             profile = result.get('data') if isinstance(result, dict) else None
             require(isinstance(profile, dict), 'invalid_profile')
-            user_id = str(profile.get('id', ''))
-            require(re.fullmatch(r'[1-9][0-9]*', user_id), 'invalid_profile')
-            key = 'jala-' + user_id
-            require(ctx['source'] == 'api' and ctx['sender_id'] == key, 'identity_mismatch')
-            require(not data or (data.get('user_id') == key and data.get('origin') == api_origin()),
+            jala_user_id = str(profile.get('id', ''))
+            require(re.fullmatch(r'[1-9][0-9]*', jala_user_id), 'invalid_profile')
+            require(not data or (profile_id(data) == jala_user_id and data.get('origin') == api_origin()),
                     'identity_mismatch')
-            prior = data.get('file_id')
+            prior = stored_reference(data)
             replacement = {'version': 2, 'sender': ctx['sender_key'], 'thread': ctx['thread_key'],
-                           'origin': api_origin(), 'user_id': key, 'session_id': metadata['session_id'],
-                           'file_id': file_id, 'revision': uuid.uuid4().hex,
+                           'origin': api_origin(), 'user_id': ctx['sender_id'], 'profile_id': jala_user_id,
+                           'file_id': file_id, 'credential_path': relative_path, 'revision': uuid.uuid4().hex,
                            'status': 'authenticated', 'superseded': [prior] if prior else []}
             store.save(replacement)
         except Exception:
-            if data.get('file_id') != file_id:
+            if stored_reference(data) != relative_path:
                 file.unlink(missing_ok=True)
             raise
         clean_superseded(ctx, replacement)
-    return {'status': 'authenticated', 'user_id': key, 'file_id': file_id}
+    return {'status': 'authenticated', 'user_id': ctx['sender_id'], 'file_id': file_id}
 
 
 def execute(args):
@@ -307,8 +344,9 @@ def execute(args):
         clean_superseded(ctx, data)
         if args.command == 'disconnect':
             if data:
-                previous = data.get('file_id')
-                data.update(status='disconnected', file_id=None, revision=uuid.uuid4().hex,
+                previous = stored_reference(data)
+                data.update(status='disconnected', file_id=None, credential_path=None,
+                            revision=uuid.uuid4().hex,
                             superseded=[previous] if previous else [])
                 store.save(data)
                 clean_superseded(ctx, data)
