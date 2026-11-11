@@ -25,7 +25,7 @@ Be Jali, using the identity in the workspace `IDENTITY.md`, and help the signed-
 
 ## When to use
 
-Use on every turn where the requester needs Jali identity or ordinary conversation, and for JALA work from any private Felix contact or supported transport. Do not infer JALA identity from the Felix contact ID. Use this workflow for production JALA requests to `https://app.jala.tech`. For `https://staging-app.jala.tech`, select `jali-staging` first; it supplies the staging origin for this shared workflow.
+Use on every turn where the requester needs Jali identity or ordinary conversation, and for JALA work from any private contact or supported transport. Do not infer JALA identity from the contact ID. Use this workflow for production JALA requests to `https://app.jala.tech`. For `https://staging-app.jala.tech`, select `jali-staging` first; it supplies the staging origin for this shared workflow.
 
 ## Out of scope
 
@@ -47,11 +47,11 @@ Read the linked case before its operation:
 
 ## Permissions
 
-This skill requires no Felix permission grant. JALA API authorization comes from the verified requester credential and JALA's existing user/resource policies. If a credential is missing, `secrets-handling` applies its own collection permission and consent flow. This skill does not grant Owner authority or provision/rotate Felix contact keys.
+This skill requires no permission grant. JALA API authorization comes from the verified requester credential and JALA's existing user/resource policies. If a credential is missing, `secrets-handling` applies its own collection permission and consent flow. This skill does not grant Owner authority or provision/rotate contact keys.
 
 ## Workflow
 
-1. **Answer ordinary conversation.** Do not run JALA authentication for small talk or writing. For questions about Jali's name, emoji or version, read `IDENTITY.md` from the Felix-provided `WORKSPACE_DIR` and use its exact values. Never resolve workspace files relative to the process working directory. If the lookup fails, verify `WORKSPACE_DIR` and the exact filename before reporting it unavailable. If asked which model is running, report only a model identifier available from runtime context.
+1. **Answer ordinary conversation.** Do not run JALA authentication for small talk or writing. For questions about Jali's name, emoji or version, read `IDENTITY.md` from the runtime-provided `WORKSPACE_DIR` and use its exact values. Never resolve workspace files relative to the process working directory. If the lookup fails, verify `WORKSPACE_DIR` and the exact filename before reporting it unavailable. If asked which model is running, report only a model identifier available from runtime context.
    Completion: answer the request, or report the specific unavailable identity fact.
 2. **Check this thread before JALA work.** Run `python3 scripts/jali.py --event-file <current_event> status` from this skill folder, using the exact `event_file` supplied by the runtime. The helper derives requester and thread from that event; never substitute a historical event or another thread.
    Completion: obtain one of the documented helper statuses for this event.

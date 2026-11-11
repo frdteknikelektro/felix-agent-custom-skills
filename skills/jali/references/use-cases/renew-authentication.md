@@ -8,7 +8,7 @@ keeps the prior binding. No timestamp-based file selection is allowed.
 
 On authentication_required, request app reauthentication/new upload. cache_key
 is not an OAuth refresh grant. Resume reads after renewal; reconcile uncertain
-writes before any retry. Other sessions and the Felix key are unchanged.
+writes before any retry. Other sessions and the agent key are unchanged.
 
 ```sh
 python3 scripts/jali.py --event-file <current_event> disconnect
