@@ -3,13 +3,14 @@ name: jala-byop
 description: >-
   Use for JALA Bring Your Own Prediction (BYOP) work: authoring, previewing,
   applying, resetting or verifying a farm- or cycle-scoped prediction, target or
-  actual calculation, including FR fallback, future partial harvest, and BYOP
-  widget turns. Runs on the jali skill's thread credential.
+  actual calculation, including FR fallback and future partial harvest. Always
+  active on a turn whose event thread_key starts with api:jala-byop- (the BYOP
+  widget). Runs with jali (production) or jali-staging (staging).
 metadata:
   author: felix-agent
   kind: operational
   version: "2.0.0"
-  match: jala byop, bring your own prediction, jala prediction, jala calculation, jala target, jala actual, jala feeding rate, jala mortality, jala FR, jala FR fallback, jala partial harvest, jala farm calculation, jala cycle calculation, byop widget, byop-action, byop-panel, byop-prompts
+  match: jala byop, bring your own prediction, jala prediction, jala calculation, jala target, jala actual, jala feeding rate, jala mortality, jala FR, jala FR fallback, jala partial harvest, jala farm calculation, jala cycle calculation, byop widget, api:jala-byop-, byop-action, byop-panel, byop-prompts
 ---
 
 # Jala BYOP (Bring Your Own Prediction)
@@ -20,11 +21,11 @@ Author, preview, apply, reset and verify JALA farm- or cycle-scoped BYOP calcula
 
 ## When to use
 
-Use when a farmer or JALA operator asks to change, preview, apply, reset or verify a prediction, target, actual, growth, feeding, mortality or FR calculation, and on every turn that arrives from the BYOP widget (`<byop-action>` input, or a reply the widget renders).
+Use on every turn whose event frontmatter has a `thread_key` starting with `api:jala-byop-` (for example `api:jala-byop-1312:session_…`). That is the BYOP widget's thread, including its hidden opening and authentication turns and any `<byop-action>` input. Also use when a farmer or JALA operator asks to change, preview, apply, reset or verify a prediction, target, actual, growth, feeding, mortality or FR calculation from any other thread.
 
 ## Out of scope
 
-- Authentication, credential renewal and general JALA reads: the `jali` skill owns them.
+- Authentication, credential renewal and general JALA reads: `jali` owns them for production and `jali-staging` for staging.
 - Local calculation engines, databases, PHP runtimes or direct result-row edits.
 - Undocumented JALA endpoints or mutation paths, and non-JALA calculation systems.
 
@@ -40,8 +41,8 @@ This skill requires no permission grant and adds no authority. Every API call ru
 
 ## Workflow
 
-1. **Confirm thread access.** Run the `jali` helper `status` for the current event file (through `jali-staging` for staging).
-   Completion: the helper reports `authenticated`; any other status follows the `jali` renewal case before BYOP work starts.
+1. **Confirm thread access.** Run the helper `status` for the current event file through `jali` for production, or through `jali-staging` (its origin override) for staging.
+   Completion: the helper reports `authenticated`; any other status follows that skill's renewal case before BYOP work starts.
 2. **Read the workflow reference.** Read [the calculation workflow](references/calculation-workflow.md), and [the widget protocol](references/widget-protocol.md) for a widget turn.
    Completion: every rule section of the references that applies to this turn has been read.
 3. **Run the authoring loop.** Use [the client](scripts/client.py) with `--event-file <current_event>` for target resolution, contract and context reads, previews, approval state, mutations and verification. JALA's API is the only source of calculated values.
@@ -53,7 +54,12 @@ This skill requires no permission grant and adds no authority. Every API call ru
 
 ## Environment
 
-This skill declares no environment variables and holds no credential. It inherits the `jali` helper's origin: production by default, or staging when each client command carries the `jali-staging` override (`JALI_JALA_BASE_URL="$JALI_STAGING_JALA_BASE_URL" python3 scripts/client.py --event-file <current_event> ...`).
+This skill declares no environment variables and holds no credential. The thread's environment comes from the skill that authenticated it:
+
+- **Production — `jali`:** run `python3 scripts/client.py --event-file <current_event> ...`; the helper uses `JALI_JALA_BASE_URL`.
+- **Staging — `jali-staging`:** prefix every client command with its override, `JALI_JALA_BASE_URL="$JALI_STAGING_JALA_BASE_URL" python3 scripts/client.py --event-file <current_event> ...`.
+
+The helper pins each thread to the origin it authenticated against, so every client command in a thread uses that same skill's form.
 
 ## Checks
 
