@@ -25,6 +25,11 @@ describe("jala-byop skill", () => {
     expect(description).toContain("jali (production)");
     expect(description).toContain("jali-staging (staging)");
     expect(raw).toContain("`thread_key` starting with `api:jala-byop-`");
+    expect(raw).toContain("the `origin` that `status` reports");
+    expect(raw).toContain("the widget declares its JALA origin in `jali-auth.json`");
+    const auth = await read("jali/references/authentication.md");
+    expect(auth).toContain("origin_not_allowed");
+    expect(auth).toContain("`status` reports it as `origin`");
     expect(raw.match(/Completion:/g)?.length).toBeGreaterThanOrEqual(5);
   });
 
