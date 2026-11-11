@@ -66,6 +66,23 @@ nonempty arrays. The widget backend reads the API itself and checks these
 hashes before notifying the host. When complete proof is unavailable, use
 pending/unknown and explain the missing verification.
 
+## Render errors
+
+The widget validates every `<byop-panel>` and `<byop-prompts>` block it
+receives and tells you when one fails, in one of two hidden forms. Neither is
+from the farmer, so the reply never mentions it.
+
+- A turn that starts with `[[jali-internal:render-error:<id>:<message id>]]`
+  names the reason your previous reply's `<byop-panel>` could not be displayed.
+  Reply with that whole reply again: the same farmer-facing text, the same
+  proposal and source IDs, and a corrected panel built from the evidence you
+  already gathered. Make no new API calls or writes in this turn. The widget
+  shows your answer in place of the broken reply and asks only once.
+- A user message that starts with a `[[jali-render-note:v1]] …
+  [[/jali-render-note]]` block carries a note about your previous reply, such
+  as prompt choices that were not shown and why. Answer the farmer's message
+  after the block as usual, and apply the note to this and later replies.
+
 ## Prompt choices
 
 End a reply with one `<byop-prompts>` block when the farmer has a few clear next
