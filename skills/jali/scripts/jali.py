@@ -26,7 +26,9 @@ LIMIT = 4 * 1024 * 1024
 
 
 class Refused(Exception):
-    pass
+    def __init__(self, code, details=None):
+        super().__init__(code)
+        self.details = details or {}
 
 
 def require(condition, code):
@@ -285,7 +287,7 @@ def call_api(auth, method, route, query=None, body=None):
     request = urllib.request.Request(url, method=method, headers=headers,
                                     data=None if body is None else json.dumps(body).encode())
     try:
-        with urllib.request.build_opener(NoRedirect()).open(request, timeout=20) as response:
+        with urllib.request.build_opener(NoRedirect()).open(request, timeout=30) as response:
             raw = response.read(LIMIT + 1)
             require(len(raw) <= LIMIT, 'response_too_large')
             return None if not raw else decode(raw)
@@ -294,9 +296,23 @@ def call_api(auth, method, route, query=None, body=None):
             raise Refused('authentication_required') from None
         if error.code == 403:
             raise Refused('permission_denied') from None
-        raise Refused('request_rejected' if error.code < 500 else ('jala_unavailable' if method == 'GET' else 'request_outcome_unknown')) from None
+        if error.code < 500:
+            raise Refused('request_rejected', rejection(error, secret)) from None
+        raise Refused('jala_unavailable' if method == 'GET' else 'request_outcome_unknown') from None
     except (urllib.error.URLError, TimeoutError, OSError, ValueError):
         raise Refused('request_outcome_unknown' if method != 'GET' else 'jala_unavailable') from None
+
+
+def rejection(error, secret):
+    # JALA explains a rejected request (for example a validation failure) in its error body.
+    details = {'http_status': error.code}
+    try:
+        body = decode(error.read(65537)[:65536])
+    except Exception:
+        return details
+    if isinstance(body, dict) and isinstance(body.get('error'), dict):
+        details['error'] = redact(body['error'], secret)
+    return details
 
 
 def authenticate(ctx, store, supplied):
@@ -391,7 +407,7 @@ def main():
     try:
         result = execute(parser.parse_args())
     except Refused as error:
-        result = {'status': str(error)}
+        result = {'status': str(error), **error.details}
     except Exception:
         result = {'status': 'unavailable'}
     print(json.dumps(result, ensure_ascii=False))

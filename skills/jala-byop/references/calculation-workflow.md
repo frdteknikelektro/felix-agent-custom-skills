@@ -2,7 +2,7 @@
 
 Read this reference for every Jala BYOP request. It is the complete farmer-facing authoring, preview, approval, mutation, reconciliation, and verification contract.
 
-Use this standalone skill to change or verify a JALA calculation without local
+Use this workflow to change or verify a JALA calculation without local
 repository, database, PHP, or calculation-runtime access. JALA owns data,
 calculation, validation, persistence, cleanup, normal generation, and result
 rows. The calling agent owns the interview, decision ledger, candidate loop,
@@ -61,29 +61,26 @@ same target, scope, evidence sample, effective time, and current source. A
 change to any of these, or to the candidate definition, invalidates the
 approval and requires a fresh baseline or preview before mutation.
 
-## Boundary and setup
+## Thread transport
 
-Read credentials only from the process environment:
+JALA access comes from this thread's uploaded credential, held by the `jali`
+helper. Run `scripts/client.py` with `--event-file <current_event>`; it sends
+every API call through `jali/scripts/jali.py request` for that thread, so the
+credential never appears in arguments, files, prompts, logs, or output. For
+staging, prefix each client command with the same origin override the
+`jali-staging` overlay uses for the helper.
 
-```text
-JALA_BYOP_API_BASE_URL=https://<host>/api
-JALA_BYOP_ACCESS_TOKEN=<dedicated-user-access-token>
-```
-
-Require an absolute HTTP(S) base URL whose path ends in `/api`. Send the token
-only as an `Authorization: Bearer` header. Keep it out of arguments, files,
-prompts, diagnostics, logs, and output. Use the backend's 30-second request
-timeout. The client is dependency-free Python and uses only the standard
-library.
-
-Use `scripts/client.py` for transport, target resolution, pagination, contract
-and context reads, baseline/candidate previews, approval state, timeout
-reconciliation, mutation limits, farm sample confirmation, and structural
-verification. The client has no server session and no calculation engine.
+The client owns target resolution, pagination, contract and context reads,
+baseline/candidate previews, approval state, timeout reconciliation, mutation
+limits, farm sample confirmation, and structural verification. It has no server
+session and no calculation engine. A helper status other than `ok` stops the
+iteration: `authentication_required` follows the jali renewal case,
+`permission_denied` is reported as such, and `request_rejected` carries JALA's
+own error code and message for the candidate loop.
 
 ## Calculation contract
 
-These rules are part of this standalone skill; follow them directly during
+These rules are part of this skill; follow them directly during
 remote authoring.
 
 ### Scope and precedence
@@ -194,7 +191,7 @@ JALA compiles and validates the candidate. The client never evaluates it.
 
 ### 0. Preflight and decision ledger
 
-Before the first substantive question, check local environment configuration only
+Before the first substantive question, check this thread's jali helper status and configured JALA origin only
 and prepare the API reads needed after the target is known. When a target is
 already supplied, perform a bounded read-only preflight: resolve the target, read
 the live contract, and read the current effective calculation. Select
@@ -251,9 +248,9 @@ farms, ponds, or batches to guess.
 The client supports these equivalent forms:
 
 ```text
-python client.py resolve_target cycle 123
-python client.py resolve_target farm https://host/api/farms/7
-cat narrow-farm-search.json | python client.py resolve_target farm --search
+python3 scripts/client.py --event-file <current_event> resolve_target cycle 123
+python3 scripts/client.py --event-file <current_event> resolve_target farm https://host/api/farms/7
+cat narrow-farm-search.json | python3 scripts/client.py --event-file <current_event> resolve_target farm --search
 ```
 
 When needed, discover cycles progressively through the existing routes:
@@ -497,7 +494,7 @@ no apply or reset command.
 ```python
 from client import AuthoringLoop, RemoteCalculationClient
 
-client = RemoteCalculationClient.from_environment()
+client = RemoteCalculationClient.for_event(current_event)
 loop = AuthoringLoop(client)
 loop.set_target(scope, target_id, as_of=as_of)
 
@@ -557,8 +554,8 @@ objects. The sample objects must come from the narrow farm discovery flow:
 Example commands:
 
 ```text
-python client.py preview farm 7 --cycle-id 123 < farm-preview.json
-python client.py verify farm 7 --cycle-id 123 < farm-verification.json
+python3 scripts/client.py --event-file <current_event> preview farm 7 --cycle-id 123 < farm-preview.json
+python3 scripts/client.py --event-file <current_event> verify farm 7 --cycle-id 123 < farm-verification.json
 ```
 
 Verification uses a separate evidence object. `expected` is the effective
@@ -595,7 +592,7 @@ through the approval-gated loop.
 
 ## Safety and stop conditions
 
-- Use the dedicated user access token and normal parent farm/cycle authorization.
+- Use this thread's uploaded credential and the requester's normal farm/cycle authorization.
 - Keep API errors concise and safe; never print raw response bodies or headers.
 - Keep authoring iterations unlimited but mutation attempts bounded and approval-gated.
 - Keep JALA stateless: no server session, transcript, candidate history, rollback
