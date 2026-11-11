@@ -1,74 +1,71 @@
 ---
 name: jala-byop
-description: Use when a farmer or Jala operator needs to author, preview, apply, reset, or verify a JALA Bring Your Own Prediction calculation through the stateless farm- or cycle-scoped API, including FR fallback and future partial-harvest behavior.
+description: >-
+  Use for JALA Bring Your Own Prediction (BYOP) work: authoring, previewing,
+  applying, resetting or verifying a farm- or cycle-scoped prediction, target or
+  actual calculation, including FR fallback and future partial harvest. Always
+  active on a turn whose event thread_key starts with api:jala-byop- (the BYOP
+  widget). Runs with jali (production) or jali-staging (staging).
 metadata:
   author: felix-agent
   kind: operational
-  version: "1.0.0"
-  permissions: calculation.read, calculation.write
-  match: jala byop, bring your own prediction, jala prediction, jala calculation, jala target, jala actual, jala feeding rate, jala mortality, jala FR, jala FR fallback, jala partial harvest, jala farm calculation, jala cycle calculation
-env:
-  - key: JALA_BYOP_API_BASE_URL
-    description: Absolute JALA API base URL whose path ends in /api
-    required: true
-    secret: false
-  - key: JALA_BYOP_ACCESS_TOKEN
-    description: Dedicated JALA access token for BYOP calculation authoring
-    required: true
-    secret: true
+  version: "2.0.0"
+  match: jala byop, bring your own prediction, jala prediction, jala calculation, jala target, jala actual, jala feeding rate, jala mortality, jala FR, jala FR fallback, jala partial harvest, jala farm calculation, jala cycle calculation, byop widget, api:jala-byop-, byop-action, byop-panel, byop-prompts
 ---
 
 # Jala BYOP (Bring Your Own Prediction)
 
 ## Purpose
 
-Author, preview, apply, reset, and verify JALA farm- or cycle-scoped Bring Your Own Prediction calculations through the stateless API. JALA owns calculation, validation, persistence, cleanup, normal generation, and result rows; this skill owns the farmer-facing interview, decision ledger, candidate loop, approval state, and communication.
+Author, preview, apply, reset and verify JALA farm- or cycle-scoped BYOP calculations through JALA's stateless API, for the signed-in requester. JALA owns calculation, validation, persistence, generated-row cleanup and result rows; this skill owns the farmer interview, candidate loop, approval state and verification.
 
 ## When to use
 
-Use when a farmer or Jala operator asks to change, preview, apply, reset, or verify a JALA prediction, target, actual, growth, feeding, mortality, FR, farm-scoped, or cycle-scoped calculation.
+Use on every turn whose event frontmatter has a `thread_key` starting with `api:jala-byop-` (for example `api:jala-byop-1312:session_…`). That is the BYOP widget's thread, including its hidden opening and authentication turns and any `<byop-action>` input. Also use when a farmer or JALA operator asks to change, preview, apply, reset or verify a prediction, target, actual, growth, feeding, mortality or FR calculation from any other thread.
 
 ## Out of scope
 
-- Local calculation engines, databases, PHP runtimes, or direct result-row editing
-- Undocumented JALA endpoints or mutation paths
-- Non-JALA calculation systems
+- Authentication, credential renewal and general JALA reads: `jali` owns them for production and `jali-staging` for staging.
+- Local calculation engines, databases, PHP runtimes or direct result-row edits.
+- Undocumented JALA endpoints or mutation paths, and non-JALA calculation systems.
+
+## Use Cases
+
+- Author or change a calculation in conversation: follow [the calculation workflow](references/calculation-workflow.md).
+- Answer the BYOP widget: also follow [the widget protocol](references/widget-protocol.md) for panels, actions, readback proof and prompt choices.
+- Reset or verify an existing calculation: the same workflow, from its baseline read.
 
 ## Permissions
 
-Request the bare permission shown below; the runtime stores grants under this skill ID.
-
-- `calculation.read` — resolve targets, read contracts and contexts, preview candidates, inspect series, and verify results.
-- `calculation.write` — apply or reset a calculation after the current-turn approval gate succeeds.
-
-Preview, baseline reads, and verification are read-only. Apply and reset always require explicit user approval in the current turn.
+This skill requires no permission grant and adds no authority. Every API call runs as the requester through the `jali` helper, so JALA's own user and farm authorization decides what is allowed. Apply and reset still require the requester's explicit approval in the current turn.
 
 ## Workflow
 
-1. Read [the complete Jala BYOP calculation workflow](references/calculation-workflow.md) before acting.
-2. Read credentials only from `JALA_BYOP_API_BASE_URL` and `JALA_BYOP_ACCESS_TOKEN`; never print, persist, or pass them in arguments.
-3. Use the bundled [dependency-free client](scripts/client.py) for transport, target resolution, live-contract reads, contexts, previews, series, mutation approval state, timeout reconciliation, and structural verification.
-4. Keep the API as the only calculation and data source. Never calculate prediction, target, actual, growth, feeding, mortality, fallback, finance, or expected result values locally.
-5. Treat every baseline, candidate, approval, mutation, and verification as one freshness-gated iteration. Stop on ambiguity, failed or incomplete previews, invalid lifecycle operations, stale identity, indeterminate timeout state, malformed output, incomplete coverage, or unexplained drift.
-6. Before apply or reset, summarize scope, evidence, rule, before/after proof, downstream effects, and lifecycle consequence, then require explicit approval in the current turn.
-7. Verify the effective source and all approved prediction, target, and actual series before reporting success.
+1. **Confirm thread access.** Run the helper `status` for the current event file through `jali`.
+   Completion: the helper reports `authenticated` with the thread's `origin`; any other status follows the `jali` renewal case (or `jali-staging` for staging) before BYOP work starts.
+2. **Read the workflow reference.** Read [the calculation workflow](references/calculation-workflow.md), and [the widget protocol](references/widget-protocol.md) for a widget turn.
+   Completion: every rule section of the references that applies to this turn has been read.
+3. **Run the authoring loop.** Use [the client](scripts/client.py) with `--event-file <current_event>` for target resolution, contract and context reads, previews, approval state, mutations and verification. JALA's API is the only source of calculated values.
+   Completion: the baseline, each candidate preview and its warnings come from JALA responses bound to one freshness-gated iteration.
+4. **Gate the write.** Before apply or reset, summarize scope, evidence, rule, before/after proof, downstream effects and lifecycle consequence, then wait for the requester's explicit approval in the current turn.
+   Completion: an approval that names this unchanged proposal is on record, or no write happens.
+5. **Verify and report.** Read back the effective source and all approved prediction, target and actual series, and report only observed results.
+   Completion: every affected cycle and all three series carry a concrete verification status.
 
 ## Environment
 
-The client requires:
+This skill declares no environment variables and holds no credential. The thread's environment is the `origin` that `status` reports, and the helper uses it for every call:
 
-```text
-JALA_BYOP_API_BASE_URL=https://<host>/api
-JALA_BYOP_ACCESS_TOKEN=<dedicated-user-access-token>
-```
+- **BYOP widget threads:** the widget declares its JALA origin in `jali-auth.json`, so `jali` authenticates the thread on production or staging directly. Run `python3 scripts/client.py --event-file <current_event> ...` with no override.
+- **Other threads without a declared origin:** `jali` authenticates on production; `jali-staging` authenticates on staging with its override, and the thread keeps that origin afterwards.
 
-Require an absolute HTTP(S) base URL whose path ends in `/api`. Send the token only as an `Authorization: Bearer` header. Use the client's 30-second timeout. Keep credentials out of logs, diagnostics, handoff notes, and generated artifacts.
+Report the environment from that `origin`, never from the conversation's wording.
 
 ## Checks
 
-- Target is authorized and unambiguous.
+- The target is authorized for the requester and unambiguous.
 - The live contract and current effective source are recorded before the first candidate.
-- One timezone-aware `as_of`, context sample, current source, candidate, approval, mutation, and verification remain bound to the same iteration.
-- Farm mutations use confirmed real evidence cycles; cycle apply may activate BYOP for the explicitly selected cycle, including a non-BYOP or finished cycle, under the detailed lifecycle rules.
-- JALA owns generated-row cleanup and regeneration.
+- One timezone-aware `as_of`, context sample, current source, candidate, approval, mutation and verification stay bound to the same iteration.
+- Farm mutations use confirmed real evidence cycles; cycle apply follows the lifecycle rules in the workflow.
+- An uncertain mutation outcome is reconciled by readback before any retry.
 - Every approved cycle and all three series have a concrete verification status before completion.

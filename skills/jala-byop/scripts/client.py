@@ -3,6 +3,9 @@
 This module deliberately contains no prediction interpreter.  JALA owns
 calculation, persistence, generated-row cleanup, and result generation; the
 client only transports ASTs and verifies safe response properties.
+
+Every API call goes through the jali helper for the current thread, which holds
+the requester's uploaded credential. This client never reads or stores it.
 """
 
 import argparse
@@ -11,18 +14,14 @@ import hashlib
 import json
 import math
 import os
+from pathlib import Path
 import socket
+import subprocess
 import sys
-import urllib.error
+import tempfile
 import urllib.parse
-import urllib.request
 
-
-class HttpResponse:
-    def __init__(self, status, headers=None, body=b""):
-        self.status = status
-        self.headers = headers or {}
-        self.body = body
+DEFAULT_HELPER = Path(__file__).resolve().parents[2] / "jali" / "scripts" / "jali.py"
 
 
 class ConfigurationError(Exception):
@@ -76,111 +75,96 @@ def normalize_as_of(value):
     return parsed.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-class UrllibTransport:
-    """Default stdlib transport; tests can replace it with a fake object."""
+class JaliTransport:
+    """Runs one jali helper request per API call for the current thread."""
 
-    def request(self, method, url, headers, body, timeout):
-        request = urllib.request.Request(url, data=body, headers=headers, method=method)
+    HELPER_MESSAGES = {
+        "authentication_required": "JALA access for this conversation needs to be renewed.",
+        "permission_denied": "The signed-in JALA user is not allowed to do this.",
+        "jala_unavailable": "JALA is not reachable right now.",
+        "request_rejected": "JALA rejected the request.",
+    }
+
+    def __init__(self, event_file, helper=None, timeout=60.0, runner=None):
+        if not event_file:
+            raise ConfigurationError("--event-file is required.")
+        self.event_file = str(event_file)
+        self.work_dir = Path(event_file).resolve().parent.parent / "work"
+        self.helper = str(helper or DEFAULT_HELPER)
+        self.timeout = float(timeout)
+        self.runner = runner or subprocess.run
+
+    def call(self, method, route, query=None, payload=None):
+        files = []
+        command = [sys.executable, self.helper, "--event-file", self.event_file, "request", method, route]
         try:
-            with urllib.request.urlopen(request, timeout=timeout) as response:
-                return HttpResponse(response.getcode(), dict(response.headers), response.read())
-        except urllib.error.HTTPError as error:
-            return HttpResponse(error.code, dict(error.headers or {}), error.read())
-        except (socket.timeout, TimeoutError):
-            raise TransportTimeout("The JALA API request timed out.")
-        except urllib.error.URLError as error:
-            if isinstance(error.reason, (socket.timeout, TimeoutError)):
+            if query:
+                command += ["--query-file", self._write(query, files)]
+            if payload is not None:
+                command += ["--body-file", self._write(payload, files)]
+            try:
+                completed = self.runner(command, capture_output=True, timeout=self.timeout, check=False)
+            except subprocess.TimeoutExpired:
                 raise TransportTimeout("The JALA API request timed out.")
-            raise
+        finally:
+            for file in files:
+                try:
+                    os.unlink(file)
+                except OSError:
+                    pass
+        try:
+            result = json.loads(completed.stdout or b"{}")
+        except ValueError as error:
+            raise RemoteApiError("HELPER_UNAVAILABLE", "The jali helper returned an invalid result.") from error
+        status = result.get("status") if isinstance(result, dict) else None
+        if status == "ok":
+            return result.get("data")
+        if status == "request_outcome_unknown":
+            raise TransportTimeout("JALA did not confirm the request outcome.")
+        error = result.get("error") if isinstance(result, dict) and isinstance(result.get("error"), dict) else {}
+        status = status if isinstance(status, str) and status else "helper_unavailable"
+        raise RemoteApiError(
+            error.get("code") or status.upper(),
+            error.get("message") or self.HELPER_MESSAGES.get(status, "The jali helper refused the request."),
+            result.get("http_status") if isinstance(result, dict) else None,
+            error.get("details") or {},
+        )
+
+    def _write(self, value, files):
+        handle, path = tempfile.mkstemp(prefix="byop-", suffix=".json", dir=self.work_dir)
+        files.append(path)
+        with os.fdopen(handle, "w", encoding="utf-8") as stream:
+            json.dump(value, stream, separators=(",", ":"))
+        return path
 
 
 class RemoteCalculationClient:
-    """Authenticated transport for the existing unversioned JALA API routes."""
+    """API operations for the existing unversioned JALA routes."""
 
-    def __init__(self, api_base_url, transport=None, timeout=30.0):
-        self.api_base_url = self._normalize_base(api_base_url)
-        access_token = os.environ.get("JALA_BYOP_ACCESS_TOKEN")
-        if not access_token:
-            raise ConfigurationError("JALA_BYOP_ACCESS_TOKEN is required.")
-        self._access_token = access_token
-        self.transport = transport or UrllibTransport()
-        self.timeout = float(timeout)
+    def __init__(self, transport):
+        self.transport = transport
         self._confirmed_farm_samples = {}
 
     @classmethod
-    def from_environment(cls, transport=None):
-        return cls(
-            os.environ.get("JALA_BYOP_API_BASE_URL"),
-            transport=transport,
-        )
+    def for_event(cls, event_file, helper=None):
+        return cls(JaliTransport(event_file, helper))
 
     def __repr__(self):
-        return "RemoteCalculationClient(api_base_url={!r}, timeout={!r})".format(
-            self.api_base_url, self.timeout
-        )
-
-    @staticmethod
-    def _normalize_base(api_base_url):
-        if not api_base_url:
-            raise ConfigurationError("JALA_BYOP_API_BASE_URL is required.")
-        parsed = urllib.parse.urlparse(api_base_url)
-        if parsed.scheme not in ("http", "https") or not parsed.netloc:
-            raise ConfigurationError("JALA_BYOP_API_BASE_URL must be an absolute HTTP(S) URL.")
-        path = parsed.path.rstrip("/")
-        if path != "/api" and not path.endswith("/api"):
-            raise ConfigurationError("JALA_BYOP_API_BASE_URL must include the /api prefix.")
-        return urllib.parse.urlunparse((parsed.scheme, parsed.netloc, path, "", "", ""))
+        return "RemoteCalculationClient(transport={})".format(type(self.transport).__name__)
 
     def _request(self, method, path, query=None, payload=None, unwrap_data=True):
-        url = self.api_base_url + "/" + path.lstrip("/")
-        if query:
-            encoded = urllib.parse.urlencode(
-                [(key, value) for key, value in query.items() if value is not None]
-            )
-            if encoded:
-                url += "?" + encoded
-
-        body = None
-        headers = {
-            "Accept": "application/json",
-            "Authorization": "Bearer " + self._access_token,
-        }
-        if payload is not None:
-            body = json.dumps(payload, separators=(",", ":")).encode("utf-8")
-            headers["Content-Type"] = "application/json"
-
+        query = {key: value for key, value in (query or {}).items() if value is not None}
         try:
-            response = self.transport.request(method, url, headers, body, self.timeout)
-        except (TransportTimeout, socket.timeout, TimeoutError) as error:
-            raise TransportTimeout(str(error) or "The JALA API request timed out.")
+            decoded = self.transport.call(method, "/api/" + path.lstrip("/"), query or None, payload)
+        except (TransportTimeout, RemoteApiError):
+            raise
         except Exception as error:
-            # Do not expose transport internals, request bodies, or headers.
+            # Do not expose transport internals, request bodies, or credentials.
             raise RemoteApiError("NETWORK_ERROR", "The JALA API request failed.") from error
-
-        decoded = self._decode(response.body)
-        if response.status < 200 or response.status >= 300:
-            error = decoded.get("error", {}) if isinstance(decoded, dict) else {}
-            code = error.get("code") if isinstance(error, dict) else None
-            message = error.get("message") if isinstance(error, dict) else None
-            raise RemoteApiError(
-                code or "HTTP_ERROR",
-                message or "The JALA API request failed.",
-                response.status,
-                error.get("details") if isinstance(error, dict) else {},
-            )
-
+        if decoded is None:
+            return {}
         if unwrap_data and isinstance(decoded, dict) and "data" in decoded:
             return decoded["data"]
-        return decoded
-
-    @staticmethod
-    def _decode(body):
-        if not body:
-            return {}
-        try:
-            decoded = json.loads(body.decode("utf-8") if isinstance(body, bytes) else body)
-        except (ValueError, UnicodeDecodeError) as error:
-            raise RemoteApiError("INVALID_RESPONSE", "The JALA API returned an invalid response.") from error
         return decoded
 
     @staticmethod
@@ -1001,6 +985,7 @@ def _read_json_stdin():
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Author BYOP calculations through JALA's API")
+    parser.add_argument("--event-file", required=True, help="the current turn's Felix event file")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("contract")
 
@@ -1033,7 +1018,7 @@ def main(argv=None):
     verify.add_argument("--cycle-id", action="append", dest="cycle_ids")
 
     args = parser.parse_args(argv)
-    client = RemoteCalculationClient.from_environment()
+    client = RemoteCalculationClient.for_event(args.event_file)
     if args.command == "contract":
         result = client.contract()
     elif args.command == "resolve_target":

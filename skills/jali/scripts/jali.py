@@ -26,7 +26,9 @@ LIMIT = 4 * 1024 * 1024
 
 
 class Refused(Exception):
-    pass
+    def __init__(self, code, details=None):
+        super().__init__(code)
+        self.details = details or {}
 
 
 def require(condition, code):
@@ -35,7 +37,23 @@ def require(condition, code):
 
 
 def api_origin():
-    value = os.environ.get('JALI_JALA_BASE_URL', 'https://app.jala.tech')
+    return valid_origin(os.environ.get('JALI_JALA_BASE_URL', 'https://app.jala.tech'))
+
+
+def allowed_origins():
+    # The configured production origin (or a per-command staging override) and,
+    # when configured, the staging origin. A thread may only use one of these.
+    origins = {api_origin()}
+    staging = os.environ.get('JALI_STAGING_JALA_BASE_URL')
+    if staging:
+        try:
+            origins.add(valid_origin(staging))
+        except Refused:
+            pass
+    return origins
+
+
+def valid_origin(value):
     try:
         parsed = urllib.parse.urlsplit(value)
         valid = (value == value.strip() and not any(c.isspace() for c in value) and
@@ -86,12 +104,26 @@ def read_json(file, limit=LIMIT):
 
 
 def credential(value):
-    require(isinstance(value, dict) and len(value) == 1, 'invalid_auth_file')
-    key = next(iter(value))
-    require(key in ('cache_key', 'access_token'), 'invalid_auth_file')
+    # jali-auth.json holds one secret and, from the widget, the JALA origin it signed in to.
+    require(isinstance(value, dict), 'invalid_auth_file')
+    secrets = [key for key in value if key != 'origin']
+    require(len(secrets) == 1 and secrets[0] in ('cache_key', 'access_token'), 'invalid_auth_file')
+    key = secrets[0]
     require(isinstance(value[key], str) and bool(value[key].strip()) and
             len(value[key]) <= 32768, 'invalid_auth_file')
-    return value
+    return {key: value[key]}
+
+
+def declared_origin(value):
+    if 'origin' not in value:
+        return api_origin()
+    require(isinstance(value['origin'], str), 'origin_not_allowed')
+    try:
+        origin = valid_origin(value['origin'])
+    except Refused:
+        raise Refused('origin_not_allowed') from None
+    require(origin in allowed_origins(), 'origin_not_allowed')
+    return origin
 
 
 def context(event_file):
@@ -232,7 +264,7 @@ def profile_id(data):
 
 
 def active(ctx, data):
-    require(data.get('origin') == api_origin() and data.get('status') == 'authenticated',
+    require(data.get('origin') in allowed_origins() and data.get('status') == 'authenticated',
             'authentication_required')
     require(ctx['sender_id'] == data.get('user_id'), 'identity_mismatch')
     try:
@@ -262,7 +294,7 @@ def redact(value, secret):
     return value.replace(secret, '[redacted]') if isinstance(value, str) else value
 
 
-def call_api(auth, method, route, query=None, body=None):
+def call_api(auth, method, route, query=None, body=None, origin=None):
     require(method in ('GET', 'POST', 'PUT', 'PATCH', 'DELETE') and
             re.fullmatch(r'/api/[A-Za-z0-9_/-]+', route) and '//' not in route,
             'invalid_operation')
@@ -278,14 +310,14 @@ def call_api(auth, method, route, query=None, body=None):
         query['cache_key'] = secret
     else:
         headers['Authorization'] = 'Bearer ' + secret
-    url = api_origin() + route + ('?' + urllib.parse.urlencode(query) if query else '')
+    url = (origin or api_origin()) + route + ('?' + urllib.parse.urlencode(query) if query else '')
     if body is not None:
         require(method != 'GET', 'invalid_operation')
         headers['Content-Type'] = 'application/json'
     request = urllib.request.Request(url, method=method, headers=headers,
                                     data=None if body is None else json.dumps(body).encode())
     try:
-        with urllib.request.build_opener(NoRedirect()).open(request, timeout=20) as response:
+        with urllib.request.build_opener(NoRedirect()).open(request, timeout=30) as response:
             raw = response.read(LIMIT + 1)
             require(len(raw) <= LIMIT, 'response_too_large')
             return None if not raw else decode(raw)
@@ -294,9 +326,23 @@ def call_api(auth, method, route, query=None, body=None):
             raise Refused('authentication_required') from None
         if error.code == 403:
             raise Refused('permission_denied') from None
-        raise Refused('request_rejected' if error.code < 500 else ('jala_unavailable' if method == 'GET' else 'request_outcome_unknown')) from None
+        if error.code < 500:
+            raise Refused('request_rejected', rejection(error, secret)) from None
+        raise Refused('jala_unavailable' if method == 'GET' else 'request_outcome_unknown') from None
     except (urllib.error.URLError, TimeoutError, OSError, ValueError):
         raise Refused('request_outcome_unknown' if method != 'GET' else 'jala_unavailable') from None
+
+
+def rejection(error, secret):
+    # JALA explains a rejected request (for example a validation failure) in its error body.
+    details = {'http_status': error.code}
+    try:
+        body = decode(error.read(65537)[:65536])
+    except Exception:
+        return details
+    if isinstance(body, dict) and isinstance(body.get('error'), dict):
+        details['error'] = redact(body['error'], secret)
+    return details
 
 
 def authenticate(ctx, store, supplied):
@@ -311,19 +357,22 @@ def authenticate(ctx, store, supplied):
         clean_superseded(ctx, data)
         if data.get('file_id') == file_id and data.get('status') == 'authenticated':
             active(ctx, data)
-            return {'status': 'authenticated', 'user_id': ctx['sender_id'], 'file_id': file_id}
+            return {'status': 'authenticated', 'user_id': ctx['sender_id'], 'file_id': file_id,
+                    'origin': data['origin']}
         try:
-            auth = credential(read_json(file, 65536))
-            result = call_api(auth, 'GET', '/api/profile')
+            value = read_json(file, 65536)
+            auth = credential(value)
+            origin = declared_origin(value)
+            result = call_api(auth, 'GET', '/api/profile', origin=origin)
             profile = result.get('data') if isinstance(result, dict) else None
             require(isinstance(profile, dict), 'invalid_profile')
             jala_user_id = str(profile.get('id', ''))
             require(re.fullmatch(r'[1-9][0-9]*', jala_user_id), 'invalid_profile')
-            require(not data or (profile_id(data) == jala_user_id and data.get('origin') == api_origin()),
+            require(not data or (profile_id(data) == jala_user_id and data.get('origin') == origin),
                     'identity_mismatch')
             prior = stored_reference(data)
             replacement = {'version': 2, 'sender': ctx['sender_key'], 'thread': ctx['thread_key'],
-                           'origin': api_origin(), 'user_id': ctx['sender_id'], 'profile_id': jala_user_id,
+                           'origin': origin, 'user_id': ctx['sender_id'], 'profile_id': jala_user_id,
                            'file_id': file_id, 'credential_path': relative_path, 'revision': uuid.uuid4().hex,
                            'status': 'authenticated', 'superseded': [prior] if prior else []}
             store.save(replacement)
@@ -332,7 +381,7 @@ def authenticate(ctx, store, supplied):
                 file.unlink(missing_ok=True)
             raise
         clean_superseded(ctx, replacement)
-    return {'status': 'authenticated', 'user_id': ctx['sender_id'], 'file_id': file_id}
+    return {'status': 'authenticated', 'user_id': ctx['sender_id'], 'file_id': file_id, 'origin': origin}
 
 
 def execute(args):
@@ -352,14 +401,14 @@ def execute(args):
                 clean_superseded(ctx, data)
             return {'status': 'disconnected'}
         auth = active(ctx, data)
-        user, revision = data['user_id'], data['revision']
+        user, revision, origin = data['user_id'], data['revision'], data['origin']
         if args.command == 'status':
-            return {'status': 'authenticated', 'user_id': user, 'file_id': data['file_id']}
+            return {'status': 'authenticated', 'user_id': user, 'file_id': data['file_id'], 'origin': origin}
     query = read_json(safe_file(args.query_file, ctx['thread_dir'] / 'work')) if args.query_file else {}
     require(isinstance(query, dict) and all(isinstance(v, (str, int, float, bool)) for v in query.values()), 'invalid_query')
     body = read_json(safe_file(args.body_file, ctx['thread_dir'] / 'work')) if args.body_file else None
     try:
-        result = call_api(auth, args.method, args.route, query, body)
+        result = call_api(auth, args.method, args.route, query, body, origin=origin)
     except Refused as error:
         if str(error) == 'authentication_required':
             with store.locked() as current:
@@ -391,7 +440,7 @@ def main():
     try:
         result = execute(parser.parse_args())
     except Refused as error:
-        result = {'status': str(error)}
+        result = {'status': str(error), **error.details}
     except Exception:
         result = {'status': 'unavailable'}
     print(json.dumps(result, ensure_ascii=False))

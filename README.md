@@ -50,14 +50,14 @@ npm test
 | 📊 `posthog-jala` | `posthog` | Jala PostHog orgs (10590, 28053) — same operations with `POSTHOG_JALA_PERSONAL_KEY` |
 | ⚡ `vercel-jala` | `vercel` | Jala Vercel account — same operations with `VERCEL_JALA_TOKEN` |
 | 🛠️ `software-development-jala` | `software-development` | Jala software-development overlay — routes repo work through project workflow profiles |
-| `jali-staging` | `jali` | Jali staging overlay — requires `JALI_JALA_BASE_URL` to point at staging and uses session-scoped credentials |
+| `jali-staging` | `jali` | Jali staging overlay — maps `JALI_STAGING_JALA_BASE_URL` onto each helper call and uses session-scoped credentials |
+| 🧮 `jala-byop` | `jali` | Jala Bring Your Own Prediction — author, preview, apply, reset, and verify farm- or cycle-scoped calculations and answer the BYOP widget, on the thread's Jali credential |
 
 ### ⚙️ Standalone Jala Skills
 
 | Skill | Description |
 |---|---|
 | 📋 `odoo-jala` | Odoo 16.0 ERP for Jala via XML-RPC — search, create, update records, download reports, inspect models |
-| 🧮 `jala-byop` | Jala Bring Your Own Prediction — author, preview, apply, reset, and verify farm- or cycle-scoped calculations |
 | `jali` | Per-thread JALA authentication and requests through opaque credential handling; configurable with `JALI_JALA_BASE_URL` |
 | 🚢 `shorebird-jala` | Shorebird Flutter code-push patch management — inspect releases, move tracks, rollback investigation |
 | 🗒️ `daily-standup-meeting-jala` | Create and maintain minutes in `GPT_LIVE_NOTES.md` during the live Jala weekday standup |

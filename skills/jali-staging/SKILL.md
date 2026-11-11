@@ -60,7 +60,7 @@ This overlay requires no permission grant and adds no authority. The base skill'
 
 ## Environment
 
-`JALI_STAGING_JALA_BASE_URL` is required and must be the HTTPS origin `https://staging-app.jala.tech`, without `/api`, path, query, fragment or embedded credentials. The overlay maps it to `JALI_JALA_BASE_URL` only for each helper process. The base helper appends `/api/...`. This per-command mapping keeps the production base value unchanged.
+`JALI_STAGING_JALA_BASE_URL` is required and must be the HTTPS origin `https://staging-app.jala.tech`, without `/api`, path, query, fragment or embedded credentials. A `jali-auth.json` that declares this origin (the widget's) authenticates the thread on staging without the override, and the thread keeps that origin for every later call. The overlay maps it to `JALI_JALA_BASE_URL` only for each helper process. The base helper appends `/api/...`. This per-command mapping keeps the production base value unchanged.
 
 ## Checks
 

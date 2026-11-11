@@ -39,11 +39,11 @@ class HelperTests(unittest.TestCase):
             environment['JALI_YAML_MODULE'] = str(Path(__file__).resolve().parents[2] / 'node_modules/yaml')
         self.environment = patch.dict(os.environ, environment, clear=False)
         self.environment.start()
-        self.calls = []; self.profile_id = 123; self.reject = None
+        self.calls = []; self.profile_id = 123; self.reject = None; self.reject_body = None
         def opened(request, timeout):
             self.calls.append(request)
             if self.reject:
-                raise urllib.error.HTTPError(request.full_url, self.reject, '', {}, None)
+                raise urllib.error.HTTPError(request.full_url, self.reject, '', {}, io.BytesIO(self.reject_body) if self.reject_body else None)
             data = {'data': {'id': self.profile_id, 'name': 'Test User'}} if urllib.parse.urlparse(request.full_url).path == '/api/profile' else {'farms': [], 'access_token': 'must-not-return', 'message': 'fake-cache-secret'}
             return Response(data)
         self.transport = patch.object(jali.urllib.request, 'build_opener', return_value=argparse.Namespace(open=opened))
@@ -119,7 +119,7 @@ class HelperTests(unittest.TestCase):
         for sender in ('jala-123', 'jala-byop-123', 'jala-any-label-123'):
             event, file = self.event(sender.replace('-', '_'), sender=sender, auth={'cache_key': 'fake-cache-secret'})
             result = self.authenticate(event, file)
-            self.assertEqual(result, {'status': 'authenticated', 'user_id': sender, 'file_id': result['file_id']})
+            self.assertEqual(result, {'status': 'authenticated', 'user_id': sender, 'file_id': result['file_id'], 'origin': 'https://app.jala.tech'})
             self.assertEqual(self.request(event)['data']['farms'], [])
 
     def test_existing_state_without_profile_id_keeps_its_labelled_contact_binding(self):
@@ -133,6 +133,16 @@ class HelperTests(unittest.TestCase):
         event, file = self.event(sender='jala-byop-123', auth={'cache_key': 'other-user-secret'})
         with self.assertRaisesRegex(jali.Refused, 'identity_mismatch'):
             self.authenticate(event, file)
+
+    def test_rejected_request_returns_jala_error_details_without_the_credential(self):
+        event, file = self.event(auth={'cache_key': 'fake-cache-secret'})
+        self.authenticate(event, file)
+        self.reject = 422
+        self.reject_body = json.dumps({'error': {'code': 'INVALID_DEFINITION', 'message': 'Unknown node fake-cache-secret', 'details': {'path': 'overrides.fr'}}}).encode()
+        with self.assertRaises(jali.Refused) as caught:
+            self.request(event, '/api/cycles/1/calculation/preview', 'POST')
+        self.assertEqual(str(caught.exception), 'request_rejected')
+        self.assertEqual(caught.exception.details, {'http_status': 422, 'error': {'code': 'INVALID_DEFINITION', 'message': 'Unknown node [redacted]', 'details': {'path': 'overrides.fr'}}})
 
     def test_oauth_and_cache_key_are_exclusive_and_credentials_are_redacted_from_results(self):
         event, file = self.event(auth={'access_token': 'fake-oauth-secret'})
@@ -280,6 +290,33 @@ class HelperTests(unittest.TestCase):
                     jali.call_api({'cache_key': 'fake-cache-secret'}, 'GET', '/api/profile')
         self.assertEqual(self.calls, [])
 
+    def test_declared_origin_pins_the_thread_without_any_override(self):
+        staging = {'JALI_STAGING_JALA_BASE_URL': 'https://staging-app.jala.tech'}
+        event, file = self.event(auth={'cache_key': 'fake-cache-secret', 'origin': 'https://staging-app.jala.tech/'})
+        with patch.dict(os.environ, staging):
+            result = self.authenticate(event, file)
+            status = jali.execute(self.args(event, 'status'))
+            self.request(event)
+        self.assertEqual(result['origin'], 'https://staging-app.jala.tech')
+        self.assertEqual(status['origin'], 'https://staging-app.jala.tech')
+        self.assertEqual([urllib.parse.urlsplit(r.full_url).netloc for r in self.calls], ['staging-app.jala.tech'] * 2)
+        self.assertEqual(urllib.parse.urlsplit(self.calls[0].full_url).query, 'cache_key=fake-cache-secret')
+
+    def test_declared_origin_must_be_a_configured_origin(self):
+        for origin in ['https://evil.example', 'https://staging-app.jala.tech', 'http://app.jala.tech', 123]:
+            event, file = self.event(auth={'cache_key': 'fake-cache-secret', 'origin': origin})
+            with self.subTest(origin=origin), self.assertRaisesRegex(jali.Refused, 'origin_not_allowed'):
+                self.authenticate(event, file)
+        self.assertEqual(self.calls, [])
+
+    def test_stored_origin_outside_the_configuration_needs_fresh_authentication(self):
+        staging = {'JALI_STAGING_JALA_BASE_URL': 'https://staging-app.jala.tech'}
+        event, file = self.event(auth={'cache_key': 'fake-cache-secret', 'origin': 'https://staging-app.jala.tech'})
+        with patch.dict(os.environ, staging):
+            self.authenticate(event, file)
+        with self.assertRaisesRegex(jali.Refused, 'authentication_required'):
+            jali.execute(self.args(event, 'status'))
+
     def test_origin_change_requires_fresh_authentication(self):
         event, file = self.event(auth={'cache_key': 'fake-cache-secret'})
         self.authenticate(event, file)
@@ -313,7 +350,7 @@ class HelperTests(unittest.TestCase):
         event, first = self.event(auth={'cache_key': 'fake-cache-secret'})
         self.authenticate(event, first)
         original = jali.call_api
-        def replace_then_fail(auth, method, route, query=None, body=None):
+        def replace_then_fail(auth, method, route, query=None, body=None, origin=None):
             event2, second = self.event(auth={'access_token': 'replacement'})
             with patch.object(jali, 'call_api', original):
                 self.authenticate(event2, second)
