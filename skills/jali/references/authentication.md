@@ -6,8 +6,10 @@ attachment, collection is already authorized; run the helper without opening
 its bytes. For missing manual credentials, follow secrets-handling intake.
 
 The original filename must be exactly `jali-auth.json`. UTF-8 JSON contains
-exactly one nonempty string property: `cache_key` or `access_token`. Both fields,
-duplicate fields, extra properties and empty values are invalid.
+exactly one nonempty string secret, `cache_key` or `access_token`, and may add
+`origin`: the JALA origin the requester signed in to (the widget always sends
+it). Both secrets, duplicate fields, other properties and empty values are
+invalid.
 
 ```sh
 python3 scripts/jali.py --event-file <current_event> authenticate --credential-file <attachment_path>
@@ -15,9 +17,16 @@ python3 scripts/jali.py --event-file <current_event> authenticate --credential-f
 
 Use the exact runtime current event and attachment path. The helper verifies
 the original filename, event file reference and session-scoped managed path.
-It calls `/api/profile` on `JALI_JALA_BASE_URL` and binds the returned JALA
-profile ID to this contact and thread; the contact ID need not encode the
-profile ID. Private direct messages are required.
+It calls `/api/profile` on the declared `origin`, or on `JALI_JALA_BASE_URL`
+when the file declares none, and binds the returned JALA profile ID and that
+origin to this contact and thread; the contact ID need not encode the profile
+ID. A declared origin must equal `JALI_JALA_BASE_URL` or the configured
+`JALI_STAGING_JALA_BASE_URL`; anything else is `origin_not_allowed`. Private
+direct messages are required.
+
+`status`, `authenticate` and every later `request` use the thread's stored
+origin, and `status` reports it as `origin`. That reported origin is the
+thread's environment.
 
 On success it retains the native uploaded bytes and atomically records a
 secret-free active pointer in this thread's `.jali/auth-state.json`. Read those

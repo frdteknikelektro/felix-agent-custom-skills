@@ -66,9 +66,9 @@ approval and requires a fresh baseline or preview before mutation.
 JALA access comes from this thread's uploaded credential, held by the `jali`
 helper. Run `scripts/client.py` with `--event-file <current_event>`; it sends
 every API call through `jali/scripts/jali.py request` for that thread, so the
-credential never appears in arguments, files, prompts, logs, or output. For
-staging, prefix each client command with the same origin override the
-`jali-staging` overlay uses for the helper.
+credential never appears in arguments, files, prompts, logs, or output. The
+helper sends every call to the thread's stored JALA origin, which `status`
+reports; production and staging threads use the same command.
 
 The client owns target resolution, pagination, contract and context reads,
 baseline/candidate previews, approval state, timeout reconciliation, mutation

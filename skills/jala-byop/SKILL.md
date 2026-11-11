@@ -41,8 +41,8 @@ This skill requires no permission grant and adds no authority. Every API call ru
 
 ## Workflow
 
-1. **Confirm thread access.** Run the helper `status` for the current event file through `jali` for production, or through `jali-staging` (its origin override) for staging.
-   Completion: the helper reports `authenticated`; any other status follows that skill's renewal case before BYOP work starts.
+1. **Confirm thread access.** Run the helper `status` for the current event file through `jali`.
+   Completion: the helper reports `authenticated` with the thread's `origin`; any other status follows the `jali` renewal case (or `jali-staging` for staging) before BYOP work starts.
 2. **Read the workflow reference.** Read [the calculation workflow](references/calculation-workflow.md), and [the widget protocol](references/widget-protocol.md) for a widget turn.
    Completion: every rule section of the references that applies to this turn has been read.
 3. **Run the authoring loop.** Use [the client](scripts/client.py) with `--event-file <current_event>` for target resolution, contract and context reads, previews, approval state, mutations and verification. JALA's API is the only source of calculated values.
@@ -54,12 +54,12 @@ This skill requires no permission grant and adds no authority. Every API call ru
 
 ## Environment
 
-This skill declares no environment variables and holds no credential. The thread's environment comes from the skill that authenticated it:
+This skill declares no environment variables and holds no credential. The thread's environment is the `origin` that `status` reports, and the helper uses it for every call:
 
-- **Production — `jali`:** run `python3 scripts/client.py --event-file <current_event> ...`; the helper uses `JALI_JALA_BASE_URL`.
-- **Staging — `jali-staging`:** prefix every client command with its override, `JALI_JALA_BASE_URL="$JALI_STAGING_JALA_BASE_URL" python3 scripts/client.py --event-file <current_event> ...`.
+- **BYOP widget threads:** the widget declares its JALA origin in `jali-auth.json`, so `jali` authenticates the thread on production or staging directly. Run `python3 scripts/client.py --event-file <current_event> ...` with no override.
+- **Other threads without a declared origin:** `jali` authenticates on production; `jali-staging` authenticates on staging with its override, and the thread keeps that origin afterwards.
 
-The helper pins each thread to the origin it authenticated against, so every client command in a thread uses that same skill's form.
+Report the environment from that `origin`, never from the conversation's wording.
 
 ## Checks
 
