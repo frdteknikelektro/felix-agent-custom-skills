@@ -20,6 +20,11 @@ describe("jala-byop skill", () => {
     expect(raw).toContain("--event-file <current_event>");
     expect(raw).toContain("explicit approval in the current turn");
     expect(raw).toContain("jala partial harvest");
+    const description = raw.split("metadata:")[0];
+    expect(description).toContain("thread_key starts with api:jala-byop-");
+    expect(description).toContain("jali (production)");
+    expect(description).toContain("jali-staging (staging)");
+    expect(raw).toContain("`thread_key` starting with `api:jala-byop-`");
     expect(raw.match(/Completion:/g)?.length).toBeGreaterThanOrEqual(5);
   });
 
