@@ -78,6 +78,35 @@ class HelperTests(unittest.TestCase):
     def request(self, event, route='/api/farms', method='GET', **fields):
         return jali.execute(self.args(event, 'request', method=method, route=route, query_file=fields.get('query_file'), body_file=fields.get('body_file')))
 
+    def test_legacy_credential_can_be_read_after_new_index_is_created(self):
+        event, file = self.event(auth={'cache_key': 'fake-cache-secret'})
+        (file.parent.parent / 'api-files.json').write_text(json.dumps({'files': []}))
+        self.assertEqual(self.authenticate(event, file)['status'], 'authenticated')
+
+    def test_felix_070_staged_file_preserves_source_identity_and_rejects_unknown_ids(self):
+        event, old = self.event(auth={'cache_key': 'fake-cache-secret'})
+        base = old.parent.parent
+        file_id = old.stem
+        source_id = 'file_' + str(uuid.uuid4())
+        staged = base / (file_id + '_jali-auth.json')
+        old.rename(staged)
+        event.write_text(event.read_text().replace(str(old), str(staged)))
+        metadata = {'id': file_id, 'filename': 'jali-auth.json', 'size_bytes': staged.stat().st_size,
+                    'source_file_id': source_id, 'path': '/workspace/in/jali-auth.json'}
+        (base / 'api-files.json').write_text(json.dumps({'files': [metadata]}))
+        result = self.authenticate(event, staged)
+        self.assertEqual(result['file_id'], file_id)
+        self.assertEqual(result['source_file_id'], source_id)
+        self.assertEqual(self.authenticate(event, staged)['source_file_id'], source_id)
+        self.assertNotIn('fake-cache-secret', json.dumps(result))
+        ctx = jali.context(str(event))
+        with self.assertRaises(Exception):
+            jali.upload(ctx, 'file_' + str(uuid.uuid4()))
+        metadata['size_bytes'] += 1
+        (base / 'api-files.json').write_text(json.dumps({'files': [metadata]}))
+        with self.assertRaises(Exception):
+            jali.upload(ctx, file_id)
+
     def test_authentication_saves_verified_user_privately_without_returning_secret(self):
         event, file = self.event(auth={'cache_key': 'fake-cache-secret'})
         result = self.authenticate(event, file)

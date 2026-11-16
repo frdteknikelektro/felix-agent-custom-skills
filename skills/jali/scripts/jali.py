@@ -203,7 +203,20 @@ class Store:
 
 def upload(ctx, file_id):
     require(isinstance(file_id, str) and re.fullmatch(r'file_[a-f0-9-]{36}', file_id), 'invalid_auth_file')
-    base = ctx['thread_dir'] / 'attachments' / 'api-inputs'
+    base = ctx['thread_dir'] / 'attachments'
+    index = base / 'api-files.json'
+    if index.exists():
+        records = read_json(safe_file(index, base), 1024 * 1024).get('files', [])
+        matches = [record for record in records if record.get('id') == file_id]
+        require(len(matches) <= 1, 'invalid_auth_file')
+        if matches:
+            metadata = matches[0]
+            require(metadata.get('filename') == 'jali-auth.json', 'invalid_auth_file')
+            file = safe_file(base / (file_id + '_jali-auth.json'), base)
+            require(file.stat().st_size == metadata.get('size_bytes'), 'invalid_auth_file')
+            return file, metadata
+    # Read existing pre-0.7.0 credentials without moving or re-uploading bytes.
+    base = base / 'api-inputs'
     metadata = read_json(safe_file(base / (file_id + '.json'), base), 65536)
     require(metadata.get('id') == file_id and metadata.get('filename') == 'jali-auth.json' and
             isinstance(metadata.get('session_id'), str), 'invalid_auth_file')
@@ -353,12 +366,17 @@ def authenticate(ctx, store, supplied):
                a.get('status', 'available') == 'available']
     require(len(matches) == 1, 'auth_attachment_required')
     file, relative_path, file_id = attachment_file(ctx, matches[0])
+    source = {}
+    if ctx['source'] == 'api':
+        _, metadata = upload(ctx, file_id)
+        if metadata.get('source_file_id'):
+            source = {'source_file_id': metadata['source_file_id']}
     with store.locked() as data:
         clean_superseded(ctx, data)
         if data.get('file_id') == file_id and data.get('status') == 'authenticated':
             active(ctx, data)
             return {'status': 'authenticated', 'user_id': ctx['sender_id'], 'file_id': file_id,
-                    'origin': data['origin']}
+                    'origin': data['origin'], **source}
         try:
             value = read_json(file, 65536)
             auth = credential(value)
@@ -381,7 +399,7 @@ def authenticate(ctx, store, supplied):
                 file.unlink(missing_ok=True)
             raise
         clean_superseded(ctx, replacement)
-    return {'status': 'authenticated', 'user_id': ctx['sender_id'], 'file_id': file_id, 'origin': origin}
+    return {'status': 'authenticated', 'user_id': ctx['sender_id'], 'file_id': file_id, 'origin': origin, **source}
 
 
 def execute(args):
