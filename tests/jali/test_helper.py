@@ -34,7 +34,8 @@ class HelperTests(unittest.TestCase):
         self.workspace = self.base / 'workspace'; self.workspace.mkdir()
         self.private = self.base / 'private'
         # The helper parses Felix event frontmatter with Felix's own YAML module; use the repo copy outside the container.
-        environment = {'WORKSPACE_DIR': str(self.workspace), 'JALI_PRIVATE_DIR': str(self.private), 'JALI_JALA_BASE_URL': 'https://app.jala.tech'}
+        environment = {'WORKSPACE_DIR': str(self.workspace), 'JALI_PRIVATE_DIR': str(self.private),
+                       'JALI_JALA_BASE_URL': 'https://app.jala.tech', 'JALI_STAGING_JALA_BASE_URL': ''}
         if 'JALI_YAML_MODULE' not in os.environ and not Path('/app/node_modules/yaml').exists():
             environment['JALI_YAML_MODULE'] = str(Path(__file__).resolve().parents[2] / 'node_modules/yaml')
         self.environment = patch.dict(os.environ, environment, clear=False)
