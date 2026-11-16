@@ -2,7 +2,7 @@
 
 Read this for every turn that arrives from the BYOP widget. The widget renders
 the reply's text, one optional `<byop-panel>` and one optional `<byop-prompts>`
-block; everything else about authoring follows the
+block. For cycle method changes, use [cycle prediction methods](cycle-prediction-methods.md): reply in plain text with optional prompt choices, without a calculation panel or calculation action manifest. The existing panel verifies a BYOP AST and cannot prove a non-BYOP method change or trigger a verified host refresh for it. Ask the farmer to refresh the page after successful readback. Everything else about custom calculation authoring follows the
 [calculation workflow](calculation-workflow.md): farmer interview, freshness,
 explicit current-turn approval, structural checks and all-three-series
 verification. All API calls go through `scripts/client.py --event-file
