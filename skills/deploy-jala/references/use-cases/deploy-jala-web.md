@@ -15,7 +15,7 @@ Required:
 
 Derived:
 - Branch: staging uses `feature/compile-to-test`; production uses `release/*` or `master`.
-- Composer runner: staging uses `/usr/bin/php7.3 /usr/local/bin/composer`; production uses `/usr/bin/php7.3 /home/ubuntu/bin/composer`.
+- Composer runner: staging uses `/usr/bin/php7.3 /usr/local/bin/composer`; production must resolve its binary dynamically (below) — `/home/ubuntu/bin/composer` is not reliably present on prod.
 - Composer flags: staging installs with dev dependencies; production uses `--no-dev`.
 - Artisan flags: staging runs `--no-downtime`; production runs `--no-downtime --production`.
 
@@ -60,17 +60,18 @@ git pull || {
 # restore stashed changes if any
 git stash list | grep -q deploy-stash && git stash pop
 
-# build and apply
-/usr/bin/php7.3 /usr/local/bin/composer install
+# build and apply — resolve composer binary dynamically; do not assume a fixed path
+COMPOSER_BIN="$(command -v composer || ls /usr/local/bin/composer /home/ubuntu/bin/composer 2>/dev/null | head -n 1)"
+if [ -z "$COMPOSER_BIN" ]; then
+  echo "composer binary not found on server; check lock changes before continuing" >&2
+  git diff HEAD~1 --exit-code -- composer.lock && echo "composer.lock unchanged — continuing without install" || exit 1
+fi
+[ -n "$COMPOSER_BIN" ] && /usr/bin/php7.3 "$COMPOSER_BIN" install || true
 /usr/bin/php7.3 artisan app:update --no-downtime
 
-# restart workers
-sudo supervisorctl restart jala-staging-long-worker:*
-sudo supervisorctl restart jala-staging-worker:*
-sudo supervisorctl restart jala-staging-worker-analytic:*
-sudo supervisorctl restart jala-staging-worker-campaign:*
-sudo supervisorctl restart jala-staging-worker-import:*
-sudo supervisorctl restart jala-staging-worker-points:*
+# restart ALL jala-staging queue workers — includes jala-staging-worker-push:*,
+# which is easy to miss if enumerating groups manually
+sudo supervisorctl restart jala-staging-long-worker:* jala-staging-worker:* jala-staging-worker-analytic:* jala-staging-worker-campaign:* jala-staging-worker-import:* jala-staging-worker-points:* jala-staging-worker-push:*
 ```
 
 If `git stash pop` has conflicts, resolve by reading each conflicted file and merging both sides.
@@ -102,22 +103,33 @@ git pull || {
 # restore stashed changes if any
 git stash list | grep -q deploy-stash && git stash pop
 
-# build and apply
-/usr/bin/php7.3 /home/ubuntu/bin/composer install --no-dev
+# build and apply — resolve composer binary dynamically; `/home/ubuntu/bin/composer`
+# is not reliably present on prod (observed missing 2026-11-16), so locate it first
+COMPOSER_BIN="$(command -v composer || ls /usr/local/bin/composer /home/ubuntu/bin/composer 2>/dev/null | head -n 1)"
+if [ -z "$COMPOSER_BIN" ]; then
+  echo "composer binary not found on server; check lock changes before continuing" >&2
+  git diff HEAD~1 --exit-code -- composer.lock && echo "composer.lock unchanged — continuing without install" || exit 1
+fi
+[ -n "$COMPOSER_BIN" ] && /usr/bin/php7.3 "$COMPOSER_BIN" install --no-dev || true
 /usr/bin/php7.3 artisan app:update --no-downtime --production
 
-# restart workers
-sudo supervisorctl restart jala-long-worker:*
-sudo supervisorctl restart jala-worker:*
-sudo supervisorctl restart jala-worker-analytic:*
-sudo supervisorctl restart jala-worker-campaign:*
-sudo supervisorctl restart jala-worker-import:*
-sudo supervisorctl restart jala-worker-points:*
+# restart ALL jala queue workers — includes jala-worker-push:*,
+# which is easy to miss if enumerating groups manually
+sudo supervisorctl restart jala-long-worker:* jala-worker:* jala-worker-analytic:* jala-worker-campaign:* jala-worker-import:* jala-worker-points:* jala-worker-push:*
 ```
 
 If `git stash pop` has conflicts, resolve by reading each conflicted file and merging both sides.
 
 Verify — run `ssh ubuntu@app.jala.tech "cd Code/Web/jala-web && /usr/bin/php7.3 artisan --version"`. If it fails, go to Recovery.
+
+## Worker restarts — `queue:restart` vs `supervisorctl restart`
+
+`php artisan queue:restart` only writes a restart signal that `artisan queue:work` workers notice and exit after their current job; Supervisor then revives them. It therefore covers `artisan queue:work` processes (including push if it runs `queue:work`), but it does **not**:
+- reload non-queue processes (php-fpm/web, mqtt/reverb),
+- run `composer install` / `artisan app:update`,
+- guarantee hung/stuck workers die promptly.
+
+Keep the `supervisorctl restart <each group>:*` list as the canonical deploy step (it is deterministic and proves every process cycled). `queue:restart` may be run additionally as a graceful signal, not as a replacement for the supervisor restart.
 
 ## Verify
 
@@ -147,7 +159,8 @@ cd Code/Web/jala-web
 
 ```sh
 git checkout <commit-hash-from-above>
-/usr/bin/php7.3 /usr/local/bin/composer install
+COMPOSER_BIN="$(command -v composer || ls /usr/local/bin/composer 2>/dev/null | head -n 1)"
+[ -n "$COMPOSER_BIN" ] && /usr/bin/php7.3 "$COMPOSER_BIN" install
 /usr/bin/php7.3 artisan app:update --no-downtime
 ```
 
@@ -155,7 +168,8 @@ git checkout <commit-hash-from-above>
 
 ```sh
 git checkout <commit-hash-from-above>
-/usr/bin/php7.3 /home/ubuntu/bin/composer install --no-dev
+COMPOSER_BIN="$(command -v composer || ls /usr/local/bin/composer /home/ubuntu/bin/composer 2>/dev/null | head -n 1)"
+[ -n "$COMPOSER_BIN" ] && /usr/bin/php7.3 "$COMPOSER_BIN" install --no-dev
 /usr/bin/php7.3 artisan app:update --no-downtime --production
 ```
 
