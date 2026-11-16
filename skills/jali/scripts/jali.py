@@ -206,12 +206,18 @@ def upload(ctx, file_id):
     base = ctx['thread_dir'] / 'attachments'
     index = base / 'api-files.json'
     if index.exists():
-        records = read_json(safe_file(index, base), 1024 * 1024).get('files', [])
+        catalog = read_json(safe_file(index, base), 1024 * 1024)
+        require(isinstance(catalog, dict) and isinstance(catalog.get('files'), list), 'invalid_auth_file')
+        records = catalog['files']
+        require(all(isinstance(record, dict) for record in records), 'invalid_auth_file')
         matches = [record for record in records if record.get('id') == file_id]
         require(len(matches) <= 1, 'invalid_auth_file')
         if matches:
             metadata = matches[0]
             require(metadata.get('filename') == 'jali-auth.json', 'invalid_auth_file')
+            source_id = metadata.get('source_file_id')
+            require(source_id is None or (isinstance(source_id, str) and
+                    re.fullmatch(r'file_[a-f0-9-]{36}', source_id)), 'invalid_auth_file')
             file = safe_file(base / (file_id + '_jali-auth.json'), base)
             require(file.stat().st_size == metadata.get('size_bytes'), 'invalid_auth_file')
             return file, metadata

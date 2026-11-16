@@ -78,6 +78,100 @@ class HelperTests(unittest.TestCase):
     def request(self, event, route='/api/farms', method='GET', **fields):
         return jali.execute(self.args(event, 'request', method=method, route=route, query_file=fields.get('query_file'), body_file=fields.get('body_file')))
 
+    def staged_event(self, name='one', sender='jala-123', auth=None):
+        event, old = self.event(name, sender, auth)
+        base = old.parent.parent
+        file_id = old.stem
+        staged = base / (file_id + '_jali-auth.json')
+        old.rename(staged)
+        staged.chmod(0o400)
+        event.write_text(event.read_text().replace(str(old), str(staged)))
+        index = base / 'api-files.json'
+        catalog = json.loads(index.read_text()) if index.exists() else {'files': []}
+        record = {'id': file_id, 'filename': 'jali-auth.json', 'size_bytes': staged.stat().st_size,
+                  'source_file_id': 'file_' + str(uuid.uuid4()), 'path': '/workspace/in/jali-auth.json',
+                  'mime_type': 'application/json', 'created_at': '2026-11-16T00:00:00.000Z'}
+        catalog['files'].append(record)
+        index.write_text(json.dumps(catalog))
+        return event, staged, record
+
+    def test_staged_credential_remains_usable_without_source_upload(self):
+        event, file, metadata = self.staged_event(auth={'cache_key': 'fake-cache-secret'})
+        # No Contact file store exists in this fixture: staging owns independent bytes.
+        result = self.authenticate(event, file)
+        self.assertEqual(result['source_file_id'], metadata['source_file_id'])
+        self.assertEqual(self.authenticate(event, file), result)
+        self.assertEqual(jali.execute(self.args(event, 'status'))['status'], 'authenticated')
+        self.request(event)
+        self.assertTrue(file.exists())
+
+    def test_staged_renewal_keeps_binding_after_failure_then_cleans_old_bytes(self):
+        event, first, _ = self.staged_event(auth={'cache_key': 'fake-cache-secret'})
+        self.authenticate(event, first)
+        event, rejected, _ = self.staged_event(auth={'access_token': 'other-profile'})
+        self.profile_id = 124
+        with self.assertRaisesRegex(jali.Refused, 'identity_mismatch'):
+            self.authenticate(event, rejected)
+        self.assertFalse(rejected.exists())
+        self.assertTrue(first.exists())
+        self.assertEqual(jali.execute(self.args(event, 'status'))['status'], 'authenticated')
+        self.profile_id = 123
+        event, replacement, metadata = self.staged_event(auth={'access_token': 'replacement'})
+        self.assertEqual(self.authenticate(event, replacement)['source_file_id'], metadata['source_file_id'])
+        self.assertFalse(first.exists())
+        self.request(event)
+        self.assertEqual(self.calls[-1].get_header('Authorization'), 'Bearer replacement')
+
+    def test_staged_origin_and_thread_isolation(self):
+        with patch.dict(os.environ, {'JALI_STAGING_JALA_BASE_URL': 'https://staging-app.jala.tech'}):
+            event, file, _ = self.staged_event(auth={'cache_key': 'fake-cache-secret',
+                                                   'origin': 'https://staging-app.jala.tech'})
+            self.authenticate(event, file)
+            self.request(event)
+            self.assertEqual(urllib.parse.urlparse(self.calls[-1].full_url).hostname, 'staging-app.jala.tech')
+            other, _ = self.event('two')
+            with self.assertRaisesRegex(jali.Refused, 'authentication_required'):
+                jali.execute(self.args(other, 'status'))
+            with self.assertRaisesRegex(jali.Refused, 'unsafe_file'):
+                self.authenticate(other, file)
+
+    def test_staged_credential_expires_on_jala_401(self):
+        event, file, _ = self.staged_event(auth={'cache_key': 'fake-cache-secret'})
+        self.authenticate(event, file)
+        self.reject = 401
+        with self.assertRaisesRegex(jali.Refused, 'authentication_required'):
+            self.request(event)
+        with self.assertRaisesRegex(jali.Refused, 'authentication_required'):
+            jali.execute(self.args(event, 'status'))
+        state = json.loads((event.parent.parent / '.jali/auth-state.json').read_text())
+        self.assertEqual(state['status'], 'expired')
+
+    def test_staged_index_rejects_invalid_shapes_and_source_identity(self):
+        event, file, metadata = self.staged_event(auth={'cache_key': 'fake-cache-secret'})
+        index = file.parent / 'api-files.json'
+        for invalid in ([], {}, {'files': None}, {'files': [None]},
+                        {'files': [metadata, metadata]},
+                        {'files': [{**metadata, 'source_file_id': '../../other'}]}):
+            with self.subTest(index=invalid):
+                index.write_text(json.dumps(invalid))
+                with self.assertRaisesRegex(jali.Refused, 'invalid_auth_file'):
+                    self.authenticate(event, file)
+        self.assertEqual(self.calls, [])
+
+    def test_staged_symlink_and_wrong_filename_are_rejected_before_profile(self):
+        event, file, metadata = self.staged_event(auth={'cache_key': 'fake-cache-secret'})
+        index = file.parent / 'api-files.json'
+        index.write_text(json.dumps({'files': [{**metadata, 'filename': 'other.json'}]}))
+        with self.assertRaisesRegex(jali.Refused, 'invalid_auth_file'):
+            self.authenticate(event, file)
+        index.write_text(json.dumps({'files': [metadata]}))
+        target = file.with_name('actual-credential')
+        file.rename(target)
+        file.symlink_to(target)
+        with self.assertRaisesRegex(jali.Refused, 'unsafe_file'):
+            self.authenticate(event, file)
+        self.assertEqual(self.calls, [])
+
     def test_legacy_credential_can_be_read_after_new_index_is_created(self):
         event, file = self.event(auth={'cache_key': 'fake-cache-secret'})
         (file.parent.parent / 'api-files.json').write_text(json.dumps({'files': []}))

@@ -7,7 +7,7 @@ description: >-
 metadata:
   author: felix-agent
   kind: operational
-  version: "2.1.0"
+  version: "2.1.1"
   match: Jali identity, Jali assistant, greeting, general conversation, JALA API, any Felix contact, private message, jali-auth.json, cache_key, access_token
 env:
   - key: JALI_JALA_BASE_URL
@@ -59,7 +59,7 @@ This skill requires no permission grant. JALA API authorization comes from the v
    Completion: authentication is ready for this requester/thread, or the dependent operation has stopped with its next step explained.
 4. **Perform the selected use case.** Use only `scripts/jali.py request` with the current `--event-file`; the helper selects credentials internally. Follow the linked case, use documented JALA routes, and verify requested writes from the returned/read-back result. Never pass a contact/profile ID override or credentials to a manual API command.
    Completion: every requested read or change has an observed result, or its failure/uncertainty is reported without an unsafe retry.
-5. **Handle widget control messages.** For `[[jali-internal:init:...]]`, initialize without JALA access and reply `Ready.` For `[[jali-internal:auth:...]]`, process the referenced attachment through the helper and end with exactly `<jali-auth>` plus the helper's safe JSON result plus `</jali-auth>`. Include the actual `file_id` and `user_id` on success; on failure include only the referenced file ID and safe failure status. Preserve `[[jali-op:...]]` operation identity without echoing the marker.
+5. **Handle widget control messages.** For `[[jali-internal:init:...]]`, initialize without JALA access and reply `Ready.` For `[[jali-internal:auth:...]]`, process the referenced attachment through the helper and end with exactly `<jali-auth>` plus the helper's safe JSON result plus `</jali-auth>`. Preserve the actual `file_id`, `user_id`, and `source_file_id` when returned; on failure include only the referenced file ID and safe failure status. Preserve `[[jali-op:...]]` operation identity without echoing the marker.
    Completion: the widget receives the helper's actual safe result, not an inferred success.
 
 ## Environment

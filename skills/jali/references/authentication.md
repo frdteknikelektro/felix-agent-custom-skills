@@ -33,6 +33,20 @@ secret-free active pointer in this thread's `.jali/auth-state.json`. Read those
 bytes only inside the helper, never using cat, previews, prompts or manual curl.
 No global credential JSON is used. Local status is not a live expiry probe.
 
+On Felix 0.7, the staged session file ID differs from the original Files API
+upload ID. The helper resolves the current event's attachment through the
+session's `attachments/api-files.json` index and returns `source_file_id` when
+the index records it. Preserve that field, together with the session `file_id`,
+in the widget's `<jali-auth>` result; never reconstruct either ID from a path
+label or the request text. The helper also reads retained legacy API uploads.
+It uses the session copy even if the original Files API upload was deleted or
+expired; that upload's retention does not set the JALA credential's lifetime.
+
+A Felix 0.7 API turn may end `completed` with a permission request from another
+skill. That is not successful JALA authentication. Report only the helper's
+actual safe result. An Owner decision is applied with the requester's next
+request on the same session; the old API turn does not resume automatically.
+
 A later upload in the same conversation is renewal. Select its exact current
 file ID, validate first, require the same JALA profile, commit the pointer, then
 delete old bytes. Failure removes only the rejected candidate, preserving the
