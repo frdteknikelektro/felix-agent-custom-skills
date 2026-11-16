@@ -73,6 +73,7 @@ HTTP/helper success as verification of the requested value.
    cycle. Record identity, farm/pond, lifecycle state, current method, target SR,
    target FCR, and FCR calculation age when applicable. If already on the
    requested method, report the observed state without an update.
+   Completion: exact cycle/current method and relevant parameters are known, or ambiguity blocks the change.
 2. **Explain the proposal.** Name the cycle, environment, old/new method and
    relevant behavior from the table. The cycle update clears generated
    prediction, target and actual rows for regeneration; raw sampling, feed,
@@ -80,17 +81,20 @@ HTTP/helper success as verification of the requested value.
    from BYOP selects the legacy method path while retaining stored custom
    calculation definitions. It is not a calculation reset. Returning via a
    future BYOP apply is a separate operation.
+   Completion: the proposal identifies one method transition, scope and regeneration consequences.
 3. **Obtain approval for that proposal.** Accept explicit approval in the current
    turn for this exact cycle/method and unchanged consequences. If that approval
    is already present, continue. Otherwise ask one natural-language confirmation.
    Read the cycle again before writing; changed method/relevant parameters or
    scope invalidates the proposal and requires an updated explanation/approval.
+   Completion: approval covers the unchanged proposal and fresh cycle state, or no write occurs.
 4. **Update once.** Send only `survival_rate_prediction_method` through the helper.
    Use the cycle endpoint, not `PUT /calculation` (which activates BYOP), and do
    not delete stored calculations. On a timeout or unknown outcome, read the
    cycle: desired method means applied; old method means not observed as applied;
    another value/unreadable state is indeterminate. Do not automatically repeat
    a write or roll back; explain unresolved state before any new approved attempt.
+   Completion: the single update is accepted, rejected or reconciled as uncertain.
 5. **Read back and check results.** Read `GET /api/cycles/<cycle_id>` and require
    exact target identity and requested method. Then read the normal paginated
    `GET /api/cycles/<cycle_id>/cycle_predictions`, `/cycle_targets` and
@@ -101,6 +105,7 @@ HTTP/helper success as verification of the requested value.
    service means the method can be saved while calculation verification remains
    pending/failed. Do not claim AI execution merely from nonempty series, since
    fallback may have generated them. Do not revert a saved method automatically.
+   Completion: exact method readback and a separate result status for each of the three series are recorded.
 
 Completion: report the exact cycle and old/new method from readback, with an
 honest status for all three result series. A successful setting change can be
@@ -109,12 +114,9 @@ stated explicitly. Read and preserve recorded data; never edit result rows.
 
 ## Widget replies
 
-Follow the method-change branch of [the widget protocol](widget-protocol.md).
-Use a plain-language proposal and natural-language approval. After readback,
-report the method change in text and ask the farmer to refresh the page to see
-regenerated results. Existing BYOP calculation panels/actions require AST proof
-and cannot represent this operation. Optional prompt choices can ask for an
-explanation or a result check; do not invent new panel/action types.
+Use the method-change branch of [the widget protocol](widget-protocol.md) for
+reply format and refresh behavior. Approval comes from the requester's own
+message for the exact proposal.
 
 Example: “Untuk Kolam A2, saya akan mengganti Feed Ratio ke metode FCR memakai
 parameter FCR dan umur perhitungan yang sekarang. Estimasi akan dihitung ulang.

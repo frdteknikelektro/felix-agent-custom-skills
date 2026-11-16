@@ -2,11 +2,11 @@
 
 Read this for every turn that arrives from the BYOP widget. The widget renders
 the reply's text, one optional `<byop-panel>` and one optional `<byop-prompts>`
-block. For cycle method changes, use [cycle prediction methods](cycle-prediction-methods.md): reply in plain text with optional prompt choices, without a calculation panel or calculation action manifest. The existing panel verifies a BYOP AST and cannot prove a non-BYOP method change or trigger a verified host refresh for it. Ask the farmer to refresh the page after successful readback. Everything else about custom calculation authoring follows the
-[calculation workflow](calculation-workflow.md): farmer interview, freshness,
-explicit current-turn approval, structural checks and all-three-series
-verification. All API calls go through `scripts/client.py --event-file
-<current_event>`, which uses this thread's uploaded credential.
+block. Choose the reply format by operation:
+
+- **Method explanations and switches:** follow [cycle prediction methods](cycle-prediction-methods.md) through the `jali` helper. Use plain text and optional prompt choices. The existing calculation panel requires a BYOP AST and cannot represent a non-BYOP method switch or trigger its verified host refresh. After a verified method switch, ask the farmer to refresh the page.
+- **Custom calculation authoring:** follow [the calculation workflow](calculation-workflow.md) through `scripts/client.py --event-file <current_event>`. The proposal, panel and readback-proof sections below apply to this branch.
+- **Render-error control messages:** follow Render errors below; preserve the existing reply and evidence.
 
 ## Proposal manifests and actions
 
