@@ -8,7 +8,7 @@ description: >-
 metadata:
   author: felix-agent
   kind: operational
-  version: "2.1.2"
+  version: "2.1.3"
   match: jala byop, bring your own prediction, jala prediction, jala calculation, jala target, jala actual, jala feeding rate, jala mortality, jala FR, jala FR fallback, jala partial harvest, jala farm calculation, jala cycle calculation, prediction method, metode prediksi, fixed, fcr, stp_fr, ai_cultivation, byop widget, api:jala-byop-, byop-action, byop-panel, byop-prompts
 ---
 
@@ -19,6 +19,8 @@ metadata:
 Author, preview, apply, reset and verify JALA farm- or cycle-scoped BYOP calculations, and switch an existing cycle's prediction method, through JALA's API for the signed-in requester. JALA owns calculation, validation, persistence, generated-row cleanup and result rows; this skill owns the farmer interview, candidate loop, approval state and verification.
 
 ## Prediction conversation
+
+Use `jali`'s JALA product domain for species scope. Explain predictions for shrimp cultivation, primarily vaname; for windu, verify that the model and its inputs apply before suggesting parameters or a change. Keep verified cycle species distinct from an assumed general explanation, and report unavailable species-specific evidence explicitly.
 
 Follow `jali`'s conversation style for every customer-facing reply. Explain methods using their friendly names in **bold**, with normal prose for formulas and their practical effect. For example: "**Tabel FR STP** memakai tabel acuan FR dan bobot STP. Hasil estimasi bobot dan pakan bisa berbeda dari **Feed Ratio standar**."
 
